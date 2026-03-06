@@ -1,0 +1,320 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User Model
+model User {
+  id                String    @id @default(uuid())
+  email             String    @unique
+  passwordHash      String?   // Null if OAuth user
+  name              String?
+  provider          AuthProvider @default(EMAIL)
+  providerId        String?   // Google ID or other OAuth provider ID
+  emailVerified     Boolean   @default(false)
+  
+  // Subscription and Usage
+  planType          PlanType  @default(FREE)
+  resumesCreated    Int       @default(0)
+  resumeCredits     Int       @default(0) // For Tier1
+  subscriptionActive Boolean  @default(false)
+  subscriptionId    String?   // Stripe subscription ID
+  subscriptionExpiry DateTime?
+  
+  // Metadata
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  lastLogin         DateTime?
+  
+  // Relations
+  resumes           Resume[]
+  payments          Payment[]
+  aiUsage           AIUsage[]
+  
+  @@index([email])
+  @@index([planType])
+}
+
+enum AuthProvider {
+  EMAIL
+  GOOGLE
+}
+
+enum PlanType {
+  FREE
+  TIER1
+  TIER2
+}
+
+// Resume Model
+model Resume {
+  id                String    @id @default(uuid())
+  userId            String
+  title             String    @default("Untitled Resume")
+  templateId        String
+  customization     Json?     // Template customization (colors, fonts, spacing)
+  
+  // Personal Information
+  personalInfo      Json      // { name, email, phone, address, linkedin, website, etc }
+  professionalTitle String?   // e.g., "Senior Software Engineer"
+  
+  // Resume Sections
+  summary           String?   @db.Text
+  experience        Json      // Array of work experiences
+  education         Json      // Array of education entries
+  skills            Json      // Array of skills
+  certifications    Json?     // Array of certifications
+  projects          Json?     // Array of projects
+  awards            Json?     // Array of awards
+  languages         Json?     // Array of languages
+  volunteer         Json?     // Array of volunteer experiences
+  customSections    Json?     // Array of custom sections
+  sectionOrder      Json?     // Array defining section order and visibility
+  
+  // Metadata
+  isPublic          Boolean   @default(false)
+  viewCount         Int       @default(0)
+  downloadCount     Int       @default(0)
+  version           Int       @default(1)
+  
+  // Job Matching
+  lastJDAnalysis    String?   // ID of last JD analysis (relation below)
+  atsScore          Float?    // Latest ATS score
+  
+  // Files
+  lastPdfUrl        String?   // S3 URL of last generated PDF
+  lastDocxUrl       String?   // S3 URL of last generated DOCX
+  
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  // Relations
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // template relation removed - using string template IDs instead of UUID foreign keys
+  
+  @@index([userId])
+  @@index([templateId])
+  @@index([createdAt])
+}
+
+// Template Model
+model Template {
+  id                String    @id @default(uuid())
+  name              String
+  description       String?
+  category          TemplateCategory
+  thumbnail         String?   // S3 URL for template preview
+  
+  // Template Configuration
+  htmlTemplate      String    @db.Text // HTML template with placeholders
+  cssStyles         String    @db.Text // CSS for the template
+  docxTemplate      String?   // S3 URL to DOCX template file
+  
+  // Metadata
+  isActive          Boolean   @default(true)
+  isPremium         Boolean   @default(false)
+  usageCount        Int       @default(0)
+  rating            Float     @default(0)
+  
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  // Relations removed - templates are now code-based, not database-driven
+  
+  @@index([category])
+  @@index([isActive])
+}
+
+enum TemplateCategory {
+  MODERN
+  MINIMALIST
+  PROFESSIONAL
+  CREATIVE
+  HYBRID
+}
+
+// Payment Model
+model Payment {
+  id                String    @id @default(uuid())
+  userId            String
+  
+  // Payment Details
+  stripePaymentId   String    @unique
+  stripeCustomerId  String?
+  amount            Float
+  currency          String    @default("usd")
+  status            PaymentStatus
+  
+  // Plan Information
+  planType          PlanType
+  planDuration      String?   // "monthly", "quarterly", "yearly" for Tier2
+  creditsGranted    Int?      // For Tier1
+  
+  // Metadata
+  metadata          Json?
+  receiptUrl        String?
+  
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  // Relations
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+// AI Usage Tracking
+model AIUsage {
+  id                String    @id @default(uuid())
+  userId            String
+  
+  // Usage Type
+  type              AIUsageType
+  tokensUsed        Int
+  cost              Float     @default(0)
+  
+  // Request/Response
+  requestData       Json?
+  responseData      Json?
+  
+  // Metadata
+  successful        Boolean   @default(true)
+  errorMessage      String?
+  
+  createdAt         DateTime  @default(now())
+  
+  // Relations
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([type])
+  @@index([createdAt])
+}
+
+enum AIUsageType {
+  BULLET_ENHANCEMENT
+  GRAMMAR_CHECK
+  REDUNDANCY_CHECK
+  JD_MATCHING
+  RESUME_PARSING
+  SUMMARY_GENERATION
+  AUTO_ENHANCEMENT
+  JD_ANALYSIS
+}
+
+// Job Description Analysis
+model JobDescriptionAnalysis {
+  id                String    @id @default(uuid())
+  userId            String
+  resumeId          String?
+  
+  // Job Description
+  jdText            String    @db.Text
+  jdTitle           String?
+  jdCompany         String?
+  jdLocation        String?
+  
+  // Analysis Results (from AI)
+  keywords          Json      // Array of extracted keywords
+  requiredSkills    Json      // Array of required skills
+  preferredSkills   Json?     // Nice-to-have skills
+  tools             Json?     // Tools and technologies
+  certifications    Json?     // Required certifications
+  education         Json?     // Education requirements
+  experienceYears   String?   // e.g., "5+ years"
+  mustHave          Json?     // Critical requirements
+  niceToHave        Json?     // Preferred requirements
+  
+  // ATS Scoring
+  atsScore          Float?    // 0-100 overall score
+  atsBreakdown      Json?     // Detailed score breakdown
+  matchedKeywords   Json?     // Keywords found in resume
+  missingKeywords   Json?     // Keywords missing from resume
+  suggestions       Json?     // AI suggestions for improvement
+  
+  // Metadata
+  analysisVersion   String    @default("1.0")
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime? @updatedAt
+  
+  // Relations
+  enhancements      ResumeEnhancement[]
+  
+  @@index([userId])
+  @@index([resumeId])
+  @@index([createdAt])
+}
+
+// Resume Enhancement Tracking
+model ResumeEnhancement {
+  id                String    @id @default(uuid())
+  userId            String
+  resumeId          String
+  jdAnalysisId      String?
+  
+  // Enhancement Data
+  beforeData        Json      // Resume data before enhancement
+  afterData         Json      // Resume data after enhancement
+  changes           Json      // Array of individual changes made
+  
+  // Scoring
+  beforeScore       Float?    // ATS score before
+  afterScore        Float?    // ATS score after
+  improvement       Float?    // Score improvement percentage
+  
+  // Summary
+  skillsAdded       Int       @default(0)
+  bulletsModified   Int       @default(0)
+  summaryEnhanced   Boolean   @default(false)
+  projectsEnhanced  Int       @default(0)
+  
+  // Metadata
+  applied           Boolean   @default(false) // Whether user applied the changes
+  createdAt         DateTime  @default(now())
+  
+  // Relations
+  jdAnalysis        JobDescriptionAnalysis? @relation(fields: [jdAnalysisId], references: [id], onDelete: SetNull)
+  
+  @@index([userId])
+  @@index([resumeId])
+  @@index([jdAnalysisId])
+  @@index([createdAt])
+}
+
+// Audit Log for security and debugging
+model AuditLog {
+  id                String    @id @default(uuid())
+  userId            String?
+  
+  // Event Information
+  action            String    // e.g., "resume_created", "payment_completed"
+  resource          String?   // Resource type (resume, payment, etc.)
+  resourceId        String?   // ID of the resource
+  
+  // Details
+  ipAddress         String?
+  userAgent         String?
+  metadata          Json?
+  
+  createdAt         DateTime  @default(now())
+  
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+}

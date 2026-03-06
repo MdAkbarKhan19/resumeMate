@@ -1,0 +1,150 @@
+'use client';
+
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  planType: 'FREE' | 'TIER1' | 'TIER2';
+  resumeCredits: number;
+  subscriptionActive: boolean;
+  subscriptionExpiry: string | null;
+  createdAt: string;
+}
+
+interface AuthContextType {
+  user: User | null;
+  isLoading: boolean;
+  isAuthenticated: boolean;
+  error: string | null;
+  refreshUser: () => Promise<void>;
+  refresh: () => Promise<void>;
+  logout: () => Promise<void>;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchUser = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      let token: string | null = null;
+
+      // Try Cognito session first
+      try {
+        const { fetchAuthSession } = await import('aws-amplify/auth');
+        const session = await fetchAuthSession({ forceRefresh: false });
+        if (session.tokens?.idToken) {
+          token = session.tokens.idToken.toString();
+          localStorage.setItem('token', token);
+        }
+      } catch {
+        // Cognito not configured or no session - that's fine
+      }
+
+      // Fall back to localStorage token (from local /api/auth/login)
+      if (!token) {
+        token = localStorage.getItem('token');
+      }
+
+      if (!token) {
+        setUser(null);
+        setIsAuthenticated(false);
+        setIsLoading(false);
+        return;
+      }
+
+      // Fetch user from API
+      const response = await fetch('/api/auth/me', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('token');
+        }
+        throw new Error('Failed to fetch user');
+      }
+
+      const data = await response.json();
+
+      if (data.success && data.data?.user) {
+        setUser(data.data.user);
+        setIsAuthenticated(true);
+      } else {
+        setUser(null);
+        setIsAuthenticated(false);
+      }
+    } catch (err: any) {
+      console.error('[Auth] Error:', err);
+      setError(err.message);
+      setUser(null);
+      setIsAuthenticated(false);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const logout = useCallback(async () => {
+    try {
+      // Try Cognito sign out
+      try {
+        const { signOut } = await import('aws-amplify/auth');
+        await signOut();
+      } catch {
+        // Cognito not available - that's fine
+      }
+      localStorage.removeItem('token');
+      setUser(null);
+      setIsAuthenticated(false);
+      router.push('/auth/login');
+    } catch (err: any) {
+      console.error('[Auth] Logout error:', err);
+      // Force logout even on error
+      localStorage.removeItem('token');
+      setUser(null);
+      setIsAuthenticated(false);
+      router.push('/auth/login');
+    }
+  }, [router]);
+
+  useEffect(() => {
+    fetchUser();
+  }, [fetchUser]);
+
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        isLoading,
+        isAuthenticated,
+        error,
+        refreshUser: fetchUser,
+        refresh: fetchUser,
+        logout,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within AuthProvider');
+  }
+  return context;
+}

@@ -1,0 +1,15 @@
+{
+  "name": "ResumeMate",
+  "short_name": "ResumeMate",
+  "description": "AI-powered resume builder with ATS optimization",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "theme_color": "#4F46E5",
+  "background_color": "#ffffff",
+  "display": "standalone"
+}

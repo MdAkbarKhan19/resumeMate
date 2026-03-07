@@ -64,7 +64,7 @@ const Modal: React.FC<ModalProps> = ({
     <div className="fixed inset-0 z-50 overflow-y-auto">
       {/* Overlay */}
       <div
-        className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+        className="fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity"
         onClick={closeOnOverlayClick ? onClose : undefined}
         aria-hidden="true"
       />
@@ -73,26 +73,26 @@ const Modal: React.FC<ModalProps> = ({
       <div className="flex min-h-full items-center justify-center p-4">
         <div
           className={cn(
-            'relative w-full bg-white rounded-lg shadow-xl transform transition-all',
+            'relative w-full bg-slate-900/95 backdrop-blur-xl rounded-2xl border border-white/[0.08] shadow-elevated transform transition-all',
             sizes[size]
           )}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
           {(title || showCloseButton) && (
-            <div className="flex items-start justify-between p-6 border-b border-gray-200">
+            <div className="flex items-start justify-between p-6 border-b border-white/[0.06]">
               <div className="flex-1">
                 {title && (
-                  <h3 className="text-xl font-semibold text-gray-900">{title}</h3>
+                  <h3 className="text-xl font-semibold text-white">{title}</h3>
                 )}
                 {description && (
-                  <p className="mt-1 text-sm text-gray-600">{description}</p>
+                  <p className="mt-1 text-sm text-slate-400">{description}</p>
                 )}
               </div>
               {showCloseButton && (
                 <button
                   onClick={onClose}
-                  className="ml-4 text-gray-400 hover:text-gray-600 transition-colors"
+                  className="ml-4 text-slate-500 hover:text-white transition-colors"
                   aria-label="Close modal"
                 >
                   <svg
@@ -118,7 +118,7 @@ const Modal: React.FC<ModalProps> = ({
 
           {/* Footer */}
           {footer && (
-            <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200">
+            <div className="flex items-center justify-end gap-3 p-6 border-t border-white/[0.06]">
               {footer}
             </div>
           )}
@@ -155,9 +155,9 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
   isLoading = false,
 }) => {
   const variantStyles = {
-    danger: 'text-red-600',
-    warning: 'text-orange-600',
-    info: 'text-blue-600',
+    danger: 'text-rose-400',
+    warning: 'text-amber-400',
+    info: 'text-cyan-400',
   };
 
   const buttonVariant = variant === 'danger' ? 'danger' : 'primary';
@@ -172,7 +172,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
     >
       <div className="text-center">
         <div className={cn('mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full', 
-          variant === 'danger' ? 'bg-red-100' : variant === 'warning' ? 'bg-orange-100' : 'bg-blue-100')}>
+          variant === 'danger' ? 'bg-rose-500/10' : variant === 'warning' ? 'bg-amber-500/10' : 'bg-cyan-500/10')}>
           <svg
             className={cn('h-6 w-6', variantStyles[variant])}
             fill="none"
@@ -205,8 +205,8 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
             )}
           </svg>
         </div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">{title}</h3>
-        <p className="text-sm text-gray-600 mb-6">{message}</p>
+        <h3 className="text-lg font-semibold text-white mb-2">{title}</h3>
+        <p className="text-sm text-slate-400 mb-6">{message}</p>
         <div className="flex gap-3">
           <Button
             variant="outline"

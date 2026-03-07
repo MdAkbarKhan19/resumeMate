@@ -6,283 +6,352 @@ import { HomeRedirect } from '@/components/HomeRedirect';
 export default function Home() {
   return (
     <HomeRedirect>
-      <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50">
-      {/* Hero Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="text-center">
-          <h1 className="text-5xl md:text-6xl font-extrabold text-gray-900 mb-6">
-            Build Your Perfect Resume
-            <span className="block text-primary-600 mt-2">With AI-Powered Assistance</span>
-          </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-            Create professional, ATS-optimized resumes in minutes. Get AI suggestions,
-            match your resume to job descriptions, and land more interviews.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/auth/signup"
-              className="btn-primary text-lg px-8 py-3"
-            >
-              Start Building Free
-            </Link>
-            <Link
-              href="/templates"
-              className="btn-secondary text-lg px-8 py-3"
-            >
-              View Templates
-            </Link>
-          </div>
-        </div>
+      <div className="min-h-screen">
+        {/* ═══════════════════════════════════════════
+            HERO SECTION
+        ═══════════════════════════════════════════ */}
+        <section className="aurora-bg dot-grid relative min-h-[90vh] flex items-center">
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 w-full">
+            <div className="grid lg:grid-cols-2 gap-16 items-center">
+              {/* Left column: copy + CTAs */}
+              <div>
+                {/* Agent status indicator */}
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] mb-8">
+                  <span className="agent-dot-active" />
+                  <span className="text-xs text-cyan-400 font-mono tracking-wide">
+                    AI Agents Ready
+                  </span>
+                </div>
 
-        {/* Features Grid */}
-        <div className="mt-24 grid md:grid-cols-3 gap-8">
-          {/* Feature 1 */}
-          <div className="card hover:shadow-xl transition-shadow">
-            <div className="card-body text-center">
-              <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.08]">
+                  <span className="text-white">Build Resumes That</span>
+                  <br />
+                  <span className="gradient-text-brand">Win Interviews</span>
+                </h1>
+
+                <p className="mt-6 text-lg sm:text-xl text-slate-400 max-w-xl leading-relaxed">
+                  Our agentic AI analyzes job descriptions, optimizes keywords, and
+                  crafts ATS-beating resumes so you land more interviews -- on autopilot.
+                </p>
+
+                <div className="mt-10 flex flex-col sm:flex-row gap-4">
+                  <Link
+                    href="/auth/signup"
+                    className="inline-flex items-center justify-center px-8 py-3.5 text-base font-semibold rounded-xl text-white bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 shadow-[0_0_24px_rgba(0,212,255,0.25)] transition-all duration-200"
+                  >
+                    Start Building Free
+                  </Link>
+                  <Link
+                    href="/templates"
+                    className="inline-flex items-center justify-center px-8 py-3.5 text-base font-semibold rounded-xl text-slate-200 bg-white/10 border border-white/10 hover:bg-white/[0.15] hover:text-white transition-all duration-200"
+                  >
+                    View Templates
+                  </Link>
+                </div>
+              </div>
+
+              {/* Right column: decorative resume mock */}
+              <div className="hidden lg:block">
+                <div className="glass-card scan-line-effect p-6 max-w-md mx-auto animate-float">
+                  {/* Mock resume header */}
+                  <div className="flex items-center gap-4 mb-5">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-cyan-500/30 to-violet-500/30 border border-white/10" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-3 w-36 rounded bg-white/10" />
+                      <div className="h-2 w-24 rounded bg-white/[0.06]" />
+                    </div>
+                  </div>
+
+                  {/* Mock sections */}
+                  <div className="space-y-4">
+                    <div className="space-y-1.5">
+                      <div className="h-2 w-20 rounded bg-cyan-400/20" />
+                      <div className="h-2 w-full rounded bg-white/[0.06]" />
+                      <div className="h-2 w-5/6 rounded bg-white/[0.06]" />
+                      <div className="h-2 w-4/6 rounded bg-white/[0.06]" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <div className="h-2 w-24 rounded bg-violet-400/20" />
+                      <div className="h-2 w-full rounded bg-white/[0.06]" />
+                      <div className="h-2 w-3/4 rounded bg-white/[0.06]" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <div className="h-2 w-16 rounded bg-emerald-400/20" />
+                      <div className="h-2 w-full rounded bg-white/[0.06]" />
+                      <div className="h-2 w-5/6 rounded bg-white/[0.06]" />
+                      <div className="h-2 w-2/3 rounded bg-white/[0.06]" />
+                    </div>
+                  </div>
+
+                  {/* Agent badge overlaid on mock */}
+                  <div className="mt-5 flex items-center gap-2 text-xs font-mono text-cyan-400/70">
+                    <svg className="w-3.5 h-3.5 animate-pulse-glow" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
+                    </svg>
+                    Analyzing resume...
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ═══════════════════════════════════════════
+            FEATURES BENTO GRID
+        ═══════════════════════════════════════════ */}
+        <section className="mt-32 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white">
+              Powered by Agentic AI
+            </h2>
+            <p className="mt-4 text-lg text-slate-400 max-w-2xl mx-auto">
+              Autonomous agents work behind the scenes to craft, optimize, and
+              polish every section of your resume.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {/* Card 1 -- Multiple Templates */}
+            <div className="bg-white/[0.04] backdrop-blur-xl border border-white/[0.06] rounded-2xl p-8 hover:border-cyan-500/20 transition-colors duration-300">
+              <div className="w-14 h-14 rounded-xl bg-gradient-to-r from-cyan-500/20 to-blue-600/20 flex items-center justify-center mb-5">
+                <svg className="w-7 h-7 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Multiple Templates</h3>
-              <p className="text-gray-600">
-                Choose from 5+ professionally designed, ATS-friendly templates
+              <h3 className="text-xl font-semibold text-white mb-2">Multiple Templates</h3>
+              <p className="text-slate-400 leading-relaxed">
+                Choose from 5+ professionally designed, ATS-friendly templates tuned
+                for different industries and roles.
               </p>
             </div>
-          </div>
 
-          {/* Feature 2 */}
-          <div className="card hover:shadow-xl transition-shadow">
-            <div className="card-body text-center">
-              <div className="w-16 h-16 bg-secondary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-secondary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {/* Card 2 -- AI-Powered */}
+            <div className="bg-white/[0.04] backdrop-blur-xl border border-white/[0.06] rounded-2xl p-8 hover:border-violet-500/20 transition-colors duration-300">
+              <div className="w-14 h-14 rounded-xl bg-gradient-to-r from-violet-500/20 to-purple-600/20 flex items-center justify-center mb-5">
+                <svg className="w-7 h-7 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-2">AI-Powered</h3>
-              <p className="text-gray-600">
-                Get intelligent suggestions to enhance your resume content
+              <h3 className="text-xl font-semibold text-white mb-2">AI-Powered</h3>
+              <p className="text-slate-400 leading-relaxed">
+                Get intelligent, context-aware suggestions that enhance every bullet
+                point and summary you write.
               </p>
             </div>
-          </div>
 
-          {/* Feature 3 */}
-          <div className="card hover:shadow-xl transition-shadow">
-            <div className="card-body text-center">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {/* Card 3 -- ATS Optimized */}
+            <div className="bg-white/[0.04] backdrop-blur-xl border border-white/[0.06] rounded-2xl p-8 hover:border-emerald-500/20 transition-colors duration-300">
+              <div className="w-14 h-14 rounded-xl bg-gradient-to-r from-emerald-500/20 to-green-600/20 flex items-center justify-center mb-5">
+                <svg className="w-7 h-7 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-2">ATS Optimized</h3>
-              <p className="text-gray-600">
+              <h3 className="text-xl font-semibold text-white mb-2">ATS Optimized</h3>
+              <p className="text-slate-400 leading-relaxed">
                 Score your resume against job descriptions for maximum visibility
+                with applicant tracking systems.
               </p>
             </div>
           </div>
-        </div>
+        </section>
 
-        {/* How It Works */}
-        <div className="mt-24">
-          <h2 className="text-3xl font-bold text-center mb-12">How It Works</h2>
-          <div className="grid md:grid-cols-4 gap-8">
-            <div className="text-center">
-              <div className="w-12 h-12 bg-primary-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold">
+        {/* ═══════════════════════════════════════════
+            HOW IT WORKS
+        ═══════════════════════════════════════════ */}
+        <section className="mt-32 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white">How It Works</h2>
+            <p className="mt-4 text-lg text-slate-400 max-w-2xl mx-auto">
+              Four simple steps from blank page to interview-ready resume.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-4 gap-8 relative">
+            {/* Connector line (hidden on mobile) */}
+            <div className="hidden md:block absolute top-6 left-[12.5%] right-[12.5%] border-t border-dashed border-white/10" />
+
+            {/* Step 1 */}
+            <div className="text-center relative">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 flex items-center justify-center mx-auto mb-4 text-xl font-bold text-white shadow-[0_0_20px_rgba(0,212,255,0.2)] relative z-10">
                 1
               </div>
-              <h3 className="font-semibold mb-2">Choose Template</h3>
-              <p className="text-gray-600 text-sm">
+              <h3 className="text-white font-semibold mb-2">Choose Template</h3>
+              <p className="text-slate-500 text-sm">
                 Select from our ATS-friendly templates
               </p>
             </div>
-            <div className="text-center">
-              <div className="w-12 h-12 bg-primary-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold">
+
+            {/* Step 2 */}
+            <div className="text-center relative">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 flex items-center justify-center mx-auto mb-4 text-xl font-bold text-white shadow-[0_0_20px_rgba(0,212,255,0.2)] relative z-10">
                 2
               </div>
-              <h3 className="font-semibold mb-2">Add Content</h3>
-              <p className="text-gray-600 text-sm">
+              <h3 className="text-white font-semibold mb-2">Add Content</h3>
+              <p className="text-slate-500 text-sm">
                 Fill in your details or upload existing resume
               </p>
             </div>
-            <div className="text-center">
-              <div className="w-12 h-12 bg-primary-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold">
+
+            {/* Step 3 */}
+            <div className="text-center relative">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 flex items-center justify-center mx-auto mb-4 text-xl font-bold text-white shadow-[0_0_20px_rgba(0,212,255,0.2)] relative z-10">
                 3
               </div>
-              <h3 className="font-semibold mb-2">AI Enhancement</h3>
-              <p className="text-gray-600 text-sm">
+              <h3 className="text-white font-semibold mb-2">AI Enhancement</h3>
+              <p className="text-slate-500 text-sm">
                 Get AI suggestions to improve your content
               </p>
             </div>
-            <div className="text-center">
-              <div className="w-12 h-12 bg-primary-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold">
+
+            {/* Step 4 */}
+            <div className="text-center relative">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 flex items-center justify-center mx-auto mb-4 text-xl font-bold text-white shadow-[0_0_20px_rgba(0,212,255,0.2)] relative z-10">
                 4
               </div>
-              <h3 className="font-semibold mb-2">Download</h3>
-              <p className="text-gray-600 text-sm">
+              <h3 className="text-white font-semibold mb-2">Download</h3>
+              <p className="text-slate-500 text-sm">
                 Export as PDF or DOCX and apply with confidence
               </p>
             </div>
           </div>
-        </div>
+        </section>
 
-        {/* Pricing */}
-        <div className="mt-24">
-          <h2 className="text-3xl font-bold text-center mb-12">Simple, Transparent Pricing</h2>
+        {/* ═══════════════════════════════════════════
+            PRICING
+        ═══════════════════════════════════════════ */}
+        <section className="mt-32 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-32">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white">
+              Simple, Transparent Pricing
+            </h2>
+            <p className="mt-4 text-lg text-slate-400 max-w-2xl mx-auto">
+              Start free. Upgrade when you need more power.
+            </p>
+          </div>
+
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {/* Free Plan */}
-            <div className="card border-2 border-gray-200">
-              <div className="card-body text-center">
-                <h3 className="text-2xl font-bold mb-2">Free</h3>
-                <div className="text-4xl font-bold mb-4">$0</div>
-                <ul className="text-left space-y-3 mb-6">
-                  <li className="flex items-start">
-                    <svg className="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span>1 resume download</span>
-                  </li>
-                  <li className="flex items-start">
-                    <svg className="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span>Basic templates</span>
-                  </li>
-                  <li className="flex items-start">
-                    <svg className="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span>5 AI suggestions</span>
-                  </li>
-                </ul>
-                <Link href="/signup" className="btn-secondary w-full">
-                  Get Started
-                </Link>
+            <div className="bg-white/[0.04] backdrop-blur-xl border border-white/[0.06] rounded-2xl p-8 flex flex-col">
+              <div className="text-center mb-6">
+                <h3 className="text-2xl font-bold text-white mb-2">Free</h3>
+                <div className="text-4xl font-bold text-white">$0</div>
               </div>
+              <ul className="space-y-3 mb-8 flex-1">
+                <li className="flex items-start">
+                  <svg className="w-5 h-5 text-emerald-400 mr-2.5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-slate-300">1 resume download</span>
+                </li>
+                <li className="flex items-start">
+                  <svg className="w-5 h-5 text-emerald-400 mr-2.5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-slate-300">Basic templates</span>
+                </li>
+                <li className="flex items-start">
+                  <svg className="w-5 h-5 text-emerald-400 mr-2.5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-slate-300">5 AI suggestions</span>
+                </li>
+              </ul>
+              <Link
+                href="/signup"
+                className="inline-flex items-center justify-center w-full px-6 py-3 text-sm font-semibold rounded-xl text-slate-200 bg-white/10 border border-white/10 hover:bg-white/[0.15] hover:text-white transition-all duration-200"
+              >
+                Get Started
+              </Link>
             </div>
 
-            {/* Tier 1 */}
-            <div className="card border-2 border-primary-500 relative">
-              <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                <span className="bg-primary-600 text-white px-4 py-1 rounded-full text-sm font-semibold">
-                  POPULAR
+            {/* Starter Pack (popular) */}
+            <div className="bg-white/[0.04] backdrop-blur-xl border border-cyan-500/40 rounded-2xl p-8 flex flex-col relative glow-cyan">
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                <span className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white px-4 py-1 rounded-full text-xs font-bold tracking-wider uppercase">
+                  Popular
                 </span>
               </div>
-              <div className="card-body text-center">
-                <h3 className="text-2xl font-bold mb-2">Starter Pack</h3>
-                <div className="text-4xl font-bold mb-4">$15</div>
-                <ul className="text-left space-y-3 mb-6">
-                  <li className="flex items-start">
-                    <svg className="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span>5 resume downloads</span>
-                  </li>
-                  <li className="flex items-start">
-                    <svg className="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span>All templates</span>
-                  </li>
-                  <li className="flex items-start">
-                    <svg className="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span>50 AI suggestions</span>
-                  </li>
-                  <li className="flex items-start">
-                    <svg className="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span>PDF & DOCX export</span>
-                  </li>
-                </ul>
-                <Link href="/signup" className="btn-primary w-full">
-                  Buy Now
-                </Link>
+              <div className="text-center mb-6">
+                <h3 className="text-2xl font-bold text-white mb-2">Starter Pack</h3>
+                <div className="text-4xl font-bold text-white">$15</div>
               </div>
+              <ul className="space-y-3 mb-8 flex-1">
+                <li className="flex items-start">
+                  <svg className="w-5 h-5 text-emerald-400 mr-2.5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-slate-300">5 resume downloads</span>
+                </li>
+                <li className="flex items-start">
+                  <svg className="w-5 h-5 text-emerald-400 mr-2.5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-slate-300">All templates</span>
+                </li>
+                <li className="flex items-start">
+                  <svg className="w-5 h-5 text-emerald-400 mr-2.5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-slate-300">50 AI suggestions</span>
+                </li>
+                <li className="flex items-start">
+                  <svg className="w-5 h-5 text-emerald-400 mr-2.5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-slate-300">PDF & DOCX export</span>
+                </li>
+              </ul>
+              <Link
+                href="/signup"
+                className="inline-flex items-center justify-center w-full px-6 py-3 text-sm font-semibold rounded-xl text-white bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 shadow-[0_0_20px_rgba(0,212,255,0.2)] transition-all duration-200"
+              >
+                Buy Now
+              </Link>
             </div>
 
-            {/* Tier 2 */}
-            <div className="card border-2 border-gray-200">
-              <div className="card-body text-center">
-                <h3 className="text-2xl font-bold mb-2">Unlimited Pro</h3>
-                <div className="text-4xl font-bold mb-1">$20</div>
-                <div className="text-gray-600 mb-4">/month</div>
-                <ul className="text-left space-y-3 mb-6">
-                  <li className="flex items-start">
-                    <svg className="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span>Unlimited resumes</span>
-                  </li>
-                  <li className="flex items-start">
-                    <svg className="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span>All premium templates</span>
-                  </li>
-                  <li className="flex items-start">
-                    <svg className="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span>Unlimited AI assistance</span>
-                  </li>
-                  <li className="flex items-start">
-                    <svg className="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span>Priority support</span>
-                  </li>
-                </ul>
-                <Link href="/signup" className="btn-primary w-full">
-                  Subscribe
-                </Link>
+            {/* Unlimited Pro */}
+            <div className="bg-white/[0.04] backdrop-blur-xl border border-white/[0.06] rounded-2xl p-8 flex flex-col">
+              <div className="text-center mb-6">
+                <h3 className="text-2xl font-bold text-white mb-2">Unlimited Pro</h3>
+                <div className="text-4xl font-bold text-white">$20</div>
+                <div className="text-slate-500 mt-1">/month</div>
               </div>
+              <ul className="space-y-3 mb-8 flex-1">
+                <li className="flex items-start">
+                  <svg className="w-5 h-5 text-emerald-400 mr-2.5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-slate-300">Unlimited resumes</span>
+                </li>
+                <li className="flex items-start">
+                  <svg className="w-5 h-5 text-emerald-400 mr-2.5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-slate-300">All premium templates</span>
+                </li>
+                <li className="flex items-start">
+                  <svg className="w-5 h-5 text-emerald-400 mr-2.5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-slate-300">Unlimited AI assistance</span>
+                </li>
+                <li className="flex items-start">
+                  <svg className="w-5 h-5 text-emerald-400 mr-2.5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-slate-300">Priority support</span>
+                </li>
+              </ul>
+              <Link
+                href="/signup"
+                className="inline-flex items-center justify-center w-full px-6 py-3 text-sm font-semibold rounded-xl text-slate-200 bg-white/10 border border-white/10 hover:bg-white/[0.15] hover:text-white transition-all duration-200"
+              >
+                Subscribe
+              </Link>
             </div>
           </div>
-        </div>
+        </section>
       </div>
-
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white mt-24 py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-4 gap-8">
-            <div>
-              <h3 className="text-lg font-semibold mb-4">ResumeMate</h3>
-              <p className="text-gray-400">
-                Build professional resumes with AI assistance
-              </p>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Product</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><Link href="/templates" className="hover:text-white">Templates</Link></li>
-                <li><Link href="/pricing" className="hover:text-white">Pricing</Link></li>
-                <li><Link href="/features" className="hover:text-white">Features</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Company</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><Link href="/about" className="hover:text-white">About</Link></li>
-                <li><Link href="/contact" className="hover:text-white">Contact</Link></li>
-                <li><Link href="/blog" className="hover:text-white">Blog</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Legal</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><Link href="/privacy" className="hover:text-white">Privacy</Link></li>
-                <li><Link href="/terms" className="hover:text-white">Terms</Link></li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2025 ResumeMate. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
-    </div>
     </HomeRedirect>
   );
 }

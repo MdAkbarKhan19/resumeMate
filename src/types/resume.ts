@@ -37,7 +37,7 @@ export interface Education {
 export interface Skill {
   id: string;
   name: string;
-  category: 'technical' | 'soft' | 'language';
+  category: 'technical' | 'soft' | 'language' | 'tools';
 }
 
 export interface Certification {

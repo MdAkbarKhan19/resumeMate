@@ -25,7 +25,7 @@ const Loading: React.FC<LoadingProps> = ({
 
   const Spinner = () => (
     <svg
-      className={cn('animate-spin text-blue-600', sizes[size])}
+      className={cn('animate-spin text-cyan-400', sizes[size])}
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"
@@ -56,15 +56,15 @@ const Loading: React.FC<LoadingProps> = ({
 
     return (
       <div className="flex space-x-2">
-        <div className={cn('rounded-full bg-blue-600 animate-bounce', dotSize[size])} />
-        <div className={cn('rounded-full bg-blue-600 animate-bounce delay-100', dotSize[size])} />
-        <div className={cn('rounded-full bg-blue-600 animate-bounce delay-200', dotSize[size])} />
+        <div className={cn('rounded-full bg-cyan-400 animate-bounce', dotSize[size])} />
+        <div className={cn('rounded-full bg-violet-400 animate-bounce delay-100', dotSize[size])} />
+        <div className={cn('rounded-full bg-emerald-400 animate-bounce delay-200', dotSize[size])} />
       </div>
     );
   };
 
   const Pulse = () => (
-    <div className={cn('rounded-full bg-blue-600 animate-pulse', sizes[size])} />
+    <div className={cn('rounded-full bg-cyan-400 animate-pulse', sizes[size])} />
   );
 
   const renderVariant = () => {
@@ -83,13 +83,13 @@ const Loading: React.FC<LoadingProps> = ({
   const content = (
     <div className={cn('flex flex-col items-center justify-center gap-3', className)}>
       {renderVariant()}
-      {text && <p className="text-sm text-gray-600">{text}</p>}
+      {text && <p className="text-sm text-slate-400">{text}</p>}
     </div>
   );
 
   if (fullScreen) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-white bg-opacity-90">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-xl">
         {content}
       </div>
     );
@@ -116,7 +116,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({
   className,
   ...props
 }) => {
-  const baseClass = 'animate-pulse bg-gray-200';
+  const baseClass = 'animate-pulse bg-white/[0.06]';
 
   const variantClass = {
     text: 'rounded h-4',
@@ -156,8 +156,9 @@ export const Skeleton: React.FC<SkeletonProps> = ({
 // Page loading component
 export const PageLoading: React.FC<{ text?: string }> = ({ text = 'Loading...' }) => {
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="min-h-screen flex flex-col items-center justify-center gap-4">
       <Loading size="lg" text={text} />
+      <p className="text-xs text-slate-600 font-mono">agent initializing...</p>
     </div>
   );
 };

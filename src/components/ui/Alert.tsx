@@ -29,24 +29,24 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
   ) => {
     const variants = {
       info: {
-        container: 'bg-blue-50 border-blue-200 text-blue-900',
-        icon: 'text-blue-600',
-        title: 'text-blue-900',
+        container: 'bg-cyan-500/10 border-cyan-500/20 text-cyan-300',
+        icon: 'text-cyan-400',
+        title: 'text-cyan-300',
       },
       success: {
-        container: 'bg-green-50 border-green-200 text-green-900',
-        icon: 'text-green-600',
-        title: 'text-green-900',
+        container: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300',
+        icon: 'text-emerald-400',
+        title: 'text-emerald-300',
       },
       warning: {
-        container: 'bg-yellow-50 border-yellow-200 text-yellow-900',
-        icon: 'text-yellow-600',
-        title: 'text-yellow-900',
+        container: 'bg-amber-500/10 border-amber-500/20 text-amber-300',
+        icon: 'text-amber-400',
+        title: 'text-amber-300',
       },
       error: {
-        container: 'bg-red-50 border-red-200 text-red-900',
-        icon: 'text-red-600',
-        title: 'text-red-900',
+        container: 'bg-rose-500/10 border-rose-500/20 text-rose-300',
+        icon: 'text-rose-400',
+        title: 'text-rose-300',
       },
     };
 
@@ -94,7 +94,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
         ref={ref}
         role="alert"
         className={cn(
-          'relative rounded-lg border p-4',
+          'relative rounded-xl border p-4',
           variants[variant].container,
           className
         )}
@@ -120,7 +120,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
             <button
               type="button"
               onClick={onDismiss}
-              className="ml-3 inline-flex flex-shrink-0 rounded-md p-1.5 hover:bg-black hover:bg-opacity-10 focus:outline-none focus:ring-2 focus:ring-offset-2"
+              className="ml-3 inline-flex flex-shrink-0 rounded-md p-1.5 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-offset-2"
             >
               <span className="sr-only">Dismiss</span>
               <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -202,7 +202,7 @@ export const ToastContainer: React.FC = () => {
   };
 
   return (
-    <div className="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-md">
+    <div className="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-md backdrop-blur-sm">
       {toasts.map((toast) => (
         <Alert
           key={toast.id}

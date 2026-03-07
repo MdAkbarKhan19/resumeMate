@@ -175,13 +175,13 @@ const SettingsPage: React.FC = () => {
   const getPlanBadgeColor = (plan: string) => {
     switch (plan) {
       case 'FREE':
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-slate-500/10 text-slate-400';
       case 'TIER1':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-cyan-500/10 text-cyan-400';
       case 'TIER2':
-        return 'bg-purple-100 text-purple-800';
+        return 'bg-violet-500/10 text-violet-400';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-slate-500/10 text-slate-400';
     }
   };
 
@@ -209,15 +209,15 @@ const SettingsPage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-surface-primary py-8">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
-          <p className="mt-2 text-gray-600">Manage your account and preferences</p>
+          <h1 className="text-3xl font-bold text-white">Settings</h1>
+          <p className="mt-2 text-slate-400">Manage your account and preferences</p>
         </div>
 
         {/* Tabs */}
-        <div className="mb-6 border-b border-gray-200">
+        <div className="mb-6 border-b border-white/[0.06]">
           <nav className="-mb-px flex space-x-8">
             {tabs.map((tab) => (
               <button
@@ -227,8 +227,8 @@ const SettingsPage: React.FC = () => {
                   py-4 px-1 border-b-2 font-medium text-sm transition-colors
                   ${
                     activeTab === tab.id
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      ? 'border-cyan-400 text-cyan-400'
+                      : 'border-transparent text-slate-500 hover:text-slate-300 hover:border-white/20'
                   }
                 `}
               >
@@ -324,10 +324,10 @@ const SettingsPage: React.FC = () => {
 
             <Card variant="bordered">
               <CardContent className="p-6">
-                <h3 className="text-lg font-semibold text-red-600 mb-2">
+                <h3 className="text-lg font-semibold text-rose-400 mb-2">
                   Danger Zone
                 </h3>
-                <p className="text-gray-600 mb-4">
+                <p className="text-slate-400 mb-4">
                   Once you delete your account, there is no going back. Please be
                   certain.
                 </p>
@@ -356,7 +356,7 @@ const SettingsPage: React.FC = () => {
                     >
                       {getPlanName(user.planType)}
                     </span>
-                    <p className="mt-2 text-gray-600">
+                    <p className="mt-2 text-slate-400">
                       {user.planType === 'FREE' && '1 Resume Credit'}
                       {user.planType === 'TIER1' && '5 Resume Credits'}
                       {user.planType === 'TIER2' && 'Unlimited Resume Credits'}
@@ -370,15 +370,15 @@ const SettingsPage: React.FC = () => {
                 </div>
 
                 {user.subscriptionActive && user.subscriptionExpiry && (
-                  <div className="border-t border-gray-200 pt-4 mt-4">
+                  <div className="border-t border-white/[0.06] pt-4 mt-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm text-gray-600">Status</p>
-                        <p className="font-semibold text-green-600">Active</p>
+                        <p className="text-sm text-slate-400">Status</p>
+                        <p className="font-semibold text-emerald-400">Active</p>
                       </div>
                       <div>
-                        <p className="text-sm text-gray-600">Next Billing Date</p>
-                        <p className="font-semibold text-gray-900">
+                        <p className="text-sm text-slate-400">Next Billing Date</p>
+                        <p className="font-semibold text-white">
                           {formatDate(user.subscriptionExpiry)}
                         </p>
                       </div>
@@ -387,7 +387,7 @@ const SettingsPage: React.FC = () => {
                 )}
 
                 {user.planType === 'TIER2' && user.subscriptionActive && (
-                  <div className="border-t border-gray-200 pt-4 mt-4">
+                  <div className="border-t border-white/[0.06] pt-4 mt-4">
                     <Button
                       variant="outline"
                       onClick={() => setCancelModalOpen(true)}
@@ -406,10 +406,10 @@ const SettingsPage: React.FC = () => {
               <CardContent>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-3xl font-bold text-gray-900">
+                    <p className="text-3xl font-bold text-white">
                       {user.planType === 'TIER2' ? '∞' : user.resumeCredits}
                     </p>
-                    <p className="text-gray-600">
+                    <p className="text-slate-400">
                       {user.planType === 'TIER2'
                         ? 'Unlimited Credits'
                         : 'Credits Remaining'}
@@ -429,7 +429,7 @@ const SettingsPage: React.FC = () => {
                 <CardTitle>Billing History</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600 text-center py-8">
+                <p className="text-slate-500 text-center py-8">
                   No billing history available
                 </p>
               </CardContent>
@@ -446,24 +446,24 @@ const SettingsPage: React.FC = () => {
               </CardHeader>
               <CardContent>
                 {!usageStats ? (
-                  <p className="text-gray-600 text-center py-8">
+                  <p className="text-slate-400 text-center py-8">
                     Loading usage statistics...
                   </p>
                 ) : (
                   <div className="space-y-6">
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-gray-700">
+                        <span className="text-sm font-medium text-slate-300">
                           Bullet Enhancements
                         </span>
-                        <span className="text-sm text-gray-600">
+                        <span className="text-sm text-slate-400">
                           {usageStats.bulletEnhancements} /{' '}
                           {user.planType === 'FREE' ? '10' : '∞'}
                         </span>
                       </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="w-full bg-white/10 rounded-full h-2">
                         <div
-                          className="bg-blue-600 h-2 rounded-full transition-all"
+                          className="bg-cyan-500 h-2 rounded-full transition-all"
                           style={{
                             width:
                               user.planType === 'FREE'
@@ -479,17 +479,17 @@ const SettingsPage: React.FC = () => {
 
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-gray-700">
+                        <span className="text-sm font-medium text-slate-300">
                           Grammar Checks
                         </span>
-                        <span className="text-sm text-gray-600">
+                        <span className="text-sm text-slate-400">
                           {usageStats.grammarChecks} /{' '}
                           {user.planType === 'FREE' ? '10' : '∞'}
                         </span>
                       </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="w-full bg-white/10 rounded-full h-2">
                         <div
-                          className="bg-green-600 h-2 rounded-full transition-all"
+                          className="bg-emerald-500 h-2 rounded-full transition-all"
                           style={{
                             width:
                               user.planType === 'FREE'
@@ -505,17 +505,17 @@ const SettingsPage: React.FC = () => {
 
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-gray-700">
+                        <span className="text-sm font-medium text-slate-300">
                           Summary Generations
                         </span>
-                        <span className="text-sm text-gray-600">
+                        <span className="text-sm text-slate-400">
                           {usageStats.summaryGenerations} /{' '}
                           {user.planType === 'FREE' ? '10' : '∞'}
                         </span>
                       </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="w-full bg-white/10 rounded-full h-2">
                         <div
-                          className="bg-purple-600 h-2 rounded-full transition-all"
+                          className="bg-violet-500 h-2 rounded-full transition-all"
                           style={{
                             width:
                               user.planType === 'FREE'
@@ -531,17 +531,17 @@ const SettingsPage: React.FC = () => {
 
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-gray-700">
+                        <span className="text-sm font-medium text-slate-300">
                           Job Description Matches
                         </span>
-                        <span className="text-sm text-gray-600">
+                        <span className="text-sm text-slate-400">
                           {usageStats.jdMatches} /{' '}
                           {user.planType === 'FREE' ? '10' : '∞'}
                         </span>
                       </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="w-full bg-white/10 rounded-full h-2">
                         <div
-                          className="bg-orange-600 h-2 rounded-full transition-all"
+                          className="bg-amber-500 h-2 rounded-full transition-all"
                           style={{
                             width:
                               user.planType === 'FREE'
@@ -553,8 +553,8 @@ const SettingsPage: React.FC = () => {
                     </div>
 
                     {user.planType === 'FREE' && (
-                      <div className="border-t border-gray-200 pt-4 mt-4">
-                        <p className="text-sm text-gray-600 mb-4">
+                      <div className="border-t border-white/[0.06] pt-4 mt-4">
+                        <p className="text-sm text-slate-400 mb-4">
                           You're on the Free plan with a daily limit of 10 AI
                           operations. Upgrade to get unlimited AI assistance.
                         </p>

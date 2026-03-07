@@ -9,7 +9,10 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { ToastContainer } from '@/components/ui/Alert';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+});
 
 export const metadata: Metadata = {
   title: 'ResumeMate - AI-Powered Resume Builder',
@@ -29,11 +32,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
+    <html lang="en" className="dark">
+      <body className={`${inter.className} ${inter.variable} bg-surface-primary text-slate-100 antialiased`}>
         <ClearOldAuth />
         <AuthProvider>
-          <div className="flex flex-col min-h-screen">
+          <div className="flex flex-col min-h-screen relative">
             <Navbar />
             <main className="flex-1">{children}</main>
             <Footer />
@@ -44,8 +47,12 @@ export default function RootLayout({
           toastOptions={{
             duration: 4000,
             style: {
-              background: '#363636',
-              color: '#fff',
+              background: 'rgba(22, 27, 48, 0.95)',
+              color: '#edf0fd',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              backdropFilter: 'blur(12px)',
+              borderRadius: '12px',
+              fontSize: '14px',
             },
             success: {
               duration: 3000,
@@ -57,7 +64,7 @@ export default function RootLayout({
             error: {
               duration: 5000,
               iconTheme: {
-                primary: '#ef4444',
+                primary: '#f43f5e',
                 secondary: '#fff',
               },
             },

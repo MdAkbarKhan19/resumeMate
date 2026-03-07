@@ -13,9 +13,9 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
     ref
   ) => {
     const variants = {
-      default: 'bg-white rounded-lg shadow-sm',
-      bordered: 'bg-white rounded-lg border-2 border-gray-200',
-      elevated: 'bg-white rounded-lg shadow-lg',
+      default: 'bg-white/[0.04] backdrop-blur-xl rounded-xl border border-white/[0.06] shadow-[0_0_0_1px_rgba(255,255,255,0.02)]',
+      bordered: 'bg-white/[0.03] backdrop-blur-xl rounded-xl border-2 border-white/[0.08]',
+      elevated: 'bg-white/[0.05] backdrop-blur-xl rounded-xl border border-white/[0.08] shadow-[0_8px_32px_rgba(0,0,0,0.3)]',
     };
 
     const paddings = {
@@ -31,7 +31,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
         className={cn(
           variants[variant],
           paddings[padding],
-          hoverable && 'transition-all duration-200 hover:shadow-md cursor-pointer',
+          hoverable && 'transition-all duration-200 hover:border-cyan-500/20 hover:shadow-glow-cyan cursor-pointer',
           className
         )}
         {...props}
@@ -65,7 +65,7 @@ const CardTitle = React.forwardRef<HTMLHeadingElement, CardTitleProps>(
     return (
       <h3
         ref={ref}
-        className={cn('text-xl font-semibold text-gray-900', className)}
+        className={cn('text-xl font-semibold text-white', className)}
         {...props}
       >
         {children}
@@ -81,7 +81,7 @@ export interface CardDescriptionProps extends React.HTMLAttributes<HTMLParagraph
 const CardDescription = React.forwardRef<HTMLParagraphElement, CardDescriptionProps>(
   ({ className, children, ...props }, ref) => {
     return (
-      <p ref={ref} className={cn('text-sm text-gray-600 mt-1', className)} {...props}>
+      <p ref={ref} className={cn('text-sm text-slate-400 mt-1', className)} {...props}>
         {children}
       </p>
     );
@@ -109,7 +109,7 @@ export interface CardFooterProps extends React.HTMLAttributes<HTMLDivElement> {}
 const CardFooter = React.forwardRef<HTMLDivElement, CardFooterProps>(
   ({ className, children, ...props }, ref) => {
     return (
-      <div ref={ref} className={cn('mt-4 pt-4 border-t border-gray-200', className)} {...props}>
+      <div ref={ref} className={cn('mt-4 pt-4 border-t border-white/[0.06]', className)} {...props}>
         {children}
       </div>
     );

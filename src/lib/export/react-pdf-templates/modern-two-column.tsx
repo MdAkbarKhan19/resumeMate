@@ -1,6 +1,5 @@
 /**
  * Modern Two-Column PDF Template
- * Inspired by clean professional design with:
  * - Light blue header banner with centered name/title/contacts
  * - Two-column body: left sidebar (skills, certs, education) + right main (summary, experience)
  * - Bold keywords in bullet points via **markers**
@@ -15,14 +14,9 @@ import { PDFTemplateProps, getFontSize, BulletPoint, RichText } from './base';
 export default function ModernTwoColumnPDF({ data, customization }: PDFTemplateProps) {
   const { personalInfo, summary, experience, education, skills, certifications, projects, languages, volunteer } = data;
   const fs = getFontSize(customization?.fontSize);
-  const accent = customization?.primaryColor || '#B8D4E8';
 
-  // Separate technical skills from soft skills
-  const techSkills = skills.filter(s => !s.category || s.category === 'technical');
-  const softSkills = skills.filter(s => s.category === 'soft');
-
-  // Group tech skills by sub-category
-  const techByCategory = techSkills.reduce((acc, s) => {
+  // Group ALL skills by category
+  const skillsByCategory = skills.reduce((acc, s) => {
     const cat = s.category || 'technical';
     if (!acc[cat]) acc[cat] = [];
     acc[cat].push(s.name);
@@ -30,86 +24,96 @@ export default function ModernTwoColumnPDF({ data, customization }: PDFTemplateP
   }, {} as Record<string, string[]>);
 
   const categoryLabels: Record<string, string> = {
-    technical: 'Technical',
-    tools: 'Tools & Platforms',
+    technical: 'Languages',
+    tools: 'Automation Tools',
+    soft: 'Soft Skills',
+    language: 'Languages',
   };
 
-  // Contact items
-  const contactItems: string[] = [];
-  if (personalInfo.phone) contactItems.push(personalInfo.phone);
-  if (personalInfo.email) contactItems.push(personalInfo.email);
+  const getCategoryLabel = (category: string) => {
+    return categoryLabels[category] || category.charAt(0).toUpperCase() + category.slice(1);
+  };
+
+  // Contact items - plain text, no unicode icons
+  const contactParts: string[] = [];
+  if (personalInfo.phone) contactParts.push(personalInfo.phone);
+  if (personalInfo.email) contactParts.push(personalInfo.email);
   if (personalInfo.linkedin) {
-    contactItems.push(personalInfo.linkedin.replace(/^https?:\/\/(www\.)?/, ''));
+    const raw = personalInfo.linkedin;
+    contactParts.push(raw.replace(/^https?:\/\/(www\.)?/, '').replace(/^linkedin\.com\/in\//, '').replace(/\/$/, '') || raw);
   }
   if (personalInfo.github) {
-    contactItems.push(personalInfo.github.replace(/^https?:\/\/(www\.)?/, ''));
+    const raw = personalInfo.github;
+    contactParts.push(raw.replace(/^https?:\/\/(www\.)?/, '').replace(/^github\.com\//, '').replace(/\/$/, '') || raw);
   }
   if (personalInfo.portfolio) {
-    contactItems.push(personalInfo.portfolio.replace(/^https?:\/\/(www\.)?/, ''));
+    contactParts.push(personalInfo.portfolio.replace(/^https?:\/\//, ''));
+  }
+  if (personalInfo.location) {
+    contactParts.push(personalInfo.location);
   }
 
+  const PAGE_H_PAD = 32;
+  const PAGE_V_PAD = 28;
+
   const styles = StyleSheet.create({
+    /* Page padding applies to EVERY page including page 2+ */
     page: {
       fontFamily: 'Helvetica',
       color: '#222222',
       fontSize: fs.body,
       lineHeight: 1.4,
+      paddingHorizontal: PAGE_H_PAD,
+      paddingTop: PAGE_V_PAD,
+      paddingBottom: PAGE_V_PAD,
     },
 
-    // ---- HEADER ----
+    /* Header uses negative margins to go full-width and flush-top on page 1 */
     headerBand: {
-      backgroundColor: accent,
-      paddingTop: 32,
+      backgroundColor: '#d5e5f0',
+      paddingTop: 30,
       paddingBottom: 18,
-      paddingHorizontal: 36,
+      paddingHorizontal: 40,
       alignItems: 'center',
+      marginHorizontal: -PAGE_H_PAD,
+      marginTop: -PAGE_V_PAD,
     },
     headerName: {
-      fontSize: fs.name + 4,
+      fontSize: fs.name + 2,
       fontFamily: 'Helvetica',
       color: '#1a1a1a',
-      letterSpacing: 2,
-      marginBottom: 4,
+      letterSpacing: 1.5,
+      marginBottom: 10,
     },
     headerTitle: {
       fontSize: fs.body,
-      color: '#333333',
-      marginBottom: 12,
+      color: '#444444',
+      marginBottom: 14,
     },
-    contactRow: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    contactItem: {
+    contactText: {
       fontSize: fs.tiny,
       color: '#333333',
-    },
-    contactSep: {
-      fontSize: fs.tiny,
-      color: '#666666',
-      marginHorizontal: 6,
+      textAlign: 'center',
     },
 
-    // ---- BODY (two columns) ----
+    /* Body - two column layout */
     body: {
       flexDirection: 'row',
       flex: 1,
-      paddingTop: 16,
-      paddingHorizontal: 32,
-      paddingBottom: 24,
+      paddingTop: 14,
     },
     leftCol: {
-      width: '36%',
-      paddingRight: 18,
+      width: '35%',
+      paddingRight: 14,
+      borderRightWidth: 0.75,
+      borderRightColor: '#dddddd',
     },
     rightCol: {
-      width: '64%',
-      paddingLeft: 18,
+      width: '65%',
+      paddingLeft: 16,
     },
 
-    // ---- SECTION TITLES ----
+    /* Section titles */
     sectionTitle: {
       fontSize: fs.title - 1,
       fontFamily: 'Helvetica-Bold',
@@ -123,7 +127,7 @@ export default function ModernTwoColumnPDF({ data, customization }: PDFTemplateP
       marginBottom: 14,
     },
 
-    // ---- SKILLS ----
+    /* Skills */
     skillCategory: {
       marginBottom: 4,
     },
@@ -138,7 +142,7 @@ export default function ModernTwoColumnPDF({ data, customization }: PDFTemplateP
       lineHeight: 1.5,
     },
 
-    // ---- CERTIFICATIONS ----
+    /* Certifications */
     certItem: {
       fontSize: fs.small,
       color: '#333333',
@@ -146,7 +150,7 @@ export default function ModernTwoColumnPDF({ data, customization }: PDFTemplateP
       lineHeight: 1.4,
     },
 
-    // ---- EDUCATION ----
+    /* Education */
     eduDegree: {
       fontFamily: 'Helvetica-Bold',
       fontSize: fs.small,
@@ -163,34 +167,37 @@ export default function ModernTwoColumnPDF({ data, customization }: PDFTemplateP
       marginBottom: 6,
     },
 
-    // ---- EXPERIENCE ----
+    /* Experience / Entry rows */
     entryRow: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'flex-start',
-      marginBottom: 1,
+      marginBottom: 2,
+      width: '100%',
     },
-    entryCompany: {
+    entryTitle: {
       fontFamily: 'Helvetica-Bold',
       fontSize: fs.body,
       color: '#1a1a1a',
+      flex: 1,
+      paddingRight: 8,
     },
     entryDate: {
       fontSize: fs.tiny,
       color: '#444444',
       textAlign: 'right' as any,
-      minWidth: 100,
+      flexShrink: 0,
     },
-    entryPosition: {
+    entrySubtitle: {
       fontSize: fs.small,
       color: '#444444',
       marginBottom: 4,
     },
     entry: {
-      marginBottom: 10,
+      marginBottom: 12,
     },
 
-    // ---- LANGUAGES ----
+    /* Languages */
     langItem: {
       fontSize: fs.small,
       color: '#333333',
@@ -201,54 +208,39 @@ export default function ModernTwoColumnPDF({ data, customization }: PDFTemplateP
   return (
     <Document>
       <Page size="LETTER" style={styles.page}>
-        {/* Header Band - solid blue background */}
-        <View style={styles.headerBand}>
+        {/* ===== HEADER BAND (full width, no page margins) ===== */}
+        <View style={styles.headerBand} fixed={false}>
           <Text style={styles.headerName}>
             {personalInfo.name || 'Your Name'}
           </Text>
           {personalInfo.title && (
             <Text style={styles.headerTitle}>{personalInfo.title}</Text>
           )}
-          {contactItems.length > 0 && (
-            <View style={styles.contactRow}>
-              {contactItems.map((item, i) => (
-                <React.Fragment key={i}>
-                  {i > 0 && <Text style={styles.contactSep}>|</Text>}
-                  <Text style={styles.contactItem}>{item}</Text>
-                </React.Fragment>
-              ))}
-            </View>
+          {contactParts.length > 0 && (
+            <Text style={styles.contactText}>
+              {contactParts.join('  |  ')}
+            </Text>
           )}
         </View>
 
-        {/* Body - Two Columns */}
+        {/* ===== BODY - Two Columns (with page-level padding for all pages) ===== */}
         <View style={styles.body}>
           {/* LEFT COLUMN */}
           <View style={styles.leftCol}>
             {/* Technical Skills */}
-            {techSkills.length > 0 && (
+            {skills.length > 0 && (
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Technical Skills</Text>
-                {Object.entries(techByCategory).map(([category, items]) => (
+                {Object.entries(skillsByCategory).map(([category, items]) => (
                   <View key={category} style={styles.skillCategory}>
                     <Text style={styles.skillCatItems}>
                       <Text style={styles.skillCatLabel}>
-                        {categoryLabels[category] || category}
+                        {getCategoryLabel(category)}
                       </Text>
                       {': ' + items.join(', ')}
                     </Text>
                   </View>
                 ))}
-              </View>
-            )}
-
-            {/* Soft Skills - separate section */}
-            {softSkills.length > 0 && (
-              <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Soft Skills</Text>
-                <Text style={styles.skillCatItems}>
-                  {softSkills.map(s => s.name).join(', ')}
-                </Text>
               </View>
             )}
 
@@ -270,9 +262,9 @@ export default function ModernTwoColumnPDF({ data, customization }: PDFTemplateP
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Education</Text>
                 {education.map((edu) => (
-                  <View key={edu.id} style={{ marginBottom: 6 }} wrap={false}>
+                  <View key={edu.id} style={{ marginBottom: 6 }}>
                     <Text style={styles.eduDegree}>
-                      {edu.degree}{edu.field ? ` in ${edu.field}` : ''}
+                      {edu.degree}{edu.field ? ` ${edu.field}` : ''}
                     </Text>
                     <Text style={styles.eduInstitution}>
                       {edu.institution}
@@ -307,7 +299,7 @@ export default function ModernTwoColumnPDF({ data, customization }: PDFTemplateP
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Volunteer</Text>
                 {volunteer.map((vol) => (
-                  <View key={vol.id} style={{ marginBottom: 4 }} wrap={false}>
+                  <View key={vol.id} style={{ marginBottom: 4 }}>
                     <Text style={{ fontFamily: 'Helvetica-Bold', fontSize: fs.small, color: '#1a1a1a' }}>
                       {vol.role}
                     </Text>
@@ -347,19 +339,20 @@ export default function ModernTwoColumnPDF({ data, customization }: PDFTemplateP
                 <Text style={styles.sectionTitle}>Work Experience</Text>
                 {experience.map((exp) => (
                   <View key={exp.id} style={styles.entry}>
-                    <View wrap={false}>
-                      <View style={styles.entryRow}>
-                        <Text style={styles.entryCompany}>{exp.company}</Text>
-                        <Text style={styles.entryDate}>
-                          {exp.startDate}
-                          {exp.endDate ? ` - ${exp.endDate}` : exp.current ? ' - Present' : ''}
-                        </Text>
-                      </View>
-                      <Text style={styles.entryPosition}>
-                        {exp.jobTitle}
-                        {exp.location ? `  |  ${exp.location}` : ''}
+                    {/* Company + Date row (wrap=false so title+date stay together) */}
+                    <View style={styles.entryRow} wrap={false}>
+                      <Text style={styles.entryTitle}>{exp.company}</Text>
+                      <Text style={styles.entryDate}>
+                        {exp.startDate}
+                        {exp.endDate ? ` - ${exp.endDate}` : exp.current ? ' - Present' : ''}
                       </Text>
                     </View>
+                    {/* Job Title */}
+                    <Text style={styles.entrySubtitle}>
+                      {exp.jobTitle}
+                      {exp.location ? `  |  ${exp.location}` : ''}
+                    </Text>
+                    {/* Bullets - can wrap across pages naturally */}
                     {exp.bullets.filter(b => b.trim()).map((bullet, i) => (
                       <BulletPoint
                         key={i}
@@ -381,23 +374,23 @@ export default function ModernTwoColumnPDF({ data, customization }: PDFTemplateP
                 <Text style={styles.sectionTitle}>Projects</Text>
                 {projects.map((proj) => (
                   <View key={proj.id} style={styles.entry}>
-                    <View wrap={false}>
-                      <View style={styles.entryRow}>
-                        <Text style={styles.entryCompany}>{proj.name}</Text>
-                        {(proj.startDate || proj.endDate) && (
-                          <Text style={styles.entryDate}>
-                            {proj.startDate}{proj.endDate ? ` - ${proj.endDate}` : ''}
-                          </Text>
-                        )}
-                      </View>
-                      <RichText
-                        text={proj.description}
-                        fontSize={fs.small}
-                        color="#333333"
-                        lineHeight={1.5}
-                        style={{ marginBottom: 2, textAlign: 'justify' }}
-                      />
+                    {/* Project Name + Date row */}
+                    <View style={styles.entryRow} wrap={false}>
+                      <Text style={styles.entryTitle}>{proj.name}</Text>
+                      {(proj.startDate || proj.endDate) && (
+                        <Text style={styles.entryDate}>
+                          {proj.startDate}{proj.endDate ? ` - ${proj.endDate}` : ''}
+                        </Text>
+                      )}
                     </View>
+                    {/* Description - flows naturally, no wrap={false} */}
+                    <RichText
+                      text={proj.description}
+                      fontSize={fs.small}
+                      color="#333333"
+                      lineHeight={1.5}
+                      style={{ marginBottom: 2, textAlign: 'justify' }}
+                    />
                     {proj.techStack.length > 0 && (
                       <Text style={{ fontSize: fs.tiny, color: '#666666', marginTop: 2 }}>
                         <Text style={{ fontFamily: 'Helvetica-Bold', color: '#444444' }}>Tech: </Text>

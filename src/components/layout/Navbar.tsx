@@ -10,7 +10,7 @@ import Button from '../ui/Button';
 const Navbar: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
-  
+
   const { isAuthenticated, isLoading, user, logout } = useAuth();
 
   const navigation = [
@@ -32,47 +32,60 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <nav className="bg-white shadow-sm sticky top-0 z-40">
+    <nav className="bg-slate-950/80 backdrop-blur-xl border-b border-white/[0.06] sticky top-0 z-40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xl">R</span>
+          <Link href="/" className="flex items-center space-x-2.5 group">
+            <div className="relative">
+              <div className="w-8 h-8 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-cyan-500/25 group-hover:shadow-cyan-500/40 transition-shadow duration-300">
+                <span className="text-white font-bold text-xl">R</span>
+              </div>
+              {/* Pulsing agent dot */}
+              <span className="absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-400"></span>
+              </span>
             </div>
-            <span className="text-xl font-bold text-gray-900">ResumeMate</span>
+            <span className="text-xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
+              ResumeMate
+            </span>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex md:items-center md:space-x-8">
+          <div className="hidden md:flex md:items-center md:space-x-1">
             {filteredNav.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
                 className={cn(
-                  'text-sm font-medium transition-colors',
+                  'relative text-sm font-medium transition-all duration-200 px-3 py-2 rounded-md',
                   isActive(item.href)
-                    ? 'text-blue-600'
-                    : 'text-gray-700 hover:text-blue-600'
+                    ? 'text-cyan-400'
+                    : 'text-slate-400 hover:text-white hover:bg-white/[0.06]'
                 )}
               >
                 {item.name}
+                {/* Active indicator dot */}
+                {isActive(item.href) && (
+                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/50"></span>
+                )}
               </Link>
             ))}
           </div>
 
           {/* Desktop Auth Buttons */}
-          <div className="hidden md:flex md:items-center md:space-x-4">
+          <div className="hidden md:flex md:items-center md:space-x-3">
             {isLoading ? (
               // Show loading state while checking authentication
               <div className="flex items-center space-x-2">
-                <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                <span className="text-sm text-gray-600">Loading...</span>
+                <div className="w-5 h-5 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
+                <span className="text-sm text-slate-400">Loading...</span>
               </div>
             ) : isAuthenticated ? (
               <>
                 <Link href="/dashboard/settings">
-                  <Button variant="ghost" size="sm">
+                  <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white hover:bg-white/10 border-0">
                     <svg
                       className="w-5 h-5 mr-2"
                       fill="none"
@@ -89,19 +102,19 @@ const Navbar: React.FC = () => {
                     {user?.name || user?.email || 'Profile'}
                   </Button>
                 </Link>
-                <Button variant="outline" size="sm" onClick={logout}>
+                <Button variant="outline" size="sm" className="border-white/10 text-slate-300 hover:text-white hover:bg-white/10 hover:border-white/20" onClick={logout}>
                   Logout
                 </Button>
               </>
             ) : (
               <>
                 <Link href="/auth/login">
-                  <Button variant="ghost" size="sm">
+                  <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white hover:bg-white/10 border-0">
                     Login
                   </Button>
                 </Link>
                 <Link href="/auth/signup">
-                  <Button variant="primary" size="sm">
+                  <Button variant="primary" size="sm" className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 border-0 text-white transition-all duration-300">
                     Sign Up
                   </Button>
                 </Link>
@@ -112,7 +125,7 @@ const Navbar: React.FC = () => {
           {/* Mobile menu button */}
           <button
             type="button"
-            className="md:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-blue-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+            className="md:hidden inline-flex items-center justify-center p-2 rounded-md text-slate-400 hover:text-cyan-400 hover:bg-white/[0.06] focus:outline-none focus:ring-2 focus:ring-inset focus:ring-cyan-500 transition-colors duration-200"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-expanded="false"
           >
@@ -154,41 +167,45 @@ const Navbar: React.FC = () => {
 
       {/* Mobile menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden border-t border-gray-200">
+        <div className="md:hidden bg-slate-950/95 backdrop-blur-xl border-t border-white/[0.06]">
           <div className="px-2 pt-2 pb-3 space-y-1">
             {filteredNav.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
                 className={cn(
-                  'block px-3 py-2 rounded-md text-base font-medium',
+                  'flex items-center gap-2 px-3 py-2.5 rounded-lg text-base font-medium transition-all duration-200',
                   isActive(item.href)
-                    ? 'bg-blue-50 text-blue-600'
-                    : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600'
+                    ? 'bg-cyan-500/10 text-cyan-400'
+                    : 'text-slate-400 hover:bg-white/[0.06] hover:text-white'
                 )}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
+                {/* Active indicator dot in mobile */}
+                {isActive(item.href) && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400/50 flex-shrink-0"></span>
+                )}
                 {item.name}
               </Link>
             ))}
           </div>
-          <div className="pt-4 pb-3 border-t border-gray-200">
+          <div className="pt-4 pb-3 border-t border-white/[0.06]">
             {isLoading ? (
               <div className="px-3 py-2 flex items-center space-x-2">
-                <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                <span className="text-sm text-gray-600">Loading...</span>
+                <div className="w-5 h-5 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin"></div>
+                <span className="text-sm text-slate-400">Loading...</span>
               </div>
             ) : isAuthenticated ? (
               <div className="px-2 space-y-1">
                 <Link
                   href="/dashboard/settings"
-                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-blue-600"
+                  className="block px-3 py-2.5 rounded-lg text-base font-medium text-slate-400 hover:bg-white/[0.06] hover:text-white transition-colors duration-200"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Profile
                 </Link>
                 <button
-                  className="w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-blue-600"
+                  className="w-full text-left px-3 py-2.5 rounded-lg text-base font-medium text-slate-400 hover:bg-white/[0.06] hover:text-white transition-colors duration-200"
                   onClick={() => {
                     setIsMobileMenuOpen(false);
                     logout();
@@ -200,12 +217,12 @@ const Navbar: React.FC = () => {
             ) : (
               <div className="px-2 space-y-2">
                 <Link href="/auth/login" onClick={() => setIsMobileMenuOpen(false)}>
-                  <Button variant="ghost" size="md" className="w-full">
+                  <Button variant="ghost" size="md" className="w-full text-slate-300 hover:text-white hover:bg-white/10 border-0">
                     Login
                   </Button>
                 </Link>
                 <Link href="/auth/signup" onClick={() => setIsMobileMenuOpen(false)}>
-                  <Button variant="primary" size="md" className="w-full">
+                  <Button variant="primary" size="md" className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 shadow-lg shadow-cyan-500/25 border-0 text-white">
                     Sign Up
                   </Button>
                 </Link>

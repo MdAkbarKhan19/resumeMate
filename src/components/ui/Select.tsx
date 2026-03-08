@@ -35,22 +35,22 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
     return (
       <div className={cn('w-full', containerClassName)}>
         {label && (
-          <label className="block text-sm font-medium text-slate-300 mb-1">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             {label}
-            {required && <span className="text-rose-400 ml-1">*</span>}
+            {required && <span className="text-red-500 ml-1">*</span>}
           </label>
         )}
         <div className="relative">
           <select
             ref={ref}
             className={cn(
-              'block w-full rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5',
-              'text-white',
-              'focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50',
-              'disabled:bg-white/[0.02] disabled:cursor-not-allowed disabled:text-slate-600',
-              'transition-all duration-200 backdrop-blur-sm',
+              'block w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5',
+              'text-gray-900',
+              'focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500',
+              'disabled:bg-gray-50 disabled:cursor-not-allowed disabled:text-gray-400',
+              'transition-all duration-200',
               'appearance-none cursor-pointer',
-              error && 'border-rose-500/50 focus:ring-rose-500/50',
+              error && 'border-red-300 focus:ring-red-500/30 focus:border-red-500',
               className
             )}
             disabled={disabled}
@@ -59,7 +59,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
             {...props}
           >
             {placeholder && (
-              <option value="" disabled className="bg-slate-900 text-slate-400">
+              <option value="" disabled className="text-gray-400">
                 {placeholder}
               </option>
             )}
@@ -68,13 +68,12 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
                 key={option.value}
                 value={option.value}
                 disabled={option.disabled}
-                className="bg-slate-900 text-slate-200"
               >
                 {option.label}
               </option>
             ))}
           </select>
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-400">
             <svg
               className="h-5 w-5"
               xmlns="http://www.w3.org/2000/svg"
@@ -90,12 +89,12 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           </div>
         </div>
         {error && (
-          <p id="error-message" className="mt-1 text-sm text-rose-400">
+          <p id="error-message" className="mt-1 text-sm text-red-500">
             {error}
           </p>
         )}
         {!error && helperText && (
-          <p id="helper-text" className="mt-1 text-sm text-slate-500">
+          <p id="helper-text" className="mt-1 text-sm text-gray-500">
             {helperText}
           </p>
         )}

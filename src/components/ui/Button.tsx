@@ -25,19 +25,19 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const baseStyles =
-      'inline-flex items-center justify-center rounded-xl font-medium transition-all duration-200 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:opacity-50 disabled:cursor-not-allowed';
+      'inline-flex items-center justify-center rounded-xl font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
 
     const variants = {
       primary:
-        'bg-gradient-to-r from-cyan-500 to-blue-600 text-white hover:from-cyan-400 hover:to-blue-500 focus:ring-cyan-400 shadow-[0_0_20px_rgba(0,212,255,0.15)] hover:shadow-[0_0_30px_rgba(0,212,255,0.25)]',
+        'bg-gradient-to-r from-indigo-600 to-violet-600 text-white hover:from-indigo-500 hover:to-violet-500 focus:ring-indigo-500 shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/30',
       secondary:
-        'bg-white/10 text-slate-200 border border-white/10 hover:bg-white/15 hover:text-white focus:ring-slate-400',
+        'bg-indigo-50 text-indigo-700 border border-indigo-100 hover:bg-indigo-100 focus:ring-indigo-400',
       outline:
-        'border-2 border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/10 focus:ring-cyan-400',
+        'border-2 border-indigo-200 text-indigo-600 hover:bg-indigo-50 focus:ring-indigo-400',
       ghost:
-        'text-slate-400 hover:bg-white/[0.06] hover:text-white focus:ring-slate-400',
+        'text-gray-600 hover:bg-gray-100 hover:text-indigo-700 focus:ring-gray-300',
       danger:
-        'bg-rose-600/80 text-white hover:bg-rose-500 focus:ring-rose-400',
+        'bg-red-600 text-white hover:bg-red-500 focus:ring-red-400 shadow-lg shadow-red-500/20',
     };
 
     const sizes = {
@@ -55,7 +55,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       >
         {isLoading && (
           <svg
-            className="animate-spin -ml-1 mr-2 h-4 w-4 border-current"
+            className="animate-spin -ml-1 mr-2 h-4 w-4"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"

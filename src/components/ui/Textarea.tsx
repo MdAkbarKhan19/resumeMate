@@ -33,21 +33,21 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
     return (
       <div className={cn('w-full', containerClassName)}>
         {label && (
-          <label className="block text-sm font-medium text-slate-300 mb-1">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             {label}
-            {required && <span className="text-rose-400 ml-1">*</span>}
+            {required && <span className="text-red-500 ml-1">*</span>}
           </label>
         )}
         <div className="relative">
           <textarea
             ref={ref}
             className={cn(
-              'block w-full rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5',
-              'text-white placeholder-slate-500',
-              'focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50',
-              'disabled:bg-white/[0.02] disabled:cursor-not-allowed disabled:text-slate-600',
-              'transition-all duration-200 resize-y backdrop-blur-sm',
-              error && 'border-rose-500/50 focus:ring-rose-500/50',
+              'block w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5',
+              'text-gray-900 placeholder-gray-400',
+              'focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500',
+              'disabled:bg-gray-50 disabled:cursor-not-allowed disabled:text-gray-400',
+              'transition-all duration-200 resize-y',
+              error && 'border-red-300 focus:ring-red-500/30 focus:border-red-500',
               className
             )}
             disabled={disabled}
@@ -61,12 +61,12 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         <div className="flex items-center justify-between mt-1">
           <div className="flex-1">
             {error && (
-              <p id="error-message" className="text-sm text-rose-400">
+              <p id="error-message" className="text-sm text-red-500">
                 {error}
               </p>
             )}
             {!error && helperText && (
-              <p id="helper-text" className="text-sm text-slate-500">
+              <p id="helper-text" className="text-sm text-gray-500">
                 {helperText}
               </p>
             )}
@@ -77,7 +77,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
                 'text-sm',
                 maxCharCount && charCount > maxCharCount * 0.9
                   ? 'text-orange-600'
-                  : 'text-slate-500'
+                  : 'text-gray-400'
               )}
             >
               {charCount}

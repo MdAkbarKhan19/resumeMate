@@ -91,15 +91,15 @@ export default function TemplatesPage() {
   });
 
   return (
-    <div className="min-h-screen bg-surface-primary">
+    <div className="min-h-screen bg-[#fafafc]">
       {/* Header */}
-      <div className="bg-white/[0.02] border-b border-white/[0.06]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="bg-gradient-to-b from-indigo-50/50 to-transparent py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-4xl font-bold text-white mb-4">
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">
               Professional Resume Templates
             </h1>
-            <p className="text-xl text-slate-400 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-500 max-w-3xl mx-auto">
               Choose from our collection of ATS-friendly, professionally designed templates.
               All templates are customizable and optimized for applicant tracking systems.
             </p>
@@ -109,18 +109,18 @@ export default function TemplatesPage() {
 
       {/* Filters */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white/[0.04] backdrop-blur-xl rounded-xl border border-white/[0.06] p-6 mb-8">
+        <div className="bg-white rounded-xl border border-gray-100 shadow-card p-6 mb-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             {/* Category Filter */}
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 justify-center">
               {categories.map((category) => (
                 <button
                   key={category}
                   onClick={() => setSelectedCategory(category)}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  className={`${
                     selectedCategory === category
-                      ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white'
-                      : 'bg-white/[0.06] text-slate-400 hover:bg-white/10 hover:text-white'
+                      ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-full px-5 py-2 text-sm font-semibold shadow-lg shadow-indigo-500/20'
+                      : 'bg-white text-gray-600 rounded-full px-5 py-2 text-sm font-medium border border-gray-200 hover:border-indigo-200 hover:text-indigo-600 hover:bg-indigo-50 transition-all'
                   }`}
                 >
                   {category}
@@ -134,9 +134,9 @@ export default function TemplatesPage() {
                 type="checkbox"
                 checked={showPremiumOnly}
                 onChange={(e) => setShowPremiumOnly(e.target.checked)}
-                className="w-4 h-4 text-cyan-500 border-white/20 bg-white/[0.04] rounded focus:ring-cyan-500"
+                className="w-4 h-4 text-indigo-600 border-gray-300 bg-white rounded focus:ring-indigo-500"
               />
-              <span className="text-sm font-medium text-slate-400">Premium Only</span>
+              <span className="text-sm font-medium text-gray-600">Premium Only</span>
               <StarIcon className="w-5 h-5 text-amber-400" />
             </label>
           </div>
@@ -147,30 +147,30 @@ export default function TemplatesPage() {
           {filteredTemplates.map((template) => (
             <div
               key={template.id}
-              className="bg-white/[0.04] backdrop-blur-xl rounded-2xl border border-white/[0.06] hover:border-cyan-500/20 hover:shadow-glow-cyan transition-all duration-300 overflow-hidden group"
+              className="bg-white rounded-2xl border border-gray-100 shadow-card hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300 overflow-hidden group"
             >
               {/* Template Preview */}
-              <div className="relative aspect-[3/4] bg-gray-100 overflow-hidden">
-                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-cyan-600/60 to-violet-600/60">
-                  <DocumentTextIcon className="w-24 h-24 text-white/30" />
-                  <span className="absolute bottom-4 right-4 text-white/70 text-sm font-medium bg-black/30 px-3 py-1 rounded-full">
+              <div className="relative aspect-[3/4] bg-gradient-to-br from-gray-50 to-indigo-50/30 p-6 group-hover:from-indigo-50/50 transition-colors overflow-hidden">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <DocumentTextIcon className="w-24 h-24 text-indigo-200" />
+                  <span className="absolute bottom-4 right-4 text-gray-500 text-sm font-medium bg-white/80 px-3 py-1 rounded-full border border-gray-100">
                     Preview Coming Soon
                   </span>
                 </div>
 
                 {/* Premium Badge */}
                 {template.isPremium && (
-                  <div className="absolute top-4 right-4 bg-amber-400/90 text-slate-900 px-3 py-1 rounded-full text-xs font-bold flex items-center space-x-1">
+                  <div className="absolute top-4 right-4 bg-gradient-to-r from-amber-400 to-orange-400 text-white text-xs font-bold px-2.5 py-1 rounded-full flex items-center space-x-1">
                     <StarIcon className="w-3 h-3" />
                     <span>PREMIUM</span>
                   </div>
                 )}
 
                 {/* Hover Overlay */}
-                <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <div className="absolute inset-0 bg-white/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
                   <Link
                     href={`/builder?template=${template.id}`}
-                    className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:brightness-110 transition-all"
+                    className="bg-gradient-to-r from-indigo-600 to-violet-600 text-white px-6 py-3 rounded-xl font-semibold hover:brightness-110 transition-all shadow-lg shadow-indigo-500/25"
                   >
                     Use This Template
                   </Link>
@@ -180,23 +180,23 @@ export default function TemplatesPage() {
               {/* Template Info */}
               <div className="p-6">
                 <div className="flex items-start justify-between mb-2">
-                  <h3 className="text-lg font-bold text-white">{template.name}</h3>
-                  <span className="px-2 py-1 bg-white/[0.06] text-slate-400 text-xs font-medium rounded">
+                  <h3 className="text-gray-900 font-semibold text-lg">{template.name}</h3>
+                  <span className="bg-indigo-50 text-indigo-600 text-xs font-medium px-2.5 py-1 rounded-lg">
                     {template.category}
                   </span>
                 </div>
 
-                <p className="text-slate-400 text-sm mb-4">{template.description}</p>
+                <p className="text-gray-500 text-sm mb-4">{template.description}</p>
 
                 <div className="flex items-center justify-between text-sm">
                   {/* Rating */}
                   <div className="flex items-center space-x-1">
                     <StarIcon className="w-4 h-4 text-amber-400 fill-current" />
-                    <span className="font-medium text-white">{template.rating}</span>
+                    <span className="font-medium text-gray-900">{template.rating}</span>
                   </div>
 
                   {/* Usage Count */}
-                  <span className="text-slate-500">
+                  <span className="text-gray-400">
                     {template.usageCount.toLocaleString()} uses
                   </span>
                 </div>
@@ -204,7 +204,7 @@ export default function TemplatesPage() {
                 {/* CTA Button */}
                 <Link
                   href={`/builder?template=${template.id}`}
-                  className="mt-4 w-full block text-center bg-gradient-to-r from-cyan-500 to-blue-600 text-white px-4 py-2 rounded-xl font-semibold hover:brightness-110 transition-all"
+                  className="mt-4 w-full block text-center bg-gradient-to-r from-indigo-600 to-violet-600 text-white px-4 py-2 rounded-xl font-semibold hover:brightness-110 transition-all shadow-md shadow-indigo-500/20"
                 >
                   Start Creating
                 </Link>
@@ -216,26 +216,26 @@ export default function TemplatesPage() {
         {/* Empty State */}
         {filteredTemplates.length === 0 && (
           <div className="text-center py-12">
-            <DocumentTextIcon className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-white mb-2">No templates found</h3>
-            <p className="text-slate-400">Try adjusting your filters</p>
+            <DocumentTextIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No templates found</h3>
+            <p className="text-gray-500">Try adjusting your filters</p>
           </div>
         )}
       </div>
 
       {/* CTA Section */}
-      <div className="bg-gradient-to-r from-cyan-600/80 to-violet-600/80 mt-16">
+      <div className="bg-gradient-to-r from-indigo-600 to-violet-600 mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center">
             <h2 className="text-3xl font-bold text-white mb-4">
               Ready to Build Your Resume?
             </h2>
-            <p className="text-cyan-100/80 text-lg mb-8 max-w-2xl mx-auto">
+            <p className="text-indigo-100 text-lg mb-8 max-w-2xl mx-auto">
               Choose a template and create a professional resume in minutes with AI-powered suggestions.
             </p>
             <Link
               href="/builder"
-              className="inline-block bg-white text-cyan-600 px-8 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-colors"
+              className="inline-block bg-white text-indigo-600 px-8 py-3 rounded-xl font-semibold hover:bg-indigo-50 transition-colors shadow-lg"
             >
               Start Building Now
             </Link>

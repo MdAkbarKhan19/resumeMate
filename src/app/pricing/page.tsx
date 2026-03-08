@@ -154,20 +154,22 @@ const PricingPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-surface-primary">
+    <div className="min-h-screen bg-[#fafafc]">
       {/* Hero Section */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-slate-900 via-cyan-950/50 to-slate-900 border-b border-white/[0.06] py-16">
-        {/* Aurora effect */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-1/2 left-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl" />
-          <div className="absolute -top-1/2 right-1/4 w-96 h-96 bg-violet-500/10 rounded-full blur-3xl" />
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-64 bg-cyan-400/5 rounded-full blur-3xl" />
-        </div>
+      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-violet-600 to-purple-700 text-white py-16">
+        {/* Dot-grid overlay */}
+        <div
+          className="absolute inset-0 pointer-events-none opacity-[0.08]"
+          style={{
+            backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
+            backgroundSize: '24px 24px',
+          }}
+        />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white">
             Choose Your Plan
           </h1>
-          <p className="text-xl md:text-2xl text-slate-400 max-w-3xl mx-auto">
+          <p className="text-xl md:text-2xl text-indigo-100 max-w-3xl mx-auto">
             Create professional, ATS-optimized resumes with AI assistance.
             Start free or unlock premium features.
           </p>
@@ -183,29 +185,29 @@ const PricingPage: React.FC = () => {
               variant={plan.popular ? 'elevated' : 'bordered'}
               className={`relative ${
                 plan.popular
-                  ? 'bg-white/[0.05] backdrop-blur-xl rounded-2xl border-2 border-cyan-500/40 shadow-glow-cyan'
-                  : 'bg-white/[0.04] backdrop-blur-xl rounded-2xl border border-white/[0.06]'
+                  ? 'bg-white rounded-2xl border-2 border-indigo-200 shadow-card glow-indigo hover:-translate-y-1 transition-all'
+                  : 'bg-white rounded-2xl border border-gray-100 shadow-card hover:shadow-card-hover hover:-translate-y-0.5 transition-all'
               }`}
             >
               {plan.popular && (
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white px-4 py-1 rounded-full text-sm font-semibold">
+                  <span className="bg-gradient-to-r from-indigo-600 to-violet-600 text-white px-4 py-1 rounded-full text-sm font-semibold shadow-lg shadow-indigo-500/25">
                     Most Popular
                   </span>
                 </div>
               )}
               <CardContent className="p-8">
                 <div className="text-center mb-6">
-                  <h3 className="text-2xl font-bold text-white mb-2">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">
                     {plan.name}
                   </h3>
-                  <p className="text-slate-400 mb-4">{plan.description}</p>
+                  <p className="text-gray-500 mb-4">{plan.description}</p>
                   <div className="flex items-baseline justify-center">
-                    <span className="text-4xl font-bold text-white">
+                    <span className="text-4xl font-extrabold text-gray-900">
                       {formatCurrency(plan.price)}
                     </span>
                     {plan.interval && (
-                      <span className="text-slate-500 ml-2">
+                      <span className="text-gray-400 ml-2">
                         /{plan.interval === 'monthly' ? 'month' : 'one-time'}
                       </span>
                     )}
@@ -215,20 +217,22 @@ const PricingPage: React.FC = () => {
                 <ul className="space-y-3 mb-8">
                   {plan.features.map((feature, index) => (
                     <li key={index} className="flex items-start">
-                      <svg
-                        className="w-5 h-5 text-emerald-400 mr-2 mt-0.5 flex-shrink-0"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                      <span className="text-slate-300">{feature}</span>
+                      <span className="flex-shrink-0 w-5 h-5 bg-emerald-50 rounded-full flex items-center justify-center mr-2 mt-0.5">
+                        <svg
+                          className="w-3.5 h-3.5 text-emerald-500"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                      </span>
+                      <span className="text-gray-600">{feature}</span>
                     </li>
                   ))}
                 </ul>
@@ -237,7 +241,11 @@ const PricingPage: React.FC = () => {
                   <Button
                     variant={plan.popular ? 'primary' : 'outline'}
                     size="lg"
-                    className="w-full"
+                    className={`w-full ${
+                      plan.popular
+                        ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white hover:from-indigo-700 hover:to-violet-700 shadow-lg shadow-indigo-500/25'
+                        : 'bg-indigo-50 text-indigo-700 border-indigo-100 hover:bg-indigo-100'
+                    }`}
                   >
                     {plan.cta}
                   </Button>
@@ -249,42 +257,42 @@ const PricingPage: React.FC = () => {
 
         {/* Feature Comparison Table */}
         <div className="mb-16">
-          <h2 className="text-3xl font-bold text-center text-white mb-8">
+          <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">
             Compare Plans
           </h2>
-          <Card className="bg-white/[0.04] backdrop-blur-xl rounded-2xl border border-white/[0.06]">
+          <Card className="bg-white rounded-2xl border border-gray-100 shadow-card overflow-hidden">
             <CardContent className="p-0">
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-white/[0.04]">
+                  <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-white">
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
                         Feature
                       </th>
-                      <th className="px-6 py-4 text-center text-sm font-semibold text-white">
+                      <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">
                         Free
                       </th>
-                      <th className="px-6 py-4 text-center text-sm font-semibold text-white">
+                      <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">
                         Tier 1
                       </th>
-                      <th className="px-6 py-4 text-center text-sm font-semibold text-white">
+                      <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">
                         Tier 2
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-white/[0.06]">
+                  <tbody className="divide-y divide-gray-100">
                     {features.map((feature, index) => (
-                      <tr key={index} className="hover:bg-white/[0.04] transition-colors">
-                        <td className="px-6 py-4 text-sm text-slate-300">
+                      <tr key={index} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-6 py-4 text-sm text-gray-700">
                           {feature.name}
                         </td>
-                        <td className="px-6 py-4 text-sm text-center text-slate-400">
+                        <td className="px-6 py-4 text-sm text-center text-gray-500">
                           {feature.free}
                         </td>
-                        <td className="px-6 py-4 text-sm text-center text-slate-400">
+                        <td className="px-6 py-4 text-sm text-center text-gray-500">
                           {feature.tier1}
                         </td>
-                        <td className="px-6 py-4 text-sm text-center text-slate-400">
+                        <td className="px-6 py-4 text-sm text-center text-gray-500">
                           {feature.tier2}
                         </td>
                       </tr>
@@ -298,43 +306,43 @@ const PricingPage: React.FC = () => {
 
         {/* Payment Methods */}
         <div className="mb-16 text-center">
-          <h2 className="text-2xl font-bold text-white mb-4">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">
             All Indian Payment Methods Accepted
           </h2>
           <div className="flex flex-wrap justify-center gap-6">
             {paymentMethods.map((method) => (
               <div
                 key={method.name}
-                className="flex items-center gap-2 bg-white/[0.04] px-6 py-3 rounded-xl border border-white/[0.06]"
+                className="flex items-center gap-2 bg-white px-6 py-3 rounded-xl border border-gray-100 shadow-sm"
               >
                 <span className="text-2xl">{method.icon}</span>
-                <span className="text-slate-300 font-medium">{method.name}</span>
+                <span className="text-gray-600 font-medium">{method.name}</span>
               </div>
             ))}
           </div>
-          <p className="mt-4 text-slate-500">
+          <p className="mt-4 text-gray-400">
             Powered by Razorpay - Secure & Trusted Payments
           </p>
         </div>
 
         {/* FAQs */}
         <div className="mb-16">
-          <h2 className="text-3xl font-bold text-center text-white mb-8">
+          <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">
             Frequently Asked Questions
           </h2>
           <div className="max-w-3xl mx-auto space-y-4">
             {faqs.map((faq, index) => (
-              <Card key={index} className="bg-white/[0.04] backdrop-blur-xl rounded-2xl border border-white/[0.06]">
+              <Card key={index} className="bg-white rounded-2xl border border-gray-100 shadow-card divide-y divide-gray-100">
                 <CardContent className="p-0">
                   <button
                     onClick={() => toggleFaq(index)}
-                    className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-white/[0.04] transition-colors rounded-2xl"
+                    className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors rounded-2xl"
                   >
-                    <span className="font-semibold text-white">
+                    <span className="font-medium text-gray-900">
                       {faq.question}
                     </span>
                     <svg
-                      className={`w-5 h-5 text-slate-500 transition-transform ${
+                      className={`w-5 h-5 text-gray-400 transition-transform ${
                         selectedFaq === index ? 'transform rotate-180' : ''
                       }`}
                       fill="none"
@@ -350,7 +358,7 @@ const PricingPage: React.FC = () => {
                     </svg>
                   </button>
                   {selectedFaq === index && (
-                    <div className="px-6 pb-4 text-slate-400 border-t border-white/[0.06] pt-4">
+                    <div className="px-6 pb-4 text-gray-500 border-t border-gray-100 pt-4">
                       {faq.answer}
                     </div>
                   )}
@@ -361,17 +369,17 @@ const PricingPage: React.FC = () => {
         </div>
 
         {/* CTA Section */}
-        <div className="bg-gradient-to-r from-cyan-600/80 to-violet-600/80 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-8 md:p-12 text-center mb-16">
+        <div className="bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 rounded-3xl shadow-xl p-8 md:p-12 text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">
             Ready to Build Your Perfect Resume?
           </h2>
-          <p className="text-xl text-cyan-100/80 mb-8 max-w-2xl mx-auto">
+          <p className="text-xl text-indigo-100 mb-8 max-w-2xl mx-auto">
             Join thousands of job seekers who have landed their dream jobs with
             ResumeMate's ATS-optimized resumes.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/auth/signup">
-              <Button variant="secondary" size="lg" className="bg-white text-cyan-600 hover:bg-gray-100">
+              <Button variant="secondary" size="lg" className="bg-white text-indigo-700 hover:bg-indigo-50 shadow-lg">
                 Start Free
               </Button>
             </Link>

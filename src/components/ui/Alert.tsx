@@ -29,24 +29,24 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
   ) => {
     const variants = {
       info: {
-        container: 'bg-cyan-500/10 border-cyan-500/20 text-cyan-300',
-        icon: 'text-cyan-400',
-        title: 'text-cyan-300',
+        container: 'bg-indigo-50 border-indigo-200 text-indigo-800',
+        icon: 'text-indigo-500',
+        title: 'text-indigo-800',
       },
       success: {
-        container: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300',
-        icon: 'text-emerald-400',
-        title: 'text-emerald-300',
+        container: 'bg-emerald-50 border-emerald-200 text-emerald-800',
+        icon: 'text-emerald-500',
+        title: 'text-emerald-800',
       },
       warning: {
-        container: 'bg-amber-500/10 border-amber-500/20 text-amber-300',
-        icon: 'text-amber-400',
-        title: 'text-amber-300',
+        container: 'bg-amber-50 border-amber-200 text-amber-800',
+        icon: 'text-amber-500',
+        title: 'text-amber-800',
       },
       error: {
-        container: 'bg-rose-500/10 border-rose-500/20 text-rose-300',
-        icon: 'text-rose-400',
-        title: 'text-rose-300',
+        container: 'bg-red-50 border-red-200 text-red-800',
+        icon: 'text-red-500',
+        title: 'text-red-800',
       },
     };
 
@@ -120,7 +120,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
             <button
               type="button"
               onClick={onDismiss}
-              className="ml-3 inline-flex flex-shrink-0 rounded-md p-1.5 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-offset-2"
+              className="ml-3 inline-flex flex-shrink-0 rounded-md p-1.5 hover:bg-black/5 focus:outline-none focus:ring-2 focus:ring-offset-2"
             >
               <span className="sr-only">Dismiss</span>
               <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -202,7 +202,7 @@ export const ToastContainer: React.FC = () => {
   };
 
   return (
-    <div className="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-md backdrop-blur-sm">
+    <div className="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-md">
       {toasts.map((toast) => (
         <Alert
           key={toast.id}
@@ -211,7 +211,7 @@ export const ToastContainer: React.FC = () => {
           description={toast.description}
           dismissible
           onDismiss={() => removeToast(toast.id)}
-          className="animate-slide-in shadow-lg"
+          className="animate-slide-in shadow-card"
         />
       ))}
     </div>

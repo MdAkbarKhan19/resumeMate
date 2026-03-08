@@ -32,8 +32,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
-      <body className={`${inter.className} ${inter.variable} bg-surface-primary text-slate-100 antialiased`}>
+    <html lang="en">
+      <body className={`${inter.className} ${inter.variable} bg-[#fafafc] text-gray-900 antialiased`}>
         <ClearOldAuth />
         <AuthProvider>
           <div className="flex flex-col min-h-screen relative">
@@ -47,26 +47,20 @@ export default function RootLayout({
           toastOptions={{
             duration: 4000,
             style: {
-              background: 'rgba(22, 27, 48, 0.95)',
-              color: '#edf0fd',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
-              backdropFilter: 'blur(12px)',
-              borderRadius: '12px',
+              background: '#fff',
+              color: '#1e1b4b',
+              border: '1px solid #e9e5fc',
+              borderRadius: '16px',
               fontSize: '14px',
+              boxShadow: '0 4px 16px rgba(99, 68, 236, 0.08)',
             },
             success: {
               duration: 3000,
-              iconTheme: {
-                primary: '#10b981',
-                secondary: '#fff',
-              },
+              iconTheme: { primary: '#10b981', secondary: '#fff' },
             },
             error: {
               duration: 5000,
-              iconTheme: {
-                primary: '#f43f5e',
-                secondary: '#fff',
-              },
+              iconTheme: { primary: '#ef4444', secondary: '#fff' },
             },
           }}
         />

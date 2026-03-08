@@ -56,14 +56,14 @@ const DashboardPage: React.FC = () => {
     : user.resumeCredits;
 
   return (
-    <div className="min-h-screen bg-surface-primary py-8">
+    <div className="min-h-screen bg-[#fafafc] py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white">
+          <h1 className="text-3xl font-bold text-gray-900">
             Welcome back, {user.name}!
           </h1>
-          <p className="mt-2 text-slate-400">
+          <p className="mt-2 text-gray-500">
             Here's an overview of your resume building activity
           </p>
         </div>
@@ -75,12 +75,12 @@ const DashboardPage: React.FC = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-400">Total Resumes</p>
-                  <p className="text-3xl font-bold text-white mt-2">{total}</p>
+                  <p className="text-sm font-medium text-gray-500">Total Resumes</p>
+                  <p className="text-3xl font-bold text-gray-900 mt-2">{total}</p>
                 </div>
-                <div className="w-12 h-12 bg-cyan-500/10 rounded-lg flex items-center justify-center">
+                <div className="w-12 h-12 bg-indigo-50 rounded-lg flex items-center justify-center">
                   <svg
-                    className="w-6 h-6 text-cyan-400"
+                    className="w-6 h-6 text-indigo-600"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -102,12 +102,12 @@ const DashboardPage: React.FC = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-400">Credits Left</p>
-                  <p className="text-3xl font-bold text-white mt-2">{creditsRemaining}</p>
+                  <p className="text-sm font-medium text-gray-500">Credits Left</p>
+                  <p className="text-3xl font-bold text-gray-900 mt-2">{creditsRemaining}</p>
                 </div>
-                <div className="w-12 h-12 bg-emerald-500/10 rounded-lg flex items-center justify-center">
+                <div className="w-12 h-12 bg-emerald-50 rounded-lg flex items-center justify-center">
                   <svg
-                    className="w-6 h-6 text-emerald-400"
+                    className="w-6 h-6 text-emerald-600"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -129,16 +129,16 @@ const DashboardPage: React.FC = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-400">Current Plan</p>
-                  <p className="text-2xl font-bold text-white mt-2">
+                  <p className="text-sm font-medium text-gray-500">Current Plan</p>
+                  <p className="text-2xl font-bold text-gray-900 mt-2">
                     {user.planType === 'FREE' && 'Free'}
                     {user.planType === 'TIER1' && 'Tier 1'}
                     {user.planType === 'TIER2' && 'Tier 2'}
                   </p>
                 </div>
-                <div className="w-12 h-12 bg-violet-500/10 rounded-lg flex items-center justify-center">
+                <div className="w-12 h-12 bg-violet-50 rounded-lg flex items-center justify-center">
                   <svg
-                    className="w-6 h-6 text-violet-400"
+                    className="w-6 h-6 text-violet-600"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -160,19 +160,19 @@ const DashboardPage: React.FC = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-400">Subscription</p>
-                  <p className="text-2xl font-bold text-white mt-2">
+                  <p className="text-sm font-medium text-gray-500">Subscription</p>
+                  <p className="text-2xl font-bold text-gray-900 mt-2">
                     {user.subscriptionActive ? 'Active' : 'Inactive'}
                   </p>
                   {user.subscriptionExpiry && user.subscriptionActive && (
-                    <p className="text-xs text-slate-500 mt-1">
+                    <p className="text-xs text-gray-400 mt-1">
                       Until {formatDate(user.subscriptionExpiry)}
                     </p>
                   )}
                 </div>
-                <div className={`w-12 h-12 ${user.subscriptionActive ? 'bg-emerald-500/10' : 'bg-slate-500/10'} rounded-lg flex items-center justify-center`}>
+                <div className={`w-12 h-12 ${user.subscriptionActive ? 'bg-emerald-50' : 'bg-gray-100'} rounded-lg flex items-center justify-center`}>
                   <svg
-                    className={`w-6 h-6 ${user.subscriptionActive ? 'text-emerald-400' : 'text-slate-400'}`}
+                    className={`w-6 h-6 ${user.subscriptionActive ? 'text-emerald-600' : 'text-gray-400'}`}
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -231,39 +231,33 @@ const DashboardPage: React.FC = () => {
         </Card>
 
         {/* ATS Optimization - Main Feature CTA */}
-        <Card className="mb-8 bg-gradient-to-r from-cyan-600/80 to-violet-600/80 backdrop-blur-xl border border-white/[0.08] text-white">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-xl font-bold text-white">ATS Resume Optimizer</h3>
-                <p className="text-cyan-100/80 mt-1">
-                  Paste a job description, get your ATS score, and auto-enhance your resume to match
-                </p>
-              </div>
-              {recentResumes.length > 0 ? (
-                <Link href={`/builder/ats?resumeId=${recentResumes[0].id}`}>
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    className="bg-white text-cyan-600 border-white hover:bg-cyan-50 font-semibold"
-                  >
-                    Optimize Resume
-                  </Button>
-                </Link>
-              ) : (
-                <Link href="/builder">
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    className="bg-white text-cyan-600 border-white hover:bg-cyan-50 font-semibold"
-                  >
-                    Create Resume First
-                  </Button>
-                </Link>
-              )}
+        <div className="mb-8 bg-gradient-to-r from-indigo-600 to-violet-600 rounded-2xl shadow-xl shadow-indigo-500/15 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-xl font-bold text-white">ATS Resume Optimizer</h3>
+              <p className="text-indigo-100 mt-1">
+                Paste a job description, get your ATS score, and auto-enhance your resume to match
+              </p>
             </div>
-          </CardContent>
-        </Card>
+            {recentResumes.length > 0 ? (
+              <Link href={`/builder/ats?resumeId=${recentResumes[0].id}`}>
+                <button
+                  className="bg-white text-indigo-700 font-semibold hover:bg-indigo-50 rounded-xl shadow-lg px-6 py-3 text-lg transition-all duration-200"
+                >
+                  Optimize Resume
+                </button>
+              </Link>
+            ) : (
+              <Link href="/builder">
+                <button
+                  className="bg-white text-indigo-700 font-semibold hover:bg-indigo-50 rounded-xl shadow-lg px-6 py-3 text-lg transition-all duration-200"
+                >
+                  Create Resume First
+                </button>
+              </Link>
+            )}
+          </div>
+        </div>
 
         {/* Recent Resumes */}
         <Card>
@@ -279,9 +273,9 @@ const DashboardPage: React.FC = () => {
           </CardHeader>
           <CardContent>
             {resumesLoading ? (
-              <div className="text-center py-8 text-slate-500">Loading resumes...</div>
+              <div className="text-center py-8 text-gray-400">Loading resumes...</div>
             ) : resumesError ? (
-              <div className="text-center py-8 text-rose-400">
+              <div className="text-center py-8 text-red-500">
                 <p className="text-sm">Failed to load resumes. Try refreshing the page.</p>
                 <Button variant="outline" size="sm" className="mt-3" onClick={() => window.location.reload()}>
                   Refresh
@@ -290,7 +284,7 @@ const DashboardPage: React.FC = () => {
             ) : recentResumes.length === 0 ? (
               <div className="text-center py-12">
                 <svg
-                  className="mx-auto h-12 w-12 text-slate-600"
+                  className="mx-auto h-12 w-12 text-gray-300"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -302,8 +296,8 @@ const DashboardPage: React.FC = () => {
                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                   />
                 </svg>
-                <h3 className="mt-2 text-sm font-medium text-white">No resumes</h3>
-                <p className="mt-1 text-sm text-slate-500">
+                <h3 className="mt-2 text-sm font-medium text-gray-900">No resumes</h3>
+                <p className="mt-1 text-sm text-gray-500">
                   Get started by creating your first resume.
                 </p>
                 <div className="mt-6">
@@ -317,12 +311,12 @@ const DashboardPage: React.FC = () => {
                 {recentResumes.map((resume) => (
                   <div
                     key={resume.id}
-                    className="p-4 bg-white/[0.04] rounded-xl border border-white/[0.06] hover:border-cyan-500/20 transition-all"
+                    className="bg-white rounded-2xl border border-gray-100 shadow-card hover:shadow-card-hover hover:-translate-y-0.5 transition-all p-5"
                   >
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1">
-                        <h4 className="text-sm font-medium text-white">{resume.title}</h4>
-                        <p className="text-xs text-slate-500 mt-1">
+                        <h4 className="text-sm font-semibold text-gray-900">{resume.title}</h4>
+                        <p className="text-xs text-gray-400 mt-1">
                           Last updated: {formatDate(resume.updatedAt)}
                         </p>
                       </div>
@@ -340,7 +334,7 @@ const DashboardPage: React.FC = () => {
                           </Button>
                         </Link>
                         <Link href={`/builder/ats?resumeId=${resume.id}`}>
-                          <Button variant="ghost" size="sm" className="text-cyan-400 hover:text-cyan-300">
+                          <Button variant="ghost" size="sm" className="text-indigo-600 hover:text-indigo-500">
                             ATS Optimize
                           </Button>
                         </Link>
@@ -349,29 +343,29 @@ const DashboardPage: React.FC = () => {
 
                     {/* Resume Details Preview */}
                     {resume.personalInfo && (
-                      <div className="border-t border-white/[0.06] pt-3 mt-3">
+                      <div className="border-t border-gray-100 pt-3 mt-3">
                         <div className="grid grid-cols-2 gap-2 text-xs">
                           <div>
-                            <span className="font-medium text-slate-400">Name:</span>
-                            <span className="text-slate-500 ml-2">
+                            <span className="font-medium text-gray-500">Name:</span>
+                            <span className="text-gray-600 ml-2">
                               {resume.personalInfo.fullName || 'Not provided'}
                             </span>
                           </div>
                           <div>
-                            <span className="font-medium text-slate-400">Email:</span>
-                            <span className="text-slate-500 ml-2">
+                            <span className="font-medium text-gray-500">Email:</span>
+                            <span className="text-gray-600 ml-2">
                               {resume.personalInfo.email || 'Not provided'}
                             </span>
                           </div>
                           <div>
-                            <span className="font-medium text-slate-400">Phone:</span>
-                            <span className="text-slate-500 ml-2">
+                            <span className="font-medium text-gray-500">Phone:</span>
+                            <span className="text-gray-600 ml-2">
                               {resume.personalInfo.phone || 'Not provided'}
                             </span>
                           </div>
                           <div>
-                            <span className="font-medium text-slate-400">Location:</span>
-                            <span className="text-slate-500 ml-2">
+                            <span className="font-medium text-gray-500">Location:</span>
+                            <span className="text-gray-600 ml-2">
                               {resume.personalInfo.location || 'Not provided'}
                             </span>
                           </div>
@@ -379,17 +373,17 @@ const DashboardPage: React.FC = () => {
 
                         {resume.template && (
                           <div className="mt-2 text-xs">
-                            <span className="font-medium text-slate-400">Template:</span>
-                            <span className="text-slate-500 ml-2">{resume.template.name}</span>
+                            <span className="font-medium text-gray-500">Template:</span>
+                            <span className="text-gray-600 ml-2">{resume.template.name}</span>
                           </div>
                         )}
 
                         {/* Section Summary with Counts */}
-                        <div className="mt-3 pt-3 border-t border-white/[0.06]">
-                          <div className="flex items-center flex-wrap gap-3 text-xs text-slate-400">
+                        <div className="mt-3 pt-3 border-t border-gray-100">
+                          <div className="flex items-center flex-wrap gap-3 text-xs text-gray-500">
                             {resume.experience && resume.experience.length > 0 && (
                               <div className="flex items-center">
-                                <svg className="w-4 h-4 mr-1 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg className="w-4 h-4 mr-1 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                 </svg>
                                 <span className="font-medium">{resume.experience.length}</span>
@@ -398,7 +392,7 @@ const DashboardPage: React.FC = () => {
                             )}
                             {resume.education && resume.education.length > 0 && (
                               <div className="flex items-center">
-                                <svg className="w-4 h-4 mr-1 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg className="w-4 h-4 mr-1 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5z" />
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5zm0 0v7m0-7l-9-5m9 12l9-5m-9-7V3" />
                                 </svg>
@@ -408,7 +402,7 @@ const DashboardPage: React.FC = () => {
                             )}
                             {resume.skills && resume.skills.length > 0 && (
                               <div className="flex items-center">
-                                <svg className="w-4 h-4 mr-1 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg className="w-4 h-4 mr-1 text-violet-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
                                 </svg>
                                 <span className="font-medium">{resume.skills.length}</span>
@@ -417,7 +411,7 @@ const DashboardPage: React.FC = () => {
                             )}
                             {resume.projects && resume.projects.length > 0 && (
                               <div className="flex items-center">
-                                <svg className="w-4 h-4 mr-1 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg className="w-4 h-4 mr-1 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                                 </svg>
                                 <span className="font-medium">{resume.projects.length}</span>
@@ -426,7 +420,7 @@ const DashboardPage: React.FC = () => {
                             )}
                             {resume.certifications && resume.certifications.length > 0 && (
                               <div className="flex items-center">
-                                <svg className="w-4 h-4 mr-1 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg className="w-4 h-4 mr-1 text-pink-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                                 <span className="font-medium">{resume.certifications.length}</span>
@@ -437,7 +431,7 @@ const DashboardPage: React.FC = () => {
 
                           {/* Show preview of first experience if available */}
                           {resume.experience && resume.experience.length > 0 && resume.experience[0].jobTitle && (
-                            <div className="mt-2 text-xs text-slate-500">
+                            <div className="mt-2 text-xs text-gray-500">
                               Latest: {resume.experience[0].jobTitle}
                               {resume.experience[0].company && ` at ${resume.experience[0].company}`}
                             </div>

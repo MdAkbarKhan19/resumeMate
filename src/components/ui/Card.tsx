@@ -13,9 +13,9 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
     ref
   ) => {
     const variants = {
-      default: 'bg-white/[0.04] backdrop-blur-xl rounded-xl border border-white/[0.06] shadow-[0_0_0_1px_rgba(255,255,255,0.02)]',
-      bordered: 'bg-white/[0.03] backdrop-blur-xl rounded-xl border-2 border-white/[0.08]',
-      elevated: 'bg-white/[0.05] backdrop-blur-xl rounded-xl border border-white/[0.08] shadow-[0_8px_32px_rgba(0,0,0,0.3)]',
+      default: 'bg-white rounded-2xl border border-gray-100 shadow-card',
+      bordered: 'bg-white rounded-2xl border-2 border-indigo-100 shadow-sm',
+      elevated: 'bg-white rounded-2xl border border-gray-50 shadow-elevated',
     };
 
     const paddings = {
@@ -31,7 +31,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
         className={cn(
           variants[variant],
           paddings[padding],
-          hoverable && 'transition-all duration-200 hover:border-cyan-500/20 hover:shadow-glow-cyan cursor-pointer',
+          hoverable && 'transition-all duration-300 hover:border-indigo-200 hover:shadow-card-hover cursor-pointer hover:-translate-y-0.5',
           className
         )}
         {...props}
@@ -65,7 +65,7 @@ const CardTitle = React.forwardRef<HTMLHeadingElement, CardTitleProps>(
     return (
       <h3
         ref={ref}
-        className={cn('text-xl font-semibold text-white', className)}
+        className={cn('text-xl font-semibold text-gray-900', className)}
         {...props}
       >
         {children}
@@ -81,7 +81,7 @@ export interface CardDescriptionProps extends React.HTMLAttributes<HTMLParagraph
 const CardDescription = React.forwardRef<HTMLParagraphElement, CardDescriptionProps>(
   ({ className, children, ...props }, ref) => {
     return (
-      <p ref={ref} className={cn('text-sm text-slate-400 mt-1', className)} {...props}>
+      <p ref={ref} className={cn('text-sm text-gray-500 mt-1', className)} {...props}>
         {children}
       </p>
     );
@@ -109,7 +109,7 @@ export interface CardFooterProps extends React.HTMLAttributes<HTMLDivElement> {}
 const CardFooter = React.forwardRef<HTMLDivElement, CardFooterProps>(
   ({ className, children, ...props }, ref) => {
     return (
-      <div ref={ref} className={cn('mt-4 pt-4 border-t border-white/[0.06]', className)} {...props}>
+      <div ref={ref} className={cn('mt-4 pt-4 border-t border-gray-100', className)} {...props}>
         {children}
       </div>
     );

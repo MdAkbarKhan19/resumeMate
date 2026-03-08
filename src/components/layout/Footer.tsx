@@ -59,15 +59,15 @@ const Footer: React.FC = () => {
   };
 
   return (
-    <footer className="relative bg-surface-primary border-t border-white/[0.06]">
-      {/* Aurora gradient overlay */}
+    <footer className="relative bg-white border-t border-gray-100">
+      {/* Top gradient line */}
       <div
         aria-hidden="true"
-        className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-500/40 to-transparent"
+        className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent"
       />
       <div
         aria-hidden="true"
-        className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-cyan-500/[0.03] via-blue-600/[0.02] to-transparent pointer-events-none"
+        className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-indigo-500/[0.03] via-violet-500/[0.02] to-transparent pointer-events-none"
       />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -75,12 +75,12 @@ const Footer: React.FC = () => {
           {/* Brand */}
           <div className="col-span-1">
             <Link href="/" className="flex items-center space-x-2 mb-4">
-              <div className="w-8 h-8 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-gradient-to-r from-indigo-600 to-violet-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-xl">R</span>
               </div>
-              <span className="text-xl font-bold text-white">ResumeMate</span>
+              <span className="text-xl font-bold text-gray-900">ResumeMate</span>
             </Link>
-            <p className="text-sm text-slate-500 mb-4">
+            <p className="text-sm text-gray-500 mb-4">
               Create professional, ATS-optimized resumes with AI-powered assistance.
               Stand out in your job search.
             </p>
@@ -91,7 +91,7 @@ const Footer: React.FC = () => {
                   href={item.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-slate-600 hover:text-cyan-400 transition-colors"
+                  className="text-gray-400 hover:text-indigo-600 transition-colors"
                   aria-label={item.name}
                 >
                   {item.icon}
@@ -102,7 +102,7 @@ const Footer: React.FC = () => {
 
           {/* Product */}
           <div>
-            <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-4">
+            <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">
               Product
             </h3>
             <ul className="space-y-3">
@@ -110,7 +110,7 @@ const Footer: React.FC = () => {
                 <li key={item.name}>
                   <Link
                     href={item.href}
-                    className="text-sm text-slate-500 hover:text-cyan-400 transition-colors"
+                    className="text-sm text-gray-500 hover:text-indigo-600 transition-colors"
                   >
                     {item.name}
                   </Link>
@@ -121,7 +121,7 @@ const Footer: React.FC = () => {
 
           {/* Company */}
           <div>
-            <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-4">
+            <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">
               Company
             </h3>
             <ul className="space-y-3">
@@ -129,7 +129,7 @@ const Footer: React.FC = () => {
                 <li key={item.name}>
                   <Link
                     href={item.href}
-                    className="text-sm text-slate-500 hover:text-cyan-400 transition-colors"
+                    className="text-sm text-gray-500 hover:text-indigo-600 transition-colors"
                   >
                     {item.name}
                   </Link>
@@ -140,7 +140,7 @@ const Footer: React.FC = () => {
 
           {/* Legal */}
           <div>
-            <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-4">
+            <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">
               Legal
             </h3>
             <ul className="space-y-3">
@@ -148,7 +148,7 @@ const Footer: React.FC = () => {
                 <li key={item.name}>
                   <Link
                     href={item.href}
-                    className="text-sm text-slate-500 hover:text-cyan-400 transition-colors"
+                    className="text-sm text-gray-500 hover:text-indigo-600 transition-colors"
                   >
                     {item.name}
                   </Link>
@@ -159,27 +159,27 @@ const Footer: React.FC = () => {
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-12 pt-8 border-t border-white/[0.06]">
+        <div className="mt-12 pt-8 border-t border-gray-100">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-gray-400">
               &copy; {currentYear} ResumeMate. All rights reserved.
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
               <Link
                 href="/sitemap"
-                className="text-sm text-slate-600 hover:text-cyan-400 transition-colors"
+                className="text-sm text-gray-400 hover:text-indigo-600 transition-colors"
               >
                 Sitemap
               </Link>
               <Link
                 href="/accessibility"
-                className="text-sm text-slate-600 hover:text-cyan-400 transition-colors"
+                className="text-sm text-gray-400 hover:text-indigo-600 transition-colors"
               >
                 Accessibility
               </Link>
               <Link
                 href="/support"
-                className="text-sm text-slate-600 hover:text-cyan-400 transition-colors"
+                className="text-sm text-gray-400 hover:text-indigo-600 transition-colors"
               >
                 Support
               </Link>

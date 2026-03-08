@@ -30,27 +30,27 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className={cn('w-full', containerClassName)}>
         {label && (
-          <label className="block text-sm font-medium text-slate-300 mb-1">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             {label}
-            {required && <span className="text-rose-400 ml-1">*</span>}
+            {required && <span className="text-red-500 ml-1">*</span>}
           </label>
         )}
         <div className="relative">
           {leftIcon && (
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <span className="text-slate-500">{leftIcon}</span>
+              <span className="text-gray-400">{leftIcon}</span>
             </div>
           )}
           <input
             ref={ref}
             type={type}
             className={cn(
-              'block w-full rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2.5',
-              'text-white placeholder-slate-500',
-              'focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50',
-              'disabled:bg-white/[0.02] disabled:cursor-not-allowed disabled:text-slate-600',
-              'transition-all duration-200 backdrop-blur-sm',
-              error && 'border-rose-500/50 focus:ring-rose-500/50',
+              'block w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5',
+              'text-gray-900 placeholder-gray-400',
+              'focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500',
+              'disabled:bg-gray-50 disabled:cursor-not-allowed disabled:text-gray-400',
+              'transition-all duration-200',
+              error && 'border-red-300 focus:ring-red-500/30 focus:border-red-500',
               leftIcon && 'pl-10',
               rightIcon && 'pr-10',
               className
@@ -62,17 +62,17 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           />
           {rightIcon && (
             <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-              <span className="text-slate-500">{rightIcon}</span>
+              <span className="text-gray-400">{rightIcon}</span>
             </div>
           )}
         </div>
         {error && (
-          <p id="error-message" className="mt-1 text-sm text-rose-400">
+          <p id="error-message" className="mt-1 text-sm text-red-500">
             {error}
           </p>
         )}
         {!error && helperText && (
-          <p id="helper-text" className="mt-1 text-sm text-slate-500">
+          <p id="helper-text" className="mt-1 text-sm text-gray-500">
             {helperText}
           </p>
         )}

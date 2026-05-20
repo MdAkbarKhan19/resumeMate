@@ -3,9 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { signIn, fetchAuthSession, type SignInInput } from 'aws-amplify/auth';
 import { useAuth } from '@/contexts/AuthContext';
-import '../../../lib/amplify-config';
 
 function LoginPageContent() {
   const router = useRouter();
@@ -34,81 +32,46 @@ function LoginPageContent() {
     }
   }, [isAuthenticated, router]);
 
-  const clearAmplifyState = () => {
-    // Remove the autoSignIn key that causes UnexpectedSignInInterruptionException
-    Object.keys(localStorage).forEach((k) => {
-      if (
-        k === 'amplify-auto-sign-in' ||
-        k.startsWith('CognitoIdentityServiceProvider.')
-      ) {
-        localStorage.removeItem(k);
-      }
-    });
-  };
-
-  const doSignIn = async () => {
-    const { isSignedIn, nextStep } = await signIn({
-      username: formData.email,
-      password: formData.password,
-    } as SignInInput);
-    return { isSignedIn, nextStep };
-  };
-
-  const storeSessionAndRedirect = async () => {
-    const session = await fetchAuthSession();
-    if (!session.tokens?.idToken) return false;
-    localStorage.setItem('token', session.tokens.idToken.toString());
-    await refreshUser();
-    router.replace('/dashboard');
-    return true;
-  };
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
     try {
-      // Always clear stale Amplify autoSignIn state before signing in
-      clearAmplifyState();
+      // Wipe any stale Amplify state from prior attempts
+      Object.keys(localStorage).forEach((k) => {
+        if (k === 'amplify-auto-sign-in' || k.startsWith('CognitoIdentityServiceProvider.')) {
+          localStorage.removeItem(k);
+        }
+      });
 
-      let isSignedIn = false;
+      const res = await fetch('/api/auth/cognito-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: formData.email, password: formData.password }),
+      });
 
-      try {
-        const result = await doSignIn();
-        isSignedIn = result.isSignedIn;
-        if (!isSignedIn && result.nextStep.signInStep === 'CONFIRM_SIGN_UP') {
+      const json = await res.json();
+
+      if (!res.ok || !json.success) {
+        const code = json?.error?.code;
+        if (code === 'NOT_CONFIRMED') {
           setError('Please verify your email before signing in');
           router.push('/auth/signup');
           return;
         }
-      } catch (signInErr: any) {
-        if (signInErr.name === 'UserAlreadyAuthenticatedException') {
-          isSignedIn = true;
-        } else if (signInErr.name === 'UnexpectedSignInInterruptionException') {
-          // Stale state persisted in memory — clear storage and do a clean retry
-          clearAmplifyState();
-          const { signOut } = await import('aws-amplify/auth');
-          try { await signOut({ global: false }); } catch { }
-          const retry = await doSignIn();
-          isSignedIn = retry.isSignedIn;
-        } else {
-          throw signInErr;
-        }
+        setError(json?.error?.message || 'Failed to sign in. Please try again.');
+        return;
       }
 
-      if (isSignedIn) {
-        const ok = await storeSessionAndRedirect();
-        if (!ok) setError('Signed in but session failed to load. Please refresh and try again.');
+      localStorage.setItem('token', json.data.idToken);
+      if (json.data.refreshToken) {
+        localStorage.setItem('refreshToken', json.data.refreshToken);
       }
+      await refreshUser();
+      router.replace('/dashboard');
     } catch (err: any) {
-      if (err.name === 'UserNotFoundException') {
-        setError('No account found with this email');
-      } else if (err.name === 'NotAuthorizedException') {
-        setError('Incorrect email or password');
-      } else {
-        setError(err.message || 'Failed to sign in. Please try again.');
-      }
+      setError(err.message || 'Failed to sign in. Please try again.');
     } finally {
       setLoading(false);
     }

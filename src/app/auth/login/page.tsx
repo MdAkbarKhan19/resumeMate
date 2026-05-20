@@ -34,12 +34,35 @@ function LoginPageContent() {
     }
   }, [isAuthenticated, router]);
 
+  const fetchSessionAndRedirect = async () => {
+    let retries = 5;
+    while (retries > 0) {
+      await new Promise((r) => setTimeout(r, 800));
+      try {
+        const session = await fetchAuthSession({ forceRefresh: true });
+        if (session.tokens?.idToken) {
+          localStorage.setItem('token', session.tokens.idToken.toString());
+          await refreshUser();
+          router.replace('/dashboard');
+          return true;
+        }
+      } catch { }
+      retries--;
+    }
+    return false;
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
     try {
+      // Clear any stale Amplify auth state before attempting sign-in
+      try {
+        await signOut({ global: false });
+      } catch { }
+
       const signInInput: SignInInput = {
         username: formData.email,
         password: formData.password,
@@ -47,42 +70,9 @@ function LoginPageContent() {
 
       const { isSignedIn, nextStep } = await signIn(signInInput);
 
-      console.log('[Login] Sign in result:', { isSignedIn, nextStep });
-
       if (isSignedIn) {
-        console.log('[Login] Sign in successful, establishing session...');
-
-        // Wait for Cognito to establish session, then verify it
-        let sessionEstablished = false;
-        let retries = 5;
-
-        while (retries > 0 && !sessionEstablished) {
-          try {
-            await new Promise(resolve => setTimeout(resolve, 800));
-            const session = await fetchAuthSession({ forceRefresh: true });
-
-            if (session.tokens && session.tokens.idToken) {
-              console.log('[Login] Session established successfully');
-              sessionEstablished = true;
-
-              // Store token immediately
-              const idToken = session.tokens.idToken.toString();
-              localStorage.setItem('token', idToken);
-
-              // Now refresh user context
-              await refreshUser();
-              console.log('[Login] User loaded, redirecting to dashboard');
-              router.replace('/dashboard');
-              return;
-            }
-          } catch (sessionErr: any) {
-            console.log(`[Login] Session not ready yet, retry ${6 - retries}/5:`, sessionErr.message);
-            retries--;
-          }
-        }
-
-        if (!sessionEstablished) {
-          console.error('[Login] Failed to establish session after retries');
+        const ok = await fetchSessionAndRedirect();
+        if (!ok) {
           setError('Sign in successful but session setup failed. Please try refreshing the page.');
         }
       } else if (nextStep.signInStep === 'CONFIRM_SIGN_UP') {
@@ -92,11 +82,15 @@ function LoginPageContent() {
     } catch (err: any) {
       console.error('[Login] Error:', err);
 
-      if (err.name === 'UserAlreadyAuthenticatedException') {
-        console.log('[Login] User already authenticated, refreshing...');
-        // User is already signed in, refresh and redirect
-        await refreshUser();
-        router.replace('/dashboard');
+      if (
+        err.name === 'UserAlreadyAuthenticatedException' ||
+        err.name === 'UnexpectedSignInInterruptionException'
+      ) {
+        // Session already exists or sign-in completed in background — just fetch it
+        const ok = await fetchSessionAndRedirect();
+        if (!ok) {
+          setError('Session setup failed. Please try again.');
+        }
         return;
       } else if (err.name === 'UserNotFoundException') {
         setError('No account found with this email');

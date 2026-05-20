@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { signIn, signOut, fetchAuthSession, type SignInInput } from 'aws-amplify/auth';
+import { signIn, signOut, fetchAuthSession, autoSignIn, type SignInInput } from 'aws-amplify/auth';
 import { useAuth } from '@/contexts/AuthContext';
 import '../../../lib/amplify-config';
 
@@ -37,9 +37,13 @@ function LoginPageContent() {
   const fetchSessionAndRedirect = async () => {
     let retries = 5;
     while (retries > 0) {
-      await new Promise((r) => setTimeout(r, 800));
+      await new Promise((r) => setTimeout(r, 700));
       try {
-        const session = await fetchAuthSession({ forceRefresh: true });
+        // Try cached tokens first (no network call), then force-refresh
+        let session = await fetchAuthSession();
+        if (!session.tokens?.idToken) {
+          session = await fetchAuthSession({ forceRefresh: true });
+        }
         if (session.tokens?.idToken) {
           localStorage.setItem('token', session.tokens.idToken.toString());
           await refreshUser();
@@ -58,41 +62,51 @@ function LoginPageContent() {
     setLoading(true);
 
     try {
-      // Clear any stale Amplify auth state before attempting sign-in
+      let isSignedIn = false;
+
       try {
-        await signOut({ global: false });
-      } catch { }
+        const result = await signIn({
+          username: formData.email,
+          password: formData.password,
+        } as SignInInput);
+        isSignedIn = result.isSignedIn;
 
-      const signInInput: SignInInput = {
-        username: formData.email,
-        password: formData.password,
-      };
-
-      const { isSignedIn, nextStep } = await signIn(signInInput);
+        if (!isSignedIn && result.nextStep.signInStep === 'CONFIRM_SIGN_UP') {
+          setError('Please verify your email before signing in');
+          router.push('/auth/signup');
+          return;
+        }
+      } catch (signInErr: any) {
+        if (signInErr.name === 'UserAlreadyAuthenticatedException') {
+          isSignedIn = true;
+        } else if (signInErr.name === 'UnexpectedSignInInterruptionException') {
+          // Amplify has a stale autoSignIn in-flight — complete it, then fall back
+          try {
+            const autoResult = await autoSignIn();
+            isSignedIn = autoResult.isSignedIn;
+          } catch {
+            // No pending autoSignIn — clear state and do a fresh sign-in
+            try { await signOut({ global: false }); } catch { }
+            const retryResult = await signIn({
+              username: formData.email,
+              password: formData.password,
+            } as SignInInput);
+            isSignedIn = retryResult.isSignedIn;
+          }
+        } else {
+          throw signInErr;
+        }
+      }
 
       if (isSignedIn) {
         const ok = await fetchSessionAndRedirect();
         if (!ok) {
-          setError('Sign in successful but session setup failed. Please try refreshing the page.');
+          setError('Signed in but could not load session. Please refresh the page and try again.');
         }
-      } else if (nextStep.signInStep === 'CONFIRM_SIGN_UP') {
-        setError('Please verify your email before signing in');
-        router.push('/auth/signup');
       }
     } catch (err: any) {
       console.error('[Login] Error:', err);
-
-      if (
-        err.name === 'UserAlreadyAuthenticatedException' ||
-        err.name === 'UnexpectedSignInInterruptionException'
-      ) {
-        // Session already exists or sign-in completed in background — just fetch it
-        const ok = await fetchSessionAndRedirect();
-        if (!ok) {
-          setError('Session setup failed. Please try again.');
-        }
-        return;
-      } else if (err.name === 'UserNotFoundException') {
+      if (err.name === 'UserNotFoundException') {
         setError('No account found with this email');
       } else if (err.name === 'NotAuthorizedException') {
         setError('Incorrect email or password');

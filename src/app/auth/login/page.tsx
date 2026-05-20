@@ -34,8 +34,28 @@ function LoginPageContent() {
     }
   }, [isAuthenticated, router]);
 
-  const storeSessionAndRedirect = async (forceRefresh = false) => {
-    const session = await fetchAuthSession(forceRefresh ? { forceRefresh: true } : {});
+  const clearAmplifyState = () => {
+    // Remove the autoSignIn key that causes UnexpectedSignInInterruptionException
+    Object.keys(localStorage).forEach((k) => {
+      if (
+        k === 'amplify-auto-sign-in' ||
+        k.startsWith('CognitoIdentityServiceProvider.')
+      ) {
+        localStorage.removeItem(k);
+      }
+    });
+  };
+
+  const doSignIn = async () => {
+    const { isSignedIn, nextStep } = await signIn({
+      username: formData.email,
+      password: formData.password,
+    } as SignInInput);
+    return { isSignedIn, nextStep };
+  };
+
+  const storeSessionAndRedirect = async () => {
+    const session = await fetchAuthSession();
     if (!session.tokens?.idToken) return false;
     localStorage.setItem('token', session.tokens.idToken.toString());
     await refreshUser();
@@ -49,37 +69,38 @@ function LoginPageContent() {
     setLoading(true);
 
     try {
-      try {
-        const { isSignedIn, nextStep } = await signIn({
-          username: formData.email,
-          password: formData.password,
-        } as SignInInput);
+      // Always clear stale Amplify autoSignIn state before signing in
+      clearAmplifyState();
 
-        if (!isSignedIn) {
-          if (nextStep.signInStep === 'CONFIRM_SIGN_UP') {
-            setError('Please verify your email before signing in');
-            router.push('/auth/signup');
-          }
+      let isSignedIn = false;
+
+      try {
+        const result = await doSignIn();
+        isSignedIn = result.isSignedIn;
+        if (!isSignedIn && result.nextStep.signInStep === 'CONFIRM_SIGN_UP') {
+          setError('Please verify your email before signing in');
+          router.push('/auth/signup');
           return;
         }
       } catch (signInErr: any) {
-        // These both mean tokens are already in Amplify's store
-        if (
-          signInErr.name !== 'UserAlreadyAuthenticatedException' &&
-          signInErr.name !== 'UnexpectedSignInInterruptionException'
-        ) {
+        if (signInErr.name === 'UserAlreadyAuthenticatedException') {
+          isSignedIn = true;
+        } else if (signInErr.name === 'UnexpectedSignInInterruptionException') {
+          // Stale state persisted in memory — clear storage and do a clean retry
+          clearAmplifyState();
+          const { signOut } = await import('aws-amplify/auth');
+          try { await signOut({ global: false }); } catch { }
+          const retry = await doSignIn();
+          isSignedIn = retry.isSignedIn;
+        } else {
           throw signInErr;
         }
       }
 
-      // Tokens are in Amplify's store — fetch immediately, no delay
-      if (await storeSessionAndRedirect()) return;
-
-      // Rare: not cached yet — one short wait then force-refresh
-      await new Promise((r) => setTimeout(r, 800));
-      if (await storeSessionAndRedirect(true)) return;
-
-      setError('Signed in but session failed to load. Please refresh and try again.');
+      if (isSignedIn) {
+        const ok = await storeSessionAndRedirect();
+        if (!ok) setError('Signed in but session failed to load. Please refresh and try again.');
+      }
     } catch (err: any) {
       if (err.name === 'UserNotFoundException') {
         setError('No account found with this email');

@@ -49,10 +49,10 @@ export default function Home() {
                     </svg>
                   </Link>
                   <Link
-                    href="/templates"
+                    href="/pricing"
                     className="inline-flex items-center justify-center px-8 py-3.5 text-base font-semibold rounded-xl text-indigo-600 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 transition-all duration-200"
                   >
-                    View Templates
+                    See Pricing
                   </Link>
                 </div>
 
@@ -187,8 +187,8 @@ export default function Home() {
                 <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center mb-5 shadow-lg shadow-pink-500/20">
                   <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Pro Templates</h3>
-                <p className="text-gray-500 leading-relaxed">6 professionally designed, ATS-friendly templates for every industry.</p>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">ATS-Friendly Templates</h3>
+                <p className="text-gray-500 leading-relaxed">Hand-tuned templates that pass automated screeners and recruiters love.</p>
               </div>
             </div>
 
@@ -223,12 +223,12 @@ export default function Home() {
                 <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center mb-5 shadow-lg shadow-amber-500/20">
                   <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Export Anywhere</h3>
-                <p className="text-gray-500 leading-relaxed max-w-md">Download your polished resume as pixel-perfect PDF or editable DOCX. Print-ready with proper formatting.</p>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Pixel-Perfect PDF Export</h3>
+                <p className="text-gray-500 leading-relaxed max-w-md">Download a print-ready PDF that matches the preview exactly. Auto-fit font sizing keeps everything on one page.</p>
                 <div className="mt-5 flex gap-3">
                   <span className="inline-flex items-center text-xs font-semibold px-3 py-1.5 rounded-lg bg-red-50 text-red-600 border border-red-100">PDF</span>
-                  <span className="inline-flex items-center text-xs font-semibold px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600 border border-blue-100">DOCX</span>
                   <span className="inline-flex items-center text-xs font-semibold px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-100">ATS-Safe</span>
+                  <span className="inline-flex items-center text-xs font-semibold px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-600 border border-indigo-100">Auto-Fit</span>
                 </div>
               </div>
             </div>
@@ -252,7 +252,7 @@ export default function Home() {
                 { num: 1, title: 'Choose Template', desc: 'Select from our ATS-friendly professional templates', gradient: 'from-indigo-500 to-violet-500', shadow: 'shadow-indigo-500/25' },
                 { num: 2, title: 'Add Content', desc: 'Fill in your details or upload an existing resume', gradient: 'from-pink-500 to-rose-500', shadow: 'shadow-pink-500/25' },
                 { num: 3, title: 'AI Enhancement', desc: 'Get smart suggestions to improve your content', gradient: 'from-amber-500 to-orange-500', shadow: 'shadow-amber-500/25' },
-                { num: 4, title: 'Download', desc: 'Export as PDF or DOCX and apply with confidence', gradient: 'from-emerald-500 to-teal-500', shadow: 'shadow-emerald-500/25' },
+                { num: 4, title: 'Download', desc: 'Export a polished PDF and apply with confidence', gradient: 'from-emerald-500 to-teal-500', shadow: 'shadow-emerald-500/25' },
               ].map((step) => (
                 <div key={step.num} className="text-center relative">
                   <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${step.gradient} flex items-center justify-center mx-auto mb-5 text-2xl font-bold text-white shadow-xl ${step.shadow} relative z-10`}>
@@ -281,10 +281,11 @@ export default function Home() {
             <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-8 flex flex-col hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-300">
               <div className="text-center mb-6">
                 <h3 className="text-2xl font-bold text-gray-900 mb-1">Free</h3>
-                <div className="text-4xl font-extrabold text-gray-900">$0</div>
+                <div className="text-4xl font-extrabold text-gray-900">₹0</div>
+                <div className="text-gray-400 mt-0.5 text-sm">forever</div>
               </div>
               <ul className="space-y-3 mb-8 flex-1">
-                {['1 resume download', 'Basic templates', '5 AI suggestions'].map(f => (
+                {['1 active resume', '3 ATS optimizations / month', '10 AI bullet enhancements / day', 'Watermarked PDF download', 'Both templates'].map(f => (
                   <li key={f} className="flex items-center gap-2.5">
                     <div className="w-5 h-5 rounded-full bg-emerald-50 flex items-center justify-center flex-shrink-0">
                       <svg className="w-3 h-3 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
@@ -296,17 +297,18 @@ export default function Home() {
               <Link href="/auth/signup" className="inline-flex items-center justify-center w-full px-6 py-3 text-sm font-semibold rounded-xl text-indigo-600 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 transition-all">Get Started</Link>
             </div>
 
-            {/* Starter Pack */}
+            {/* Pack */}
             <div className="bg-white rounded-2xl border-2 border-indigo-200 shadow-card p-8 flex flex-col relative glow-indigo hover:-translate-y-1 transition-all duration-300">
               <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                <span className="bg-gradient-to-r from-indigo-600 to-violet-600 text-white px-4 py-1 rounded-full text-xs font-bold tracking-wider uppercase shadow-lg shadow-indigo-500/25">Popular</span>
+                <span className="bg-gradient-to-r from-indigo-600 to-violet-600 text-white px-4 py-1 rounded-full text-xs font-bold tracking-wider uppercase shadow-lg shadow-indigo-500/25">Best Value</span>
               </div>
               <div className="text-center mb-6">
-                <h3 className="text-2xl font-bold text-gray-900 mb-1">Starter Pack</h3>
-                <div className="text-4xl font-extrabold text-gray-900">$15</div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-1">Pack</h3>
+                <div className="text-4xl font-extrabold text-gray-900">₹149</div>
+                <div className="text-gray-400 mt-0.5 text-sm">one-time</div>
               </div>
               <ul className="space-y-3 mb-8 flex-1">
-                {['5 resume downloads', 'All templates', '50 AI suggestions', 'PDF & DOCX export'].map(f => (
+                {['1 polished resume', '5 ATS optimizations per pack', 'Unlimited AI bullet enhancements', 'Clean PDF — no watermark', 'Both templates'].map(f => (
                   <li key={f} className="flex items-center gap-2.5">
                     <div className="w-5 h-5 rounded-full bg-emerald-50 flex items-center justify-center flex-shrink-0">
                       <svg className="w-3 h-3 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
@@ -315,18 +317,18 @@ export default function Home() {
                   </li>
                 ))}
               </ul>
-              <Link href="/auth/signup" className="inline-flex items-center justify-center w-full px-6 py-3 text-sm font-semibold rounded-xl text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 shadow-lg shadow-indigo-500/25 transition-all">Buy Now</Link>
+              <Link href="/pricing" className="inline-flex items-center justify-center w-full px-6 py-3 text-sm font-semibold rounded-xl text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 shadow-lg shadow-indigo-500/25 transition-all">Buy Pack</Link>
             </div>
 
-            {/* Unlimited */}
+            {/* Pro */}
             <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-8 flex flex-col hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-300">
               <div className="text-center mb-6">
-                <h3 className="text-2xl font-bold text-gray-900 mb-1">Unlimited Pro</h3>
-                <div className="text-4xl font-extrabold text-gray-900">$20</div>
-                <div className="text-gray-400 mt-0.5 text-sm">/month</div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-1">Pro</h3>
+                <div className="text-4xl font-extrabold text-gray-900">₹299</div>
+                <div className="text-gray-400 mt-0.5 text-sm">/month — billed monthly, quarterly or annually</div>
               </div>
               <ul className="space-y-3 mb-8 flex-1">
-                {['Unlimited resumes', 'All premium templates', 'Unlimited AI assistance', 'Priority support'].map(f => (
+                {['Unlimited active resumes', 'Unlimited ATS optimizations', 'Unlimited AI bullet enhancements', 'Clean PDF — no watermark', 'Priority support'].map(f => (
                   <li key={f} className="flex items-center gap-2.5">
                     <div className="w-5 h-5 rounded-full bg-emerald-50 flex items-center justify-center flex-shrink-0">
                       <svg className="w-3 h-3 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
@@ -335,7 +337,7 @@ export default function Home() {
                   </li>
                 ))}
               </ul>
-              <Link href="/auth/signup" className="inline-flex items-center justify-center w-full px-6 py-3 text-sm font-semibold rounded-xl text-indigo-600 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 transition-all">Subscribe</Link>
+              <Link href="/pricing" className="inline-flex items-center justify-center w-full px-6 py-3 text-sm font-semibold rounded-xl text-indigo-600 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 transition-all">See Pro Plans</Link>
             </div>
           </div>
         </section>

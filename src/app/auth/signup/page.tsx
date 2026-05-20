@@ -3,11 +3,13 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { signUp, confirmSignUp, signIn, resendSignUpCode, type SignUpInput } from 'aws-amplify/auth';
+import { signUp, confirmSignUp, signIn, resendSignUpCode, fetchAuthSession, type SignUpInput } from 'aws-amplify/auth';
+import { useAuth } from '@/contexts/AuthContext';
 import '../../../lib/amplify-config';
 
 export default function SignUpPage() {
   const router = useRouter();
+  const { refreshUser } = useAuth();
   const [step, setStep] = useState<'signup' | 'verify'>('signup');
   const [formData, setFormData] = useState({
     name: '',
@@ -39,6 +41,9 @@ export default function SignUpPage() {
     }
 
     try {
+      // Note: autoSignIn intentionally OFF — combining it with a manual signIn
+      // after confirmSignUp triggers Amplify's "Unable to get user session
+      // following successful sign-in" error. We sign in explicitly after verify.
       const signUpInput: SignUpInput = {
         username: formData.email,
         password: formData.password,
@@ -47,7 +52,6 @@ export default function SignUpPage() {
             email: formData.email,
             name: formData.name,
           },
-          autoSignIn: true,
         },
       };
 
@@ -58,12 +62,7 @@ export default function SignUpPage() {
       if (nextStep.signUpStep === 'CONFIRM_SIGN_UP') {
         setStep('verify');
       } else if (nextStep.signUpStep === 'DONE') {
-        // Auto sign in
-        await signIn({
-          username: formData.email,
-          password: formData.password,
-        });
-        router.push('/dashboard');
+        await signInAndRedirect();
       }
     } catch (err: any) {
       console.error('Sign up error:', err);
@@ -92,6 +91,43 @@ export default function SignUpPage() {
     }
   };
 
+  /**
+   * Sign in the user and wait for the Cognito session to be retrievable.
+   * Mirrors the retry logic in login page — Cognito's session lookup can
+   * lag a few hundred ms behind a successful signIn() call. Without the
+   * wait, the dashboard redirect happens before AuthContext has a token,
+   * which surfaces as "Unable to get user session following successful sign-in".
+   */
+  const signInAndRedirect = async () => {
+    try {
+      await signIn({
+        username: formData.email,
+        password: formData.password,
+      });
+    } catch (err: any) {
+      // Already signed in (e.g. autoSignIn beat us to it) — that's fine.
+      if (err.name !== 'UserAlreadyAuthenticatedException') throw err;
+    }
+
+    let retries = 5;
+    while (retries > 0) {
+      await new Promise((r) => setTimeout(r, 800));
+      try {
+        const session = await fetchAuthSession({ forceRefresh: true });
+        if (session.tokens?.idToken) {
+          localStorage.setItem('token', session.tokens.idToken.toString());
+          await refreshUser();
+          router.replace('/dashboard');
+          return;
+        }
+      } catch {
+        // Session not ready yet, keep retrying.
+      }
+      retries--;
+    }
+    setError('Account created but session setup is slow. Please try signing in.');
+  };
+
   const handleVerification = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -104,12 +140,7 @@ export default function SignUpPage() {
       });
 
       if (isSignUpComplete) {
-        // Auto sign in after verification
-        await signIn({
-          username: formData.email,
-          password: formData.password,
-        });
-        router.push('/dashboard');
+        await signInAndRedirect();
       }
     } catch (err: any) {
       console.error('Verification error:', err);

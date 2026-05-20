@@ -190,9 +190,9 @@ const SettingsPage: React.FC = () => {
       case 'FREE':
         return 'Free';
       case 'TIER1':
-        return 'Tier 1';
+        return 'Pack';
       case 'TIER2':
-        return 'Tier 2';
+        return 'Pro';
       default:
         return plan;
     }
@@ -378,9 +378,9 @@ const SettingsPage: React.FC = () => {
                     {getPlanName(user.planType)}
                   </span>
                   <p className="mt-2 text-gray-500">
-                    {user.planType === 'FREE' && '1 Resume Credit'}
-                    {user.planType === 'TIER1' && '5 Resume Credits'}
-                    {user.planType === 'TIER2' && 'Unlimited Resume Credits'}
+                    {user.planType === 'FREE' && '1 resume · 3 ATS/mo · 10 AI/day · watermarked PDF'}
+                    {user.planType === 'TIER1' && '1 polished resume · 5 ATS · unlimited AI · clean PDF'}
+                    {user.planType === 'TIER2' && 'Unlimited everything · clean PDF · priority support'}
                   </p>
                 </div>
                 {user.planType !== 'TIER2' && (

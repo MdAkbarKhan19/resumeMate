@@ -2,6 +2,8 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
+  output: 'standalone', // Smaller build output — only includes what's needed
+  generateBuildId: async () => `resumemate-${Date.now()}`,
   images: {
     domains: ['resumemate-uploads.s3.amazonaws.com', 'resumemate-uploads-3155.s3.amazonaws.com'],
     formats: ['image/avif', 'image/webp'],

@@ -1,22 +1,32 @@
-import { ResumeData, Template } from '@/types';
+import { Template } from '@/types';
 import ModernTwoColumnTemplate from './ModernTwoColumn';
 import MinimalistTemplate from './MinimalistTemplate';
-import ProfessionalTemplate from './ProfessionalTemplate';
-import ATSClassicTemplate from './ATSClassicTemplate';
-import ExecutiveTemplate from './ExecutiveTemplate';
-import TechModernTemplate from './TechModernTemplate';
+
+// Aliases keep old saved templateIds rendering the closest supported template
+// rather than silently falling back to Minimalist.
+const TEMPLATE_ALIASES: Record<string, 'modern-two-column' | 'minimalist'> = {
+  'modern-two-column': 'modern-two-column',
+  'minimalist': 'minimalist',
+  'minimalist-single': 'minimalist',
+  'ats-classic': 'minimalist',
+  'professional': 'minimalist',
+  'professional-corporate': 'minimalist',
+  'executive': 'minimalist',
+  'tech-modern': 'modern-two-column',
+  'creative-ats': 'modern-two-column',
+};
 
 export const templates = {
   'modern-two-column': ModernTwoColumnTemplate,
   'minimalist': MinimalistTemplate,
-  'professional': ProfessionalTemplate,
-  'ats-classic': ATSClassicTemplate,
-  'executive': ExecutiveTemplate,
-  'tech-modern': TechModernTemplate,
-};
+} as const;
+
+export function resolveTemplateId(templateId: string): 'modern-two-column' | 'minimalist' {
+  return TEMPLATE_ALIASES[templateId] || 'minimalist';
+}
 
 export function getTemplateComponent(templateId: string) {
-  return templates[templateId as keyof typeof templates] || MinimalistTemplate;
+  return templates[resolveTemplateId(templateId)];
 }
 
 export const templateMetadata: Record<string, Omit<Template, 'htmlTemplate' | 'cssStyles'>> = {
@@ -25,7 +35,7 @@ export const templateMetadata: Record<string, Omit<Template, 'htmlTemplate' | 'c
     name: 'Modern Two-Column',
     description: 'A visually engaging template with a splash of color and two-column layout',
     category: 'MODERN',
-    thumbnail: '/templates/modern-two-column.png',
+    thumbnail: '/templates/modern-two-column.svg',
     isActive: true,
     isPremium: false,
     usageCount: 0,
@@ -36,54 +46,10 @@ export const templateMetadata: Record<string, Omit<Template, 'htmlTemplate' | 'c
     name: 'Minimalist Single-Column',
     description: 'A simple, elegant design with black-and-white color scheme',
     category: 'MINIMALIST',
-    thumbnail: '/templates/minimalist.png',
+    thumbnail: '/templates/minimalist.svg',
     isActive: true,
     isPremium: false,
     usageCount: 0,
     rating: 4.9,
-  },
-  'professional': {
-    id: 'professional',
-    name: 'Professional Corporate',
-    description: 'A traditional look with clear section separators',
-    category: 'PROFESSIONAL',
-    thumbnail: '/templates/professional.png',
-    isActive: true,
-    isPremium: false,
-    usageCount: 0,
-    rating: 4.7,
-  },
-  'ats-classic': {
-    id: 'ats-classic',
-    name: 'ATS Classic',
-    description: 'Maximum ATS compatibility - single column, standard fonts, no colors. Passes all automated screening systems.',
-    category: 'PROFESSIONAL',
-    thumbnail: '/templates/ats-classic.png',
-    isActive: true,
-    isPremium: false,
-    usageCount: 0,
-    rating: 4.9,
-  },
-  'executive': {
-    id: 'executive',
-    name: 'Executive',
-    description: 'Professional dark header with elegant serif typography. Ideal for senior and executive-level positions.',
-    category: 'PROFESSIONAL',
-    thumbnail: '/templates/executive.png',
-    isActive: true,
-    isPremium: false,
-    usageCount: 0,
-    rating: 4.8,
-  },
-  'tech-modern': {
-    id: 'tech-modern',
-    name: 'Tech Modern',
-    description: 'Clean modern design with accent bar and skill tags. Perfect for software engineers and tech professionals.',
-    category: 'MODERN',
-    thumbnail: '/templates/tech-modern.png',
-    isActive: true,
-    isPremium: false,
-    usageCount: 0,
-    rating: 4.8,
   },
 };

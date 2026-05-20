@@ -3,6 +3,7 @@ import { authenticateRequest } from '@/lib/auth/middleware';
 import { ResumeParserService } from '@/lib/resume/parser';
 import { S3Service } from '@/lib/aws/s3';
 import prisma from '@/lib/db/prisma';
+import { canCreateResume } from '@/lib/payment/entitlements';
 import { z } from 'zod';
 
 // Force Node.js runtime (not Edge) for file parsing
@@ -91,6 +92,25 @@ async function handlePOST(request: NextRequest, { user }: { user: any }) {
     }
 
     console.log('✅ Validation passed, starting parsing...');
+
+    // Enforce plan limit BEFORE expensive S3 upload + parsing.
+    // Imported resumes count against the same active-resume quota.
+    const gate = await canCreateResume(user.id);
+    if (!gate.allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: gate.code || 'LIMIT_REACHED',
+            message: gate.reason || 'Resume limit reached on your current plan.',
+            tier: gate.tier,
+            used: gate.used,
+            limit: gate.limit,
+          },
+        },
+        { status: 403 },
+      );
+    }
 
     // Convert file to buffer
     const bytes = await file.arrayBuffer();

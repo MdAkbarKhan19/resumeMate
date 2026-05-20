@@ -8,24 +8,73 @@
  */
 
 import React from 'react';
-import { Document, Page, View, Text, StyleSheet } from '@react-pdf/renderer';
+import { Document, Page, View, Text, StyleSheet, Link } from '@react-pdf/renderer';
 import { PDFTemplateProps, getFontSize, BulletPoint, RichText } from './base';
+import { ResumeData } from '@/types/resume';
+
+const displayHandle = (raw: string) =>
+  raw.replace(/^https?:\/\/(www\.)?/i, '').replace(/\/$/, '') || raw;
+
+const formatMonthYear = (raw: string | undefined | null): string => {
+  if (!raw) return '';
+  const s = String(raw).trim();
+  const m = s.match(/^(\d{4})-(\d{1,2})(?:-\d{1,2})?$/);
+  if (!m) return s;
+  const monthIdx = parseInt(m[2], 10) - 1;
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  if (monthIdx < 0 || monthIdx > 11) return m[1];
+  return `${months[monthIdx]} ${m[1]}`;
+};
+
+const buildSiteUrl = (rawInput: string): string => {
+  const raw = (rawInput || '').trim();
+  if (!raw) return '';
+  if (/^https?:\/\//i.test(raw)) return raw;
+  return `https://${raw.replace(/^\/+/, '')}`;
+};
+
+const buildSocialUrl = (rawInput: string, domain: string, slugPath: string): string => {
+  const raw = (rawInput || '').trim();
+  if (!raw) return '';
+  if (/^https?:\/\//i.test(raw)) return raw;
+  const lower = raw.toLowerCase();
+  if (lower.startsWith(`${domain}/`) || lower.startsWith(`www.${domain}/`)) return `https://${raw}`;
+  if (lower.includes(`${domain}/`)) return `https://${raw.replace(/^\/+/, '')}`;
+  return `https://${domain}/${slugPath}${raw.replace(/^\/+/, '')}`;
+};
 
 export default function ModernTwoColumnPDF({ data, customization }: PDFTemplateProps) {
-  const { personalInfo, summary, experience, education, skills, certifications, projects, languages, volunteer } = data;
-  const fs = getFontSize(customization?.fontSize);
+  const personalInfo = data.personalInfo || ({} as ResumeData['personalInfo']);
+  const summary = data.summary || '';
+  const experience = data.experience || [];
+  const education = data.education || [];
+  const skills = data.skills || [];
+  const certifications = data.certifications || [];
+  const projects = data.projects || [];
+  const languages = data.languages || [];
+  const volunteer = data.volunteer || [];
+  const fs = getFontSize(customization?.fontSize as any);
 
-  // Group ALL skills by category
+  const normalizeCat = (c: string | undefined): string => {
+    if (!c) return 'technical';
+    const cat = c.toLowerCase().trim();
+    if (/^(soft|interpersonal|leadership|communication)/.test(cat) || cat.includes('soft skill')) return 'soft';
+    if (/^(language|spoken)/.test(cat) && !cat.includes('programming')) return 'language';
+    if (/(tool|platform|software|devops|cloud|database|operating)/.test(cat)) return 'tools';
+    return 'technical';
+  };
+
+  // Group ALL skills by normalized category
   const skillsByCategory = skills.reduce((acc, s) => {
-    const cat = s.category || 'technical';
+    const cat = normalizeCat(s.category);
     if (!acc[cat]) acc[cat] = [];
     acc[cat].push(s.name);
     return acc;
   }, {} as Record<string, string[]>);
 
   const categoryLabels: Record<string, string> = {
-    technical: 'Languages',
-    tools: 'Automation Tools',
+    technical: 'Technical',
+    tools: 'Tools & Platforms',
     soft: 'Soft Skills',
     language: 'Languages',
   };
@@ -34,23 +83,34 @@ export default function ModernTwoColumnPDF({ data, customization }: PDFTemplateP
     return categoryLabels[category] || category.charAt(0).toUpperCase() + category.slice(1);
   };
 
-  // Contact items - plain text, no unicode icons
-  const contactParts: string[] = [];
-  if (personalInfo.phone) contactParts.push(personalInfo.phone);
-  if (personalInfo.email) contactParts.push(personalInfo.email);
+  const primary = customization?.primaryColor || '#2563eb';
+
+  // Soft tinted header derived from primary color
+  const headerBg = (() => {
+    const hex = primary.replace('#', '');
+    if (hex.length !== 6) return '#d5e5f0';
+    const r = parseInt(hex.slice(0, 2), 16);
+    const g = parseInt(hex.slice(2, 4), 16);
+    const b = parseInt(hex.slice(4, 6), 16);
+    const mix = (c: number) => Math.round(c * 0.15 + 255 * 0.85);
+    return `rgb(${mix(r)}, ${mix(g)}, ${mix(b)})`;
+  })();
+
+  // Contact items - rendered as clickable Link elements
+  const contactParts: { text: string; href?: string }[] = [];
+  if (personalInfo.phone) contactParts.push({ text: personalInfo.phone });
+  if (personalInfo.email) contactParts.push({ text: personalInfo.email, href: `mailto:${personalInfo.email}` });
   if (personalInfo.linkedin) {
-    const raw = personalInfo.linkedin;
-    contactParts.push(raw.replace(/^https?:\/\/(www\.)?/, '').replace(/^linkedin\.com\/in\//, '').replace(/\/$/, '') || raw);
+    contactParts.push({ text: displayHandle(personalInfo.linkedin), href: buildSocialUrl(personalInfo.linkedin, 'linkedin.com', 'in/') });
   }
   if (personalInfo.github) {
-    const raw = personalInfo.github;
-    contactParts.push(raw.replace(/^https?:\/\/(www\.)?/, '').replace(/^github\.com\//, '').replace(/\/$/, '') || raw);
+    contactParts.push({ text: displayHandle(personalInfo.github), href: buildSocialUrl(personalInfo.github, 'github.com', '') });
   }
   if (personalInfo.portfolio) {
-    contactParts.push(personalInfo.portfolio.replace(/^https?:\/\//, ''));
+    contactParts.push({ text: displayHandle(personalInfo.portfolio), href: buildSiteUrl(personalInfo.portfolio) });
   }
   if (personalInfo.location) {
-    contactParts.push(personalInfo.location);
+    contactParts.push({ text: personalInfo.location });
   }
 
   const PAGE_H_PAD = 32;
@@ -70,7 +130,7 @@ export default function ModernTwoColumnPDF({ data, customization }: PDFTemplateP
 
     /* Header uses negative margins to go full-width and flush-top on page 1 */
     headerBand: {
-      backgroundColor: '#d5e5f0',
+      backgroundColor: headerBg,
       paddingTop: 30,
       paddingBottom: 18,
       paddingHorizontal: 40,
@@ -121,7 +181,7 @@ export default function ModernTwoColumnPDF({ data, customization }: PDFTemplateP
       marginBottom: 6,
       paddingBottom: 4,
       borderBottomWidth: 0.75,
-      borderBottomColor: '#cccccc',
+      borderBottomColor: primary,
     },
     section: {
       marginBottom: 14,
@@ -218,7 +278,16 @@ export default function ModernTwoColumnPDF({ data, customization }: PDFTemplateP
           )}
           {contactParts.length > 0 && (
             <Text style={styles.contactText}>
-              {contactParts.join('  |  ')}
+              {contactParts.map((part, i) => (
+                <React.Fragment key={i}>
+                  {i > 0 && <Text>{'  |  '}</Text>}
+                  {part.href ? (
+                    <Link src={part.href} style={{ color: '#333333', textDecoration: 'none' }}>{part.text}</Link>
+                  ) : (
+                    <Text>{part.text}</Text>
+                  )}
+                </React.Fragment>
+              ))}
             </Text>
           )}
         </View>
@@ -244,16 +313,37 @@ export default function ModernTwoColumnPDF({ data, customization }: PDFTemplateP
               </View>
             )}
 
-            {/* Certifications */}
+            {/* Certifications — name is the hyperlink (no "Verify" text), date formatted */}
             {certifications.length > 0 && (
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Certifications</Text>
-                {certifications.map((cert) => (
-                  <Text key={cert.id} style={styles.certItem}>
-                    {cert.name}
-                    {cert.issuer ? ` | ${cert.issuer}` : ''}
-                  </Text>
-                ))}
+                {certifications.map((cert) => {
+                  const formattedDate = formatMonthYear(cert.date);
+                  return (
+                    <View key={cert.id} style={{ marginBottom: 6 }}>
+                      {cert.url ? (
+                        <Link
+                          src={buildSiteUrl(cert.url)}
+                          style={{ fontSize: fs.small, fontFamily: 'Helvetica-Bold', color: '#1a1a1a', textDecoration: 'underline' }}
+                        >
+                          {cert.name}
+                        </Link>
+                      ) : (
+                        <Text style={{ fontSize: fs.small, fontFamily: 'Helvetica-Bold', color: '#1a1a1a' }}>{cert.name}</Text>
+                      )}
+                      {(cert.issuer || formattedDate) && (
+                        <Text style={{ fontSize: fs.tiny, color: '#666666' }}>
+                          {cert.issuer}
+                          {cert.issuer && formattedDate ? '  ·  ' : ''}
+                          {formattedDate}
+                        </Text>
+                      )}
+                      {cert.credentialId ? (
+                        <Text style={{ fontSize: fs.tiny, color: '#888888' }}>ID: {cert.credentialId}</Text>
+                      ) : null}
+                    </View>
+                  );
+                })}
               </View>
             )}
 
@@ -376,7 +466,15 @@ export default function ModernTwoColumnPDF({ data, customization }: PDFTemplateP
                   <View key={proj.id} style={styles.entry}>
                     {/* Project Name + Date row */}
                     <View style={styles.entryRow} wrap={false}>
-                      <Text style={styles.entryTitle}>{proj.name}</Text>
+                      <Text style={styles.entryTitle}>
+                        {proj.name}
+                        {proj.url ? (
+                          <>
+                            <Text>  </Text>
+                            <Link src={buildSiteUrl(proj.url)} style={{ color: primary, fontSize: fs.tiny, textDecoration: 'none' }}>↗ Link</Link>
+                          </>
+                        ) : null}
+                      </Text>
                       {(proj.startDate || proj.endDate) && (
                         <Text style={styles.entryDate}>
                           {proj.startDate}{proj.endDate ? ` - ${proj.endDate}` : ''}

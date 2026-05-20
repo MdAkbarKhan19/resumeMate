@@ -2,6 +2,7 @@ import puppeteer, { Browser } from 'puppeteer';
 import { ResumeData } from '@/types/resume';
 import { TemplateCustomization, DEFAULT_CUSTOMIZATION } from '@/types/template';
 import { getTemplateComponent } from '@/components/templates';
+import { watermarkCss, WATERMARK_FOOTER_HTML } from './watermark';
 import React from 'react';
 
 /**
@@ -42,41 +43,44 @@ export class EnhancedPDFService {
   }
 
   /**
-   * Generate enhanced PDF with Paged.js for perfect pagination
+   * Generate enhanced PDF with Paged.js for perfect pagination.
+   * Pass `watermark: true` to bake a hard-to-remove tiled overlay onto the
+   * page background — used for free-tier downloads.
    */
   static async generatePDF(
     resumeData: ResumeData,
     templateId: string,
-    customization: TemplateCustomization = DEFAULT_CUSTOMIZATION
+    customization: TemplateCustomization = DEFAULT_CUSTOMIZATION,
+    options: { watermark?: boolean } = {}
   ): Promise<Buffer> {
     const browser = await this.getBrowser();
     const page = await browser.newPage();
+    const watermark = options.watermark === true;
 
     try {
       // Dynamic import to avoid Next.js bundling issues
       const { renderToStaticMarkup } = await import('react-dom/server');
-      
-      // Set viewport to letter size (8.5 x 11 inches at 96 DPI)
+
       await page.setViewport({
-        width: 816, // 8.5 inches * 96 DPI
-        height: 1056, // 11 inches * 96 DPI
-        deviceScaleFactor: 2, // For high-quality rendering
+        width: 816,
+        height: 1056,
+        deviceScaleFactor: 2,
       });
 
-      // Get template component
       const TemplateComponent = getTemplateComponent(templateId);
 
-      // Render template to HTML
+      // Render template to HTML — forward `watermark` so the template's root
+      // gets the `rm-watermark-host` class that activates the tiled overlay.
       const templateElement = React.createElement(TemplateComponent as any, {
         data: resumeData,
         customization,
-        preview: false, // PDF mode - no interactive elements
+        preview: false,
+        watermark,
       });
 
       const templateHTML = renderToStaticMarkup(templateElement);
 
-      // Build complete HTML with all necessary resources
-      const fullHTML = this.buildEnhancedHTML(templateHTML, customization);
+      const fullHTML = this.buildEnhancedHTML(templateHTML, customization, watermark);
 
       // Set page content and wait for all resources to load
       await page.setContent(fullHTML, {
@@ -86,16 +90,6 @@ export class EnhancedPDFService {
 
       // Wait for fonts to be fully loaded
       await page.evaluateHandle('document.fonts.ready');
-
-      // Wait for Paged.js to complete pagination (if used)
-      await page.waitForFunction(
-        () => {
-          return (window as any).PagedPolyfill?.preview?.done || true;
-        },
-        { timeout: 30000 }
-      ).catch(() => {
-        // Paged.js might not be used in all templates, continue anyway
-      });
 
       // Add a small delay to ensure all styles are applied
       await page.waitForTimeout(500);
@@ -125,11 +119,15 @@ export class EnhancedPDFService {
   }
 
   /**
-   * Build complete HTML document with all styles, fonts, and Paged.js
+   * Build complete HTML document with all styles, fonts, and Paged.js.
+   * When `watermark` is true, inject the tiled SVG-pattern CSS + footer
+   * banner from `./watermark` so the resulting PDF carries hard-to-strip
+   * branding on every page.
    */
   private static buildEnhancedHTML(
     templateHTML: string,
-    customization: TemplateCustomization
+    customization: TemplateCustomization,
+    watermark: boolean = false,
   ): string {
     const primaryColor = customization?.primaryColor || '#2563eb';
     const fontFamily = customization?.fontFamily || 'Inter';
@@ -169,22 +167,19 @@ export class EnhancedPDFService {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Resume - PDF Export</title>
   
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Google Fonts - Multiple font families for template variety -->
+  <!-- Google Fonts only - templates use inline styles so no Tailwind CDN needed -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Roboto:wght@300;400;500;700;900&family=Open+Sans:wght@300;400;600;700;800&family=Lato:wght@300;400;700;900&family=Montserrat:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800;900&family=Source+Sans+Pro:wght@300;400;600;700;900&display=swap" rel="stylesheet">
-  
-  <!-- Paged.js for advanced pagination control -->
-  <script src="https://unpkg.com/pagedjs@0.4.3/dist/paged.polyfill.js"></script>
   
   <style>
     /* CSS Paged Media rules for print */
     @page {
       size: letter;
-      margin: 0;
+      margin: 24px 0 0 0;
+    }
+    @page:first {
+      margin-top: 0;
     }
     
     /* Ensure all colors and backgrounds print correctly */
@@ -217,12 +212,7 @@ export class EnhancedPDFService {
     
     /* Two-column template specific styles */
     .modern-two-column {
-      height: 11in;
-      overflow: hidden;
-    }
-    
-    .modern-two-column .flex {
-      height: 100%;
+      min-height: 11in;
     }
     
     /* Custom spacing based on user preference */
@@ -352,32 +342,30 @@ export class EnhancedPDFService {
     *, *::before, *::after {
       box-sizing: border-box;
     }
+
+    /* Essential utility classes used by templates */
+    .bg-white { background-color: #ffffff; }
+    .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); }
+    .flex { display: flex; }
+    .inline-flex { display: inline-flex; }
+    .items-center { align-items: center; }
+    .justify-center { justify-content: center; }
+    .flex-wrap { flex-wrap: wrap; }
+    .text-center { text-align: center; }
+    .font-sans { font-family: ${fontFamily}, system-ui, -apple-system, sans-serif; }
+
+    /* Free-tier watermark CSS (no-op when the resume root lacks .rm-watermark-host) */
+    ${watermark ? watermarkCss({ opacity: 0.07 }) : ''}
   </style>
 </head>
 <body>
   ${templateHTML}
-  
+  ${watermark ? WATERMARK_FOOTER_HTML : ''}
+
   <script>
-    // Ensure fonts are loaded before PDF generation
     document.fonts.ready.then(() => {
       console.log('All fonts loaded');
     });
-    
-    // Configure Paged.js if available
-    if (window.PagedPolyfill) {
-      class PagedHandler extends window.PagedPolyfill.Handler {
-        constructor(chunker, polisher, caller) {
-          super(chunker, polisher, caller);
-        }
-        
-        // Custom handlers can be added here
-        afterPreview(pages) {
-          console.log('Paged.js preview complete:', pages.length, 'pages');
-        }
-      }
-      
-      window.PagedPolyfill.registerHandlers(PagedHandler);
-    }
   </script>
 </body>
 </html>`.trim();

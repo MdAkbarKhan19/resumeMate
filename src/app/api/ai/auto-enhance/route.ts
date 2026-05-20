@@ -3,6 +3,7 @@ import { withAuth } from '@/lib/auth/middleware';
 import { AIAutoEnhancer } from '@/lib/ai/auto-enhancer';
 import { JobDescriptionAnalyzer } from '@/lib/ai/jd-analyzer';
 import { ATSCheckerService } from '@/lib/ai/ats-checker';
+import { canRunAtsOptimization } from '@/lib/payment/entitlements';
 import prisma from '@/lib/db/prisma';
 import { z } from 'zod';
 
@@ -73,40 +74,26 @@ async function handleAutoEnhance(request: NextRequest, { user }: { user: any }) 
       );
     }
 
-    // Check usage limits
-    const currentUser = await prisma.user.findUnique({
-      where: { id: user.id },
-      select: {
-        planType: true,
-      },
-    });
-
-    if (currentUser?.planType === 'FREE') {
-      // Check if they've used auto-enhance today
-      const todayEnhancements = await prisma.aIUsage.count({
-        where: {
-          userId: user.id,
-          type: 'JD_MATCHING', // Using existing type
-          createdAt: {
-            gte: new Date(new Date().setHours(0, 0, 0, 0)),
+    // Enforce per-plan ATS quota.
+    //   Free → 3 / month, Pack → 5 per pack, Pro → unlimited.
+    // The check counts AIUsage rows of type AUTO_ENHANCEMENT / JD_MATCHING
+    // within the user's active window.
+    const gate = await canRunAtsOptimization(user.id);
+    if (!gate.allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: gate.code || 'LIMIT_EXCEEDED',
+            message: gate.reason || 'ATS optimization limit reached on your current plan.',
+            tier: gate.tier,
+            used: gate.used,
+            limit: gate.limit,
+            resetsAt: gate.resetsAt?.toISOString(),
           },
         },
-      });
-
-      if (todayEnhancements >= 2) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: {
-              code: 'LIMIT_EXCEEDED',
-              message: 'Daily auto-enhancement limit reached for free plan. Upgrade to continue.',
-              limit: 2,
-              used: todayEnhancements,
-            },
-          },
-          { status: 429 }
-        );
-      }
+        { status: 429 },
+      );
     }
 
     console.log('🤖 Starting AI auto-enhancement...');
@@ -170,12 +157,12 @@ async function handleAutoEnhance(request: NextRequest, { user }: { user: any }) 
     // Compare scores
     const comparison = JobDescriptionAnalyzer.compareScores(beforeScore, afterScore);
 
-    // Save enhancement record (if schema is updated)
-    // For now, just track AI usage
+    // Record one ATS optimization against the user's quota. The entitlements
+    // module counts AUTO_ENHANCEMENT (and the legacy JD_MATCHING for old rows).
     await prisma.aIUsage.create({
       data: {
         userId: user.id,
-        type: 'JD_MATCHING',
+        type: 'AUTO_ENHANCEMENT',
         tokensUsed: 0,
         cost: 0,
         requestData: {

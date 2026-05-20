@@ -32,15 +32,26 @@ export function getSpacing(spacing?: 'compact' | 'normal' | 'spacious') {
   }
 }
 
-export function getFontSize(base?: number) {
-  const size = base || 11;
+export function getFontSize(base?: number | string) {
+  let size = 11;
+  if (typeof base === 'number' && !isNaN(base) && base > 0) {
+    size = base;
+  } else if (typeof base === 'string') {
+    const map: Record<string, number> = { xs: 9, sm: 10, base: 11, md: 11, lg: 12, xl: 13 };
+    const lower = base.toLowerCase();
+    if (map[lower]) size = map[lower];
+    else {
+      const parsed = parseFloat(base);
+      if (!isNaN(parsed) && parsed > 0) size = parsed;
+    }
+  }
   return {
-    name: size + 10,    // ~21pt
-    title: size + 2,     // ~13pt
-    sectionHeader: size + 1, // ~12pt
-    body: size,          // ~11pt
-    small: size - 1,     // ~10pt
-    tiny: size - 2,      // ~9pt
+    name: size + 10,
+    title: size + 2,
+    sectionHeader: size + 1,
+    body: size,
+    small: size - 1,
+    tiny: size - 2,
   };
 }
 

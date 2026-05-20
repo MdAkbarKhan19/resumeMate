@@ -12,6 +12,16 @@ import { ArrowLeftIcon, DocumentCheckIcon, PencilSquareIcon, XMarkIcon, CheckIco
 import { authenticatedFetch } from '@/lib/api-client';
 import { ConfirmModal } from '@/components/ui';
 
+// Render text with `**word**` markers as bold spans (no HTML injection).
+function renderMarkdownBold(text: string): React.ReactNode {
+  if (!text) return text;
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  return parts.map((part, i) => {
+    const m = part.match(/^\*\*([^*]+)\*\*$/);
+    return m ? <strong key={i} className="font-semibold">{m[1]}</strong> : <span key={i}>{part}</span>;
+  });
+}
+
 function ResumeSelector({ onSelect }: { onSelect: (id: string) => void }) {
   const [resumes, setResumes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -604,7 +614,7 @@ function ATSOptimizationPageContent() {
                             {change.before && (
                               <div className="mb-2">
                                 <div className="text-xs text-gray-500 mb-1">Before:</div>
-                                <div className="text-sm text-gray-700 line-through">{change.before}</div>
+                                <div className="text-sm text-gray-700 line-through">{renderMarkdownBold(change.before)}</div>
                               </div>
                             )}
 
@@ -641,7 +651,7 @@ function ATSOptimizationPageContent() {
                                   {change.before ? (hasEdit ? 'Edited:' : 'After:') : 'Added:'}
                                 </div>
                                 <div className={`text-sm font-medium ${isRejected ? 'text-gray-400 line-through' : 'text-gray-900'}`}>
-                                  {displayText}
+                                  {renderMarkdownBold(displayText)}
                                 </div>
                               </div>
                             )}

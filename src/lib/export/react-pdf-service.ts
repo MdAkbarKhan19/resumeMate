@@ -9,14 +9,22 @@ import { renderToBuffer } from '@react-pdf/renderer';
 import { ResumeData } from '@/types/resume';
 import { TemplateCustomization, DEFAULT_CUSTOMIZATION } from '@/types/template';
 
-// Dynamic imports to avoid bundling all templates when only one is needed
+// Only two templates are supported. Other IDs alias to the closest match.
 const templateLoaders: Record<string, () => Promise<{ default: React.ComponentType<any> }>> = {
   'minimalist': () => import('./react-pdf-templates/minimalist'),
   'modern-two-column': () => import('./react-pdf-templates/modern-two-column'),
-  'professional': () => import('./react-pdf-templates/professional'),
-  'ats-classic': () => import('./react-pdf-templates/ats-classic'),
-  'executive': () => import('./react-pdf-templates/executive'),
-  'tech-modern': () => import('./react-pdf-templates/tech-modern'),
+};
+
+const TEMPLATE_ALIASES: Record<string, 'minimalist' | 'modern-two-column'> = {
+  'modern-two-column': 'modern-two-column',
+  'minimalist': 'minimalist',
+  'minimalist-single': 'minimalist',
+  'ats-classic': 'minimalist',
+  'professional': 'minimalist',
+  'professional-corporate': 'minimalist',
+  'executive': 'minimalist',
+  'tech-modern': 'modern-two-column',
+  'creative-ats': 'modern-two-column',
 };
 
 export class ReactPDFService {
@@ -31,13 +39,13 @@ export class ReactPDFService {
   ): Promise<Buffer> {
     const startTime = Date.now();
 
-    // Load template component
-    const loader = templateLoaders[templateId];
-    if (!loader) {
+    // Resolve template ID through aliases (handles legacy/old IDs)
+    const resolvedId = TEMPLATE_ALIASES[templateId] || 'minimalist';
+    if (!(templateId in templateLoaders) && !(templateId in TEMPLATE_ALIASES)) {
       console.warn(`Template "${templateId}" not found for React-PDF, falling back to minimalist`);
     }
 
-    const templateModule = await (loader || templateLoaders['minimalist'])();
+    const templateModule = await templateLoaders[resolvedId]();
     const TemplateComponent = templateModule.default;
 
     // Create React element
@@ -66,6 +74,6 @@ export class ReactPDFService {
    * Check if a template ID is supported for React-PDF generation
    */
   static isSupported(templateId: string): boolean {
-    return templateId in templateLoaders;
+    return templateId in templateLoaders || templateId in TEMPLATE_ALIASES;
   }
 }

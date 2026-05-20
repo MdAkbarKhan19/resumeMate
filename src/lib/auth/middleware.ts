@@ -20,9 +20,14 @@ const client = jwksClient({
   rateLimit: true,
 });
 
-// In-memory cache for user data (5 minute TTL)
+// In-memory cache for user data.
+// NOTE: TTL is short on purpose. The cached user object is consumed by
+// downstream entitlement checks (canCreateResume, canRunAtsOptimization, etc.)
+// and stale plan data would block paid users right after upgrade. The
+// entitlements module re-queries fresh for the gate itself, but a longer TTL
+// here still risks confusing the UI which reads `planType` off the cached user.
 const userCache = new Map<string, { user: any; timestamp: number }>();
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const CACHE_TTL = 30 * 1000; // 30 seconds — long enough to absorb burst traffic, short enough to refresh after upgrade
 
 function getKey(header: any, callback: any) {
   client.getSigningKey(header.kid, (err, key) => {

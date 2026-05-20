@@ -1,7 +1,16 @@
+/**
+ * AWS Textract OCR fallback.
+ *
+ * COST NOTE — this used to call AnalyzeDocument with [TABLES, FORMS] which is
+ * the most expensive Textract endpoint ($50–65 per 1000 pages, with only 100
+ * free pages/month for 3 months). We only ever consume the raw text, so it's
+ * now switched to DetectDocumentText ($1.50 per 1000 pages, 1000 free pages
+ * per month). Even cheaper: don't call Textract at all unless explicitly
+ * enabled via ENABLE_AWS_TEXTRACT=true — pdf-parse handles ~99% of PDFs.
+ */
 import {
   TextractClient,
-  AnalyzeDocumentCommand,
-  FeatureType,
+  DetectDocumentTextCommand,
 } from '@aws-sdk/client-textract';
 import { awsConfig } from '@/config';
 
@@ -14,16 +23,25 @@ export interface TextractResult {
 }
 
 export class TextractService {
+  /** Default OFF. Set ENABLE_AWS_TEXTRACT=true to allow the OCR fallback. */
+  static isEnabled(): boolean {
+    return process.env.ENABLE_AWS_TEXTRACT === 'true';
+  }
+
   /**
-   * Extract text from a document using AWS Textract
+   * Extract text from a document using AWS Textract (cheap DetectDocumentText API).
+   * Throws if disabled so callers fall back to a non-OCR error path.
    */
   static async extractText(fileBuffer: Buffer): Promise<TextractResult> {
+    if (!this.isEnabled()) {
+      throw new Error(
+        'AWS Textract is disabled. Set ENABLE_AWS_TEXTRACT=true to enable the OCR fallback for scanned PDFs.'
+      );
+    }
+
     try {
-      const command = new AnalyzeDocumentCommand({
-        Document: {
-          Bytes: fileBuffer,
-        },
-        FeatureTypes: [FeatureType.TABLES, FeatureType.FORMS],
+      const command = new DetectDocumentTextCommand({
+        Document: { Bytes: fileBuffer },
       });
 
       const response = await textractClient.send(command);
@@ -32,15 +50,13 @@ export class TextractService {
         throw new Error('No blocks returned from Textract');
       }
 
-      // Extract text from blocks
       const textBlocks = response.Blocks.filter((block) => block.BlockType === 'LINE');
       const text = textBlocks.map((block) => block.Text).join('\n');
 
-      // Calculate average confidence
       const confidences = textBlocks
         .map((block) => block.Confidence || 0)
         .filter((conf) => conf > 0);
-      
+
       const avgConfidence = confidences.length > 0
         ? confidences.reduce((sum, conf) => sum + conf, 0) / confidences.length
         : 0;
@@ -56,16 +72,8 @@ export class TextractService {
     }
   }
 
-  /**
-   * Extract structured data from resume
-   * This is a helper that combines Textract with basic parsing
-   */
   static async extractResumeData(fileBuffer: Buffer): Promise<any> {
     const textractResult = await this.extractText(fileBuffer);
-    
-    // TODO: Implement resume parsing logic using the extracted text
-    // This will be enhanced with NLP in the resume parser service
-    
     return {
       rawText: textractResult.text,
       confidence: textractResult.confidence,

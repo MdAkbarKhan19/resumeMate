@@ -204,27 +204,57 @@ export default function CustomizationPanel({ customization, onChange }: Customiz
           </div>
         </div>
 
-        {/* Font Size */}
-        {showAdvanced && (
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">
-              Font Size: {customization.fontSize}pt
-            </label>
-            <input
-              type="range"
-              min="9"
-              max="14"
-              step="0.5"
-              value={customization.fontSize}
-              onChange={(e) => handleFontSizeChange(parseFloat(e.target.value))}
-              className="w-full"
-            />
-            <div className="flex justify-between text-xs text-gray-500 mt-1">
-              <span>9pt</span>
-              <span>14pt</span>
+        {/* Font Size — auto-fit by default, manual override available */}
+        {showAdvanced && (() => {
+          const isAuto = customization.fontSize === undefined;
+          const sliderValue = customization.fontSize ?? 11;
+          return (
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <label className="block text-sm font-medium text-gray-700">
+                  Font Size
+                  {isAuto ? (
+                    <span className="ml-2 text-xs font-normal text-indigo-600">
+                      Auto-fit (sized to content)
+                    </span>
+                  ) : (
+                    <span className="ml-2 text-xs font-normal text-gray-500">
+                      {sliderValue}pt (manual)
+                    </span>
+                  )}
+                </label>
+                {!isAuto && (
+                  <button
+                    type="button"
+                    onClick={() => onChange({ ...customization, fontSize: undefined })}
+                    className="text-xs text-indigo-600 hover:text-indigo-700"
+                    title="Let the app size fonts based on resume content density"
+                  >
+                    ↻ Auto
+                  </button>
+                )}
+              </div>
+              <input
+                type="range"
+                min="9"
+                max="14"
+                step="0.5"
+                value={sliderValue}
+                onChange={(e) => handleFontSizeChange(parseFloat(e.target.value))}
+                className="w-full"
+              />
+              <div className="flex justify-between text-xs text-gray-500 mt-1">
+                <span>9pt</span>
+                <span>14pt</span>
+              </div>
+              {isAuto && (
+                <p className="text-xs text-gray-500 mt-2">
+                  Sparse resumes get larger text; dense resumes shrink to fit one page.
+                </p>
+              )}
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* Advanced Toggle */}
         <button

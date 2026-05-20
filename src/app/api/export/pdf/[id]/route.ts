@@ -2,12 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/lib/auth/middleware';
 import prisma from '@/lib/db/prisma';
 import { DEFAULT_CUSTOMIZATION } from '@/types/template';
-import { ReactPDFService } from '@/lib/export/react-pdf-service';
+import { EnhancedPDFService } from '@/lib/export/enhanced-pdf';
+import { shouldWatermark } from '@/lib/payment/entitlements';
 
 /**
  * PDF Export Endpoint
- * Uses React-PDF for fast serverless-compatible generation (~200ms)
- * Falls back to Puppeteer if React-PDF fails
+ * Uses Puppeteer to render the same HTML templates as the preview
+ * This ensures pixel-perfect match between preview and downloaded PDF
  */
 async function handler(
   request: NextRequest,
@@ -43,31 +44,39 @@ async function handler(
     const certifications = (resume.certifications as any) || [];
     const projects = (resume.projects as any) || [];
     const languages = (resume.languages as any) || [];
+    const volunteer = ((resume as any).volunteer as any) || [];
+    const customSections = ((resume as any).customSections as any) || [];
+
+    const normalizeSkillCat = (c: string | undefined): string => {
+      if (!c) return 'technical';
+      const cat = c.toLowerCase().trim();
+      if (/^(soft|interpersonal|leadership|communication)/.test(cat) || cat.includes('soft skill')) return 'soft';
+      if (/^(language|spoken)/.test(cat) && !cat.includes('programming')) return 'language';
+      if (/(tool|platform|software|devops|cloud|database|operating)/.test(cat)) return 'tools';
+      return 'technical';
+    };
 
     // Normalize skills: handle both grouped format {category, items[]} and flat format
-    const normalizedSkills = Array.isArray(skills) 
+    const normalizedSkills = Array.isArray(skills)
       ? skills.flatMap((skill: any) => {
-          // If skill has 'items' array (grouped format from builder)
           if (skill.items && Array.isArray(skill.items)) {
             return skill.items.map((item: string) => ({
               id: String(Math.random()),
               name: item,
-              category: skill.category || 'technical'
+              category: normalizeSkillCat(skill.category),
             }));
           }
-          // If skill has 'keywords' array
           if (skill.keywords && Array.isArray(skill.keywords)) {
             return skill.keywords.map((keyword: string) => ({
               id: String(Math.random()),
               name: keyword,
-              category: skill.category || 'technical'
+              category: normalizeSkillCat(skill.category),
             }));
           }
-          // If skill is already in correct format or is a simple object
           return {
             id: skill.id || String(Math.random()),
             name: skill.name || skill.skill || '',
-            category: skill.category || 'technical'
+            category: normalizeSkillCat(skill.category),
           };
         })
       : [];
@@ -126,6 +135,7 @@ async function handler(
           date: cert.date || '',
           expiryDate: cert.expiryDate || '',
           credentialId: cert.credentialId || '',
+          url: cert.url || '',
         }))
       : [];
 
@@ -156,7 +166,19 @@ async function handler(
       certifications: normalizedCertifications,
       projects: normalizedProjects,
       languages: normalizedLanguages,
-      volunteer: [],
+      volunteer: Array.isArray(volunteer)
+        ? volunteer.map((vol: any) => ({
+            id: vol.id || String(Math.random()),
+            role: vol.role || '',
+            organization: vol.organization || '',
+            location: vol.location || '',
+            startDate: vol.startDate || '',
+            endDate: vol.endDate || '',
+            current: vol.current || false,
+            description: vol.description || '',
+          }))
+        : [],
+      customSections: Array.isArray(customSections) ? customSections : [],
     };
 
     // Get template and customization
@@ -167,23 +189,43 @@ async function handler(
           : JSON.parse(resume.customization as string))
       : DEFAULT_CUSTOMIZATION;
 
-    // Generate PDF using React-PDF (fast, serverless-compatible)
-    // Falls back to Puppeteer if React-PDF template is unavailable
+    // Free-tier downloads carry a hard-to-strip tiled watermark + footer banner.
+    // Paid tiers (Pack with credits, active Pro subscription) get a clean PDF.
+    const watermark = await shouldWatermark(userId);
+
     let pdfBuffer: Buffer;
     try {
-      pdfBuffer = await ReactPDFService.generatePDF(
-        resumeData,
-        templateId,
-        customization as any
-      );
-    } catch (reactPdfError) {
-      console.warn('React-PDF generation failed, falling back to Puppeteer:', reactPdfError);
-      const { EnhancedPDFService } = await import('@/lib/export/enhanced-pdf');
       pdfBuffer = await EnhancedPDFService.generatePDF(
         resumeData,
         templateId,
-        customization as any
+        customization as any,
+        { watermark },
       );
+    } catch (puppeteerError) {
+      console.error('Puppeteer PDF generation failed:', puppeteerError);
+      // Fallback to React-PDF if Puppeteer is unavailable. Note: the React-PDF
+      // fallback does NOT yet render a watermark — if we're forced down this
+      // path for a free user we deny the download to avoid handing out a clean
+      // PDF by accident.
+      if (watermark) {
+        return NextResponse.json(
+          {
+            error: 'PDF generation is temporarily unavailable. Please try again in a moment.',
+          },
+          { status: 503 },
+        );
+      }
+      try {
+        const { ReactPDFService } = await import('@/lib/export/react-pdf-service');
+        pdfBuffer = await ReactPDFService.generatePDF(
+          resumeData,
+          templateId,
+          customization as any
+        );
+      } catch (reactPdfError) {
+        console.error('React-PDF fallback also failed:', reactPdfError);
+        throw puppeteerError;
+      }
     }
 
     // Create filename

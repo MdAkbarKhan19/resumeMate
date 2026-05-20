@@ -1,7 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { RazorpayService } from '@/lib/payment/razorpay';
+import { getPlan, PLAN_CATALOG, type PlanCatalogEntry } from '@/lib/payment/plans';
 import prisma from '@/lib/db/prisma';
 import { Prisma } from '@prisma/client';
+
+/**
+ * Resolve which plan an existing Payment row belongs to by reading the
+ * `planId` we stashed on its metadata at creation time. Falls back to the
+ * legacy TIER1 → pack mapping for old records that pre-date the catalog.
+ */
+function resolvePlanFromPayment(record: { planType: string; metadata: any }): PlanCatalogEntry | null {
+  const meta = (record.metadata ?? {}) as Record<string, any>;
+  if (meta.planId) {
+    const p = getPlan(String(meta.planId));
+    if (p) return p;
+  }
+  if (record.planType === 'TIER1') return PLAN_CATALOG.pack;
+  if (record.planType === 'TIER2') return PLAN_CATALOG.pro_monthly;
+  return null;
+}
 
 /**
  * POST /api/webhooks/razorpay
@@ -115,17 +132,22 @@ async function handlePaymentCaptured(payment: any) {
     where: { id: paymentRecord.id },
     data: {
       status: 'COMPLETED',
-      metadata: payment as Prisma.JsonObject,
+      metadata: {
+        ...((paymentRecord.metadata as any) || {}),
+        capture: payment,
+      } as Prisma.JsonObject,
     },
   });
 
-  // Update user plan if not already done
-  if (paymentRecord.planType === 'TIER1' && paymentRecord.user.planType !== 'TIER1') {
+  // Resolve plan from catalog and apply the right grant. Guard with the
+  // user's current state to avoid double-crediting on webhook retries.
+  const plan = resolvePlanFromPayment(paymentRecord);
+  if (plan?.kind === 'one_time' && paymentRecord.user.planType !== plan.userPlanType) {
     await prisma.user.update({
       where: { id: paymentRecord.userId },
       data: {
-        planType: 'TIER1',
-        resumeCredits: { increment: 5 },
+        planType: plan.userPlanType,
+        resumeCredits: { increment: plan.creditsGranted ?? 0 },
       },
     });
   }
@@ -217,15 +239,23 @@ async function handleSubscriptionCharged(subscription: any) {
   const user = await prisma.user.findFirst({
     where: { subscriptionId: subscription.id },
   });
-
   if (!user) {
     console.error('User not found for subscription:', subscription.id);
     return;
   }
 
-  const amount = RazorpayService.paiseToRupees(
-    parseInt(process.env.RAZORPAY_TIER2_AMOUNT || '199900')
-  );
+  // Find the original Payment row to learn which catalog plan this is.
+  // The Razorpay subscription.id is stashed there as stripePaymentId.
+  const originalPayment = await prisma.payment.findFirst({
+    where: { stripePaymentId: subscription.id },
+  });
+  const plan = originalPayment
+    ? resolvePlanFromPayment(originalPayment)
+    : PLAN_CATALOG.pro_monthly;
+
+  const amount = plan
+    ? RazorpayService.paiseToRupees(plan.amountPaise)
+    : RazorpayService.paiseToRupees(29900); // safe default = pro_monthly
 
   await prisma.payment.create({
     data: {
@@ -234,18 +264,30 @@ async function handleSubscriptionCharged(subscription: any) {
       amount,
       currency: 'INR',
       status: 'COMPLETED',
-      planType: 'TIER2',
-      metadata: subscription as Prisma.JsonObject,
+      planType: plan?.userPlanType ?? 'TIER2',
+      planDuration: plan?.planDuration ?? 'monthly',
+      metadata: {
+        kind: 'subscription_charge',
+        planId: plan?.id,
+        subscription,
+      } as Prisma.JsonObject,
     },
   });
 
-  const endDate = new Date(subscription.current_end * 1000);
+  // Trust Razorpay's current_end for expiry — it already accounts for the
+  // plan's cycle length, so this works for monthly / quarterly / annual
+  // identically. Fallback: compute from plan.cycleMonths.
+  const endDate = subscription.current_end
+    ? new Date(subscription.current_end * 1000)
+    : (() => {
+        const d = new Date();
+        d.setMonth(d.getMonth() + (plan?.cycleMonths ?? 1));
+        return d;
+      })();
 
   await prisma.user.update({
     where: { id: user.id },
-    data: {
-      subscriptionExpiry: endDate,
-    },
+    data: { subscriptionExpiry: endDate },
   });
 }
 
@@ -386,17 +428,17 @@ async function handleRefundCreated(refund: any) {
     },
   });
 
-  if (paymentRecord.planType === 'TIER1') {
+  const plan = resolvePlanFromPayment(paymentRecord);
+  if (plan?.kind === 'one_time') {
+    // Reverse the exact number of credits this plan originally granted.
     await prisma.user.update({
       where: { id: paymentRecord.userId },
       data: {
-        resumeCredits: { decrement: 5 },
+        resumeCredits: { decrement: plan.creditsGranted ?? 0 },
         planType: 'FREE',
       },
     });
-  }
-
-  if (paymentRecord.planType === 'TIER2') {
+  } else if (plan?.kind === 'subscription') {
     await prisma.user.update({
       where: { id: paymentRecord.userId },
       data: {

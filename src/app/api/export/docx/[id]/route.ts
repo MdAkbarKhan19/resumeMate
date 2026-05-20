@@ -35,31 +35,38 @@ async function handler(
     const certifications = (resume.certifications as any) || [];
     const projects = (resume.projects as any) || [];
     const languages = (resume.languages as any) || [];
+    const volunteer = ((resume as any).volunteer as any) || [];
+    const customSections = ((resume as any).customSections as any) || [];
 
-    // Normalize skills: handle both grouped format {category, items[]} and flat format
-    const normalizedSkills = Array.isArray(skills) 
+    const normalizeSkillCat = (c: string | undefined): string => {
+      if (!c) return 'technical';
+      const cat = c.toLowerCase().trim();
+      if (/^(soft|interpersonal|leadership|communication)/.test(cat) || cat.includes('soft skill')) return 'soft';
+      if (/^(language|spoken)/.test(cat) && !cat.includes('programming')) return 'language';
+      if (/(tool|platform|software|devops|cloud|database|operating)/.test(cat)) return 'tools';
+      return 'technical';
+    };
+
+    const normalizedSkills = Array.isArray(skills)
       ? skills.flatMap((skill: any) => {
-          // If skill has 'items' array (grouped format from builder)
           if (skill.items && Array.isArray(skill.items)) {
             return skill.items.map((item: string) => ({
               id: String(Math.random()),
               name: item,
-              category: skill.category || 'technical'
+              category: normalizeSkillCat(skill.category),
             }));
           }
-          // If skill has 'keywords' array
           if (skill.keywords && Array.isArray(skill.keywords)) {
             return skill.keywords.map((keyword: string) => ({
               id: String(Math.random()),
               name: keyword,
-              category: skill.category || 'technical'
+              category: normalizeSkillCat(skill.category),
             }));
           }
-          // If skill is already in correct format or is a simple object
           return {
             id: skill.id || String(Math.random()),
             name: skill.name || skill.skill || '',
-            category: skill.category || 'technical'
+            category: normalizeSkillCat(skill.category),
           };
         })
       : [];
@@ -118,6 +125,7 @@ async function handler(
           date: cert.date || '',
           expiryDate: cert.expiryDate || '',
           credentialId: cert.credentialId || '',
+          url: cert.url || '',
         }))
       : [];
 
@@ -148,7 +156,19 @@ async function handler(
       certifications: normalizedCertifications,
       projects: normalizedProjects,
       languages: normalizedLanguages,
-      volunteer: [],
+      volunteer: Array.isArray(volunteer)
+        ? volunteer.map((vol: any) => ({
+            id: vol.id || String(Math.random()),
+            role: vol.role || '',
+            organization: vol.organization || '',
+            location: vol.location || '',
+            startDate: vol.startDate || '',
+            endDate: vol.endDate || '',
+            current: vol.current || false,
+            description: vol.description || '',
+          }))
+        : [],
+      customSections: Array.isArray(customSections) ? customSections : [],
     };
 
     const templateId = resume.templateId || 'modern-two-column';

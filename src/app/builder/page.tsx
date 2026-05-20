@@ -40,6 +40,76 @@ const SECTIONS: { key: SectionKey; label: string; icon: string }[] = [
   { key: 'template', label: 'Template', icon: 'M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z' },
 ];
 
+const MONTH_MAP: Record<string, string> = {
+  jan: '01', january: '01', feb: '02', february: '02', mar: '03', march: '03',
+  apr: '04', april: '04', may: '05', jun: '06', june: '06', jul: '07', july: '07',
+  aug: '08', august: '08', sep: '09', sept: '09', september: '09',
+  oct: '10', october: '10', nov: '11', november: '11', dec: '12', december: '12',
+};
+
+function toMonthInputValue(dateStr: string | undefined | null): string {
+  if (!dateStr) return '';
+  const s = String(dateStr).trim();
+  if (!s) return '';
+  if (/^(present|current|now|ongoing|n\/a)$/i.test(s)) return '';
+  if (/^\d{4}-\d{2}$/.test(s)) return s;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s.slice(0, 7);
+
+  // "January 2024" / "Jan, 2024" / "Jan-2024" / "Jan '24" / "Jan-24"
+  const monthYearLoose = s.toLowerCase().match(/([a-z]+)[\s,\-'.]+(\d{2,4})/);
+  if (monthYearLoose) {
+    const mon = MONTH_MAP[monthYearLoose[1]];
+    if (mon) {
+      let yr = monthYearLoose[2];
+      if (yr.length === 2) yr = (parseInt(yr, 10) >= 50 ? '19' : '20') + yr;
+      if (yr.length === 4) return `${yr}-${mon}`;
+    }
+  }
+
+  // "2024 January" / "2024 Jan"
+  const yearMonthWords = s.toLowerCase().match(/(\d{4})[\s,\-]+([a-z]+)/);
+  if (yearMonthWords) {
+    const mon = MONTH_MAP[yearMonthWords[2]];
+    if (mon) return `${yearMonthWords[1]}-${mon}`;
+  }
+
+  // "01/2024" / "1-2024" / "1.2024"
+  const numericSlash = s.match(/^(\d{1,2})[\/\-.](\d{4})$/);
+  if (numericSlash) {
+    const month = parseInt(numericSlash[1], 10);
+    if (month >= 1 && month <= 12) {
+      return `${numericSlash[2]}-${String(month).padStart(2, '0')}`;
+    }
+  }
+
+  // "2024/01" / "2024-1"
+  const numericReverse = s.match(/^(\d{4})[\/\-.](\d{1,2})$/);
+  if (numericReverse) {
+    const month = parseInt(numericReverse[2], 10);
+    if (month >= 1 && month <= 12) {
+      return `${numericReverse[1]}-${String(month).padStart(2, '0')}`;
+    }
+  }
+
+  // Bare 4-digit year only
+  if (/^\d{4}$/.test(s)) return `${s}-01`;
+
+  // NOTE: deliberately NO `new Date(s)` fallback here — `new Date("01")` returns
+  // Jan 1 2001 (and similar surprises for "feb", "jun", "20", etc.), which is
+  // how every imported field was collapsing to 2001. If a value doesn't match
+  // any explicit pattern above, leave the field empty so the user can fix it.
+  return '';
+}
+
+function normalizeSkillCategory(category: string | undefined | null): 'technical' | 'soft' | 'language' | 'tools' {
+  if (!category) return 'technical';
+  const cat = String(category).toLowerCase().trim();
+  if (/^(soft|interpersonal|leadership|communication)/.test(cat) || cat.includes('soft skill')) return 'soft';
+  if (/^(language|spoken)/.test(cat) && !cat.includes('programming')) return 'language';
+  if (/(tool|platform|software|devops|cloud|database|operating)/.test(cat)) return 'tools';
+  return 'technical';
+}
+
 const BuilderPage: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -122,38 +192,95 @@ const BuilderPage: React.FC = () => {
               summary: resume.summary || '',
               experience: (resume.experience || []).map((exp: any) => ({
                 id: exp.id || generateId(), company: exp.company || '', jobTitle: exp.position || '',
-                location: exp.location || '', startDate: exp.startDate || '', endDate: exp.endDate || '',
-                current: exp.current || false, bullets: exp.bullets || [],
+                location: exp.location || '',
+                startDate: toMonthInputValue(exp.startDate),
+                endDate: toMonthInputValue(exp.endDate),
+                current: exp.current || /^(present|current|now|ongoing)$/i.test(String(exp.endDate || '')),
+                bullets: exp.bullets || [],
               })),
               education: (resume.education || []).map((edu: any) => ({
                 id: edu.id || generateId(), institution: edu.institution || '', degree: edu.degree || '',
-                field: edu.field || '', location: edu.location || '', startDate: edu.startDate || '',
-                graduationDate: edu.endDate || '', gpa: edu.gpa || '',
+                field: edu.field || '', location: edu.location || '',
+                startDate: toMonthInputValue(edu.startDate),
+                graduationDate: toMonthInputValue(edu.endDate || edu.graduationDate),
+                gpa: edu.gpa || '',
               })),
-              skills: (resume.skills || []).flatMap((skill: any) =>
-                (skill.items || []).map((itemName: string) => ({
-                  id: generateId(), category: (skill.category || 'technical').toLowerCase(), name: itemName,
-                }))
-              ),
+              // Skills can arrive in several shapes depending on whether the
+              // resume was created from upload, the builder, or the ATS pass:
+              //   1) Grouped:   [{ category: 'Technical', items: ['React', ...] }]
+              //   2) Flat:      [{ id, name: 'React', category: 'technical' }]
+              //   3) String:    ['React', 'Node.js']
+              //   4) Mixed
+              // The old loader only handled (1) and silently dropped everything else,
+              // which is why the preview's Skills section appeared empty even when
+              // the PDF download (whose normalizer is permissive) showed them.
+              skills: (resume.skills || []).flatMap((skill: any) => {
+                if (!skill) return [];
+                if (typeof skill === 'string') {
+                  return [{ id: generateId(), name: skill, category: normalizeSkillCategory(undefined) }];
+                }
+                if (Array.isArray(skill.items)) {
+                  const cat = normalizeSkillCategory(skill.category);
+                  return skill.items
+                    .filter((it: any) => typeof it === 'string' && it.trim())
+                    .map((itemName: string) => ({ id: generateId(), name: itemName.trim(), category: cat }));
+                }
+                if (Array.isArray(skill.keywords)) {
+                  const cat = normalizeSkillCategory(skill.category);
+                  return skill.keywords
+                    .filter((it: any) => typeof it === 'string' && it.trim())
+                    .map((itemName: string) => ({ id: generateId(), name: itemName.trim(), category: cat }));
+                }
+                if (skill.name) {
+                  return [{
+                    id: skill.id || generateId(),
+                    name: String(skill.name),
+                    category: normalizeSkillCategory(skill.category),
+                  }];
+                }
+                return [];
+              }),
               certifications: (resume.certifications || []).map((cert: any) => ({
                 id: cert.id || generateId(), name: cert.name || '', issuer: cert.issuer || '',
-                date: cert.date || '', expiryDate: cert.expiryDate || '', credentialId: cert.credentialId || '',
+                date: toMonthInputValue(cert.date),
+                expiryDate: toMonthInputValue(cert.expiryDate),
+                credentialId: cert.credentialId || '',
+                url: cert.url || '',
               })),
               projects: (resume.projects || []).map((proj: any) => ({
                 id: proj.id || generateId(), name: proj.name || '', description: proj.description || '',
                 techStack: proj.technologies || proj.techStack || [], url: proj.url || '',
-                startDate: proj.startDate || '', endDate: proj.endDate || '',
+                startDate: toMonthInputValue(proj.startDate),
+                endDate: toMonthInputValue(proj.endDate),
               })),
               languages: (resume.languages || []).map((lang: any) => ({
                 id: lang.id || generateId(), name: lang.name || '', proficiency: lang.proficiency || '',
               })),
               volunteer: ((resume as any).volunteer || []).map((vol: any) => ({
                 id: vol.id || generateId(), role: vol.role || '', organization: vol.organization || '',
-                location: vol.location || '', startDate: vol.startDate || '', endDate: vol.endDate || '',
-                current: vol.current || false, description: vol.description || '',
+                location: vol.location || '',
+                startDate: toMonthInputValue(vol.startDate),
+                endDate: toMonthInputValue(vol.endDate),
+                current: vol.current || /^(present|current|now|ongoing)$/i.test(String(vol.endDate || '')),
+                description: vol.description || '',
               })),
             });
-            if ((resume as any).customSections) setCustomSections((resume as any).customSections);
+            if ((resume as any).customSections) {
+              const raw = (resume as any).customSections;
+              if (Array.isArray(raw)) {
+                const normalized = raw
+                  .map((s: any): CustomSection | null => {
+                    if (!s || typeof s !== 'object') return null;
+                    return {
+                      id: s.id || generateId(),
+                      title: s.title || '',
+                      content: s.content || '',
+                    };
+                  })
+                  .filter((s): s is CustomSection => s !== null);
+                setCustomSections(normalized);
+              }
+            }
             toast.success('Resume loaded successfully');
           } else {
             toast.error('Failed to load resume');
@@ -169,7 +296,18 @@ const BuilderPage: React.FC = () => {
         const draft = localStorage.getItem('resume-draft');
         if (draft) {
           try {
-            setResumeData(JSON.parse(draft));
+            const parsed = JSON.parse(draft);
+            setResumeData(prev => ({
+              ...prev,
+              ...parsed,
+              certifications: parsed.certifications ?? [],
+              languages: parsed.languages ?? [],
+              volunteer: parsed.volunteer ?? [],
+              projects: parsed.projects ?? [],
+              skills: parsed.skills ?? [],
+              experience: parsed.experience ?? [],
+              education: parsed.education ?? [],
+            }));
             toast.info('Draft loaded from previous session');
           } catch {}
         }
@@ -348,7 +486,7 @@ const BuilderPage: React.FC = () => {
   }, [resumeData.experience, resumeData.skills, generateSummary]);
 
   // Save/Export
-  const handleSave = useCallback(async () => {
+  const handleSave = useCallback(async (skipNavigation = false) => {
     setIsSaving(true);
     try {
       const token = localStorage.getItem('token');
@@ -386,6 +524,7 @@ const BuilderPage: React.FC = () => {
         certifications: resumeData.certifications.map(cert => ({
           name: cert.name || '', issuer: cert.issuer || '', date: cert.date || '',
           expiryDate: cert.expiryDate || '', credentialId: cert.credentialId || '',
+          url: cert.url || '',
         })),
         projects: resumeData.projects.map(proj => ({
           name: proj.name || '', description: proj.description || '',
@@ -398,7 +537,13 @@ const BuilderPage: React.FC = () => {
           startDate: vol.startDate || '', endDate: vol.endDate || '', current: vol.current || false,
           description: vol.description || '',
         })),
-        customSections,
+        customSections: (customSections || [])
+          .filter(s => s && (s.title?.trim() || s.content?.trim()))
+          .map(s => ({
+            id: s.id || generateId(),
+            title: s.title || 'Section',
+            content: s.content || '',
+          })),
         templateId: selectedTemplateId,
         customization,
       };
@@ -423,27 +568,38 @@ const BuilderPage: React.FC = () => {
       if (result.success) {
         toast.success('Resume saved');
         localStorage.removeItem('resume-draft');
-        if (!resumeId && result.data?.id) router.push(`/builder?id=${result.data.id}`);
+        if (!resumeId && result.data?.id) {
+          if (!skipNavigation) {
+            router.push(`/builder?id=${result.data.id}`);
+          }
+          return result.data.id;
+        }
+        return resumeId;
       } else {
         toast.error(result.error?.message || result.error || 'Failed to save');
+        return null;
       }
     } catch {
       toast.error('An error occurred while saving');
+      return null;
     } finally {
       setIsSaving(false);
     }
   }, [resumeId, resumeTitle, resumeData, customSections, selectedTemplateId, customization, router]);
 
-  const handleDownload = useCallback(async (format: 'pdf' | 'docx') => {
-    if (!resumeId) {
-      toast.error('Please save the resume first');
-      return;
-    }
+  // DOCX export is temporarily disabled — only PDF is supported in the UI.
+  // The /api/export/docx route and EnhancedDOCXService still exist if we want
+  // to re-enable Word export later; just restore the 'docx' branch + button.
+  const handleDownload = useCallback(async (format: 'pdf') => {
     try {
-      // Auto-save before downloading to ensure latest template/data is used
-      await handleSave();
+      const savedId = await handleSave(true);
+      const currentResumeId = savedId || resumeId;
+      if (!currentResumeId) {
+        toast.error('Please save the resume first');
+        return;
+      }
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/export/${format}/${resumeId}`, {
+      const response = await fetch(`/api/export/${format}/${currentResumeId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!response.ok) throw new Error(`Failed to download ${format.toUpperCase()}`);
@@ -531,22 +687,31 @@ const BuilderPage: React.FC = () => {
 
             {/* Right: Save/Export */}
             <div className="flex items-center gap-2">
-              <Button variant="primary" size="sm" onClick={handleSave} isLoading={isSaving}>
-                {resumeId ? 'Save' : 'Create'}
+              <Button variant="primary" size="sm" onClick={() => handleSave()} isLoading={isSaving}>
+                Save
               </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleDownload('pdf')}
+              >
+                <svg className="w-4 h-4 mr-1 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                PDF
+              </Button>
+              {/* Word/DOCX download intentionally hidden — PDF only for now.
+                  The export route and DOCX builder still exist; restore this
+                  button + the 'docx' branch in handleDownload to bring it back. */}
               {resumeId && (
-                <>
-                  <Button variant="outline" size="sm" onClick={() => handleDownload('pdf')}>PDF</Button>
-                  <Button variant="outline" size="sm" onClick={() => handleDownload('docx')}>DOCX</Button>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => router.push(`/builder/ats?resumeId=${resumeId}`)}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white border-0"
-                  >
-                    ATS Score
-                  </Button>
-                </>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => router.push(`/builder/ats?resumeId=${resumeId}`)}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white border-0"
+                >
+                  ATS Score
+                </Button>
               )}
             </div>
           </div>
@@ -726,6 +891,7 @@ const BuilderPage: React.FC = () => {
                         <Input label="Issuer" value={cert.issuer} onChange={(e) => updateCertification(index, 'issuer', e.target.value)} placeholder="Amazon Web Services" />
                         <Input label="Date" type="month" value={cert.date} onChange={(e) => updateCertification(index, 'date', e.target.value)} />
                         <Input label="Credential ID" value={cert.credentialId || ''} onChange={(e) => updateCertification(index, 'credentialId', e.target.value)} placeholder="ABC123" />
+                        <Input label="Credential URL" value={cert.url || ''} onChange={(e) => updateCertification(index, 'url', e.target.value)} placeholder="https://www.credly.com/..." className="md:col-span-2" />
                       </div>
                       <div className="flex justify-end mt-3 pt-3 border-t">
                         <button type="button" onClick={() => removeCertification(index)} className="text-xs text-red-500 hover:text-red-700">Remove</button>
@@ -861,7 +1027,11 @@ const BuilderPage: React.FC = () => {
                     <div className="transform scale-[0.65] origin-top">
                       <TemplateRenderer
                         templateId={selectedTemplateId}
-                        data={resumeData}
+                        // Merge customSections into the preview data — they live
+                        // in a separate state slice in the builder, but the
+                        // templates expect them on `data.customSections` (which
+                        // is how the saved/downloaded version sees them).
+                        data={{ ...resumeData, customSections }}
                         customization={customization}
                         preview={true}
                       />

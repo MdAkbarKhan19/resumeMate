@@ -21,9 +21,23 @@ export interface KeyPhrase {
 
 export class ComprehendService {
   /**
+   * Default OFF. Set ENABLE_AWS_COMPREHEND=true to enable.
+   *
+   * Free tier is 50K characters/month for the first 12 months — a typical
+   * resume is 3–5K chars and a JD 2–4K chars, so a handful of users will
+   * exhaust the quota and start incurring charges ($0.0001/unit, 100 chars/unit).
+   * Our OpenAI-based parser already extracts entities + key phrases, so
+   * Comprehend is redundant by default.
+   */
+  static isEnabled(): boolean {
+    return process.env.ENABLE_AWS_COMPREHEND === 'true';
+  }
+
+  /**
    * Detect entities in text (names, organizations, locations, dates, etc.)
    */
   static async detectEntities(text: string): Promise<Entity[]> {
+    if (!this.isEnabled()) return [];
     try {
       const command = new DetectEntitiesCommand({
         Text: text,
@@ -47,6 +61,7 @@ export class ComprehendService {
    * Detect key phrases in text
    */
   static async detectKeyPhrases(text: string): Promise<KeyPhrase[]> {
+    if (!this.isEnabled()) return [];
     try {
       const command = new DetectKeyPhrasesCommand({
         Text: text,
@@ -72,6 +87,7 @@ export class ComprehendService {
     sentiment: string;
     scores: any;
   }> {
+    if (!this.isEnabled()) return { sentiment: 'NEUTRAL', scores: {} };
     try {
       const command = new DetectSentimentCommand({
         Text: text,
@@ -98,6 +114,7 @@ export class ComprehendService {
     requiredSkills: string[];
     entities: Entity[];
   }> {
+    if (!this.isEnabled()) return { keywords: [], requiredSkills: [], entities: [] };
     try {
       // Get key phrases (these often represent requirements)
       const keyPhrases = await this.detectKeyPhrases(jdText);

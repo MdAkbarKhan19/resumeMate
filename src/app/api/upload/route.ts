@@ -3,6 +3,7 @@ import { authenticateRequest } from '@/lib/auth/middleware';
 import prisma from '@/lib/db/prisma';
 import { S3Service } from '@/lib/aws/s3';
 import { ResumeParserService } from '@/lib/resume/parser';
+import { canCreateResume } from '@/lib/payment/entitlements';
 
 // Force Node.js runtime (not Edge) for file uploads
 export const runtime = 'nodejs';
@@ -55,6 +56,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { success: false, error: 'File size must be less than 10MB' },
         { status: 400 }
+      );
+    }
+
+    // Enforce plan limit BEFORE expensive S3 upload + parsing.
+    const gate = await canCreateResume(auth.user.id);
+    if (!gate.allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: gate.code || 'LIMIT_REACHED',
+            message: gate.reason || 'Resume limit reached on your current plan.',
+            tier: gate.tier,
+            used: gate.used,
+            limit: gate.limit,
+          },
+        },
+        { status: 403 },
       );
     }
 

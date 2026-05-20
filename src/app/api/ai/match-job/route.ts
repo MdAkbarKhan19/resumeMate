@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/lib/auth/middleware';
 import { OpenAIService } from '@/lib/ai/openai';
 import { ComprehendService } from '@/lib/aws/comprehend';
+import { canRunAtsOptimization } from '@/lib/payment/entitlements';
 import prisma from '@/lib/db/prisma';
 import { z } from 'zod';
 import { Prisma } from '@prisma/client';
@@ -74,6 +75,25 @@ async function handleMatchJob(request: NextRequest, { user }: { user: any }) {
           },
         },
         { status: 403 }
+      );
+    }
+
+    // JD matching is an ATS optimization — counts against the user's ATS quota.
+    const atsGate = await canRunAtsOptimization(user.id);
+    if (!atsGate.allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: atsGate.code || 'LIMIT_REACHED',
+            message: atsGate.reason || 'ATS optimization limit reached on your current plan.',
+            tier: atsGate.tier,
+            used: atsGate.used,
+            limit: atsGate.limit,
+            resetsAt: atsGate.resetsAt?.toISOString(),
+          },
+        },
+        { status: 429 },
       );
     }
 

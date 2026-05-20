@@ -2,47 +2,24 @@
 
 import { TEMPLATE_REGISTRY } from '@/types/template';
 import { Card } from '@/components/ui';
-import { useState } from 'react';
 
 interface TemplateGalleryProps {
   selectedTemplateId?: string;
   onTemplateSelect: (templateId: string) => void;
 }
 
-export default function TemplateGallery({ 
-  selectedTemplateId, 
-  onTemplateSelect 
+export default function TemplateGallery({
+  selectedTemplateId,
+  onTemplateSelect,
 }: TemplateGalleryProps) {
-  const [selectedFilter, setSelectedFilter] = useState<string>('all');
-  
-  const categories = ['all', 'modern', 'minimal', 'professional', 'creative'];
-  
-  const filteredTemplates = Object.values(TEMPLATE_REGISTRY).filter(template => 
-    selectedFilter === 'all' || template.category === selectedFilter
-  );
+  // Only two templates supported — show them both, no filter needed.
+  const allTemplates = Object.values(TEMPLATE_REGISTRY);
 
   return (
     <div className="template-gallery">
-      {/* Category Filters */}
-      <div className="flex gap-2 mb-6 flex-wrap">
-        {categories.map(category => (
-          <button
-            key={category}
-            onClick={() => setSelectedFilter(category)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              selectedFilter === category
-                ? 'bg-primary-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            {category.charAt(0).toUpperCase() + category.slice(1)}
-          </button>
-        ))}
-      </div>
-
       {/* Template Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredTemplates.map(template => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        {allTemplates.map((template) => (
           <Card
             key={template.id}
             className={`cursor-pointer transition-all hover:shadow-lg ${

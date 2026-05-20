@@ -1,17 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/lib/auth/middleware';
 import { AIEnhancementService } from '@/lib/ai/enhancement-service';
+import { canEnhanceBullet } from '@/lib/payment/entitlements';
+import prisma from '@/lib/db/prisma';
 
 /**
- * API endpoint to improve resume bullet points using AI
+ * API endpoint to improve resume bullet points using AI.
+ * Counts against the user's daily bullet-enhancement quota (10/day free).
  */
 async function handler(
   request: NextRequest,
-  context: { user: any }
+  { user }: { user: any }
 ): Promise<NextResponse> {
   try {
-    const userId = context.user?.sub;
-
+    // Bug fix: middleware returns `user.id`, not `user.sub`.
+    const userId = user?.id;
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -26,11 +29,36 @@ async function handler(
       );
     }
 
-    // Call AI service
-    const result = await AIEnhancementService.improveBullet(
-      bulletText,
-      bulletContext
-    );
+    // Per-plan bullet quota.
+    const gate = await canEnhanceBullet(userId);
+    if (!gate.allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: gate.code || 'LIMIT_REACHED',
+            message: gate.reason || 'AI enhancement limit reached on your current plan.',
+            tier: gate.tier,
+            used: gate.used,
+            limit: gate.limit,
+            resetsAt: gate.resetsAt?.toISOString(),
+          },
+        },
+        { status: 429 },
+      );
+    }
+
+    const result = await AIEnhancementService.improveBullet(bulletText, bulletContext);
+
+    // Log usage so quota counts correctly.
+    await prisma.aIUsage.create({
+      data: {
+        userId,
+        type: 'BULLET_ENHANCEMENT',
+        tokensUsed: 0,
+        cost: 0,
+      },
+    });
 
     return NextResponse.json(result, { status: 200 });
   } catch (error) {
@@ -45,7 +73,4 @@ async function handler(
   }
 }
 
-export const POST = withAuth((request: NextRequest, context: { user: any; params?: any }) => 
-  handler(request, context)
-);
-export const dynamic = 'force-dynamic';
+export const POST = withAuth(handler);

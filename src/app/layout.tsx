@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
 import { Toaster } from 'react-hot-toast';
 import './globals.css';
 import '@/lib/amplify-config'; // Initialize Amplify
@@ -8,11 +7,6 @@ import { ClearOldAuth } from '@/components/ClearOldAuth';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { ToastContainer } from '@/components/ui/Alert';
-
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-inter',
-});
 
 export const metadata: Metadata = {
   title: 'ResumeMate - AI-Powered Resume Builder',
@@ -33,7 +27,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} ${inter.variable} bg-[#fafafc] text-gray-900 antialiased`}>
+      <body className="font-sans bg-[#fafafc] text-gray-900 antialiased">
         <ClearOldAuth />
         <AuthProvider>
           <div className="flex flex-col min-h-screen relative">

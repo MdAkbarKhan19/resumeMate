@@ -3,6 +3,7 @@ import { withAuth } from '@/lib/auth/middleware';
 import prisma from '@/lib/db/prisma';
 import { z } from 'zod';
 import { Prisma } from '@prisma/client';
+import { canCreateResume } from '@/lib/payment/entitlements';
 
 // Validation schemas
 const createResumeSchema = z.object({
@@ -11,20 +12,20 @@ const createResumeSchema = z.object({
   customization: z.object({
     primaryColor: z.string().optional(),
     accentColor: z.string().optional(),
-    fontFamily: z.enum(['Inter', 'Roboto', 'Georgia', 'Arial']).optional(),
-    fontSize: z.number().optional(),
-    spacing: z.enum(['compact', 'normal', 'spacious']).optional(),
+    fontFamily: z.string().optional(),
+    fontSize: z.union([z.number(), z.string()]).optional(),
+    spacing: z.string().optional(),
     sectionOrder: z.array(z.string()).optional(),
-  }).optional(),
+  }).passthrough().optional(),
   personalInfo: z.object({
     fullName: z.string().min(1),
     title: z.string().optional(),
     email: z.string().email(),
     phone: z.string().optional(),
     location: z.string().optional(),
-    linkedin: z.string().url().optional().or(z.literal('')),
-    website: z.string().url().optional().or(z.literal('')),
-    github: z.string().url().optional().or(z.literal('')),
+    linkedin: z.string().optional().or(z.literal('')),
+    website: z.string().optional().or(z.literal('')),
+    github: z.string().optional().or(z.literal('')),
   }),
   summary: z.string().optional(),
   experience: z.array(
@@ -62,6 +63,7 @@ const createResumeSchema = z.object({
       date: z.string().optional(),
       expiryDate: z.string().optional(),
       credentialId: z.string().optional(),
+      url: z.string().optional().or(z.literal('')),
     })
   ).optional(),
   projects: z.array(
@@ -223,7 +225,26 @@ async function handleCreateResume(request: NextRequest, { user }: { user: any })
 
     const data = validation.data;
 
-    // Check plan limits
+    // Single source of truth for whether this user is allowed to create
+    // another resume. See src/lib/payment/entitlements.ts.
+    const gate = await canCreateResume(user.id);
+    if (!gate.allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: gate.code || 'LIMIT_REACHED',
+            message: gate.reason || 'Resume limit reached on your current plan.',
+            tier: gate.tier,
+            used: gate.used,
+            limit: gate.limit,
+          },
+        },
+        { status: 403 },
+      );
+    }
+
+    // We still need the user row for the credit-decrement step below.
     const currentUser = await prisma.user.findUnique({
       where: { id: user.id },
       select: {
@@ -233,44 +254,10 @@ async function handleCreateResume(request: NextRequest, { user }: { user: any })
         subscriptionActive: true,
       },
     });
-
     if (!currentUser) {
       return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'USER_NOT_FOUND',
-            message: 'User not found',
-          },
-        },
-        { status: 404 }
-      );
-    }
-
-    // Check limits
-    if (currentUser.planType === 'FREE' && currentUser.resumesCreated >= 1) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'LIMIT_REACHED',
-            message: 'Free plan allows only 1 resume. Please upgrade to create more.',
-          },
-        },
-        { status: 403 }
-      );
-    }
-
-    if (currentUser.planType === 'TIER1' && currentUser.resumeCredits <= 0) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'CREDITS_EXHAUSTED',
-            message: 'You have used all your resume credits. Please purchase more.',
-          },
-        },
-        { status: 403 }
+        { success: false, error: { code: 'USER_NOT_FOUND', message: 'User not found' } },
+        { status: 404 },
       );
     }
 

@@ -15,7 +15,6 @@ const Navbar: React.FC = () => {
 
   const navigation = [
     { name: 'Home', href: '/', public: true },
-    { name: 'Templates', href: '/templates', public: true },
     { name: 'Pricing', href: '/pricing', public: true },
     { name: 'Dashboard', href: '/dashboard', public: false },
     { name: 'Builder', href: '/builder', public: false },

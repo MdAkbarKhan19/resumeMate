@@ -110,7 +110,10 @@ export class RazorpayService {
   }
 
   /**
-   * Create a subscription for recurring payments (Tier 2)
+   * Create a Razorpay subscription.
+   *
+   * `total_count` is how many billing cycles before the subscription auto-ends.
+   * Callers pass it per plan: monthly=12, quarterly=4, annual=1 (all = one year).
    */
   static async createSubscription(
     planId: string,
@@ -121,18 +124,18 @@ export class RazorpayService {
       name: string;
       email: string;
       contact: string;
-    }
+    },
+    totalCount: number = 12,
   ): Promise<RazorpaySubscription> {
     try {
       const subscriptionData: any = {
         plan_id: planId,
         customer_notify: customerNotify,
         quantity,
-        total_count: 12, // 12 months
+        total_count: totalCount,
         notes,
       };
 
-      // If customer details provided, create customer first
       if (customerDetails) {
         const customer = await razorpay.customers.create({
           name: customerDetails.name,

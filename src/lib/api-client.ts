@@ -20,7 +20,12 @@ export function getAuthHeaders(): HeadersInit {
 }
 
 /**
- * Make an authenticated API request
+ * Make an authenticated API request.
+ *
+ * Note: this no longer auto-redirects on 401. A single 401 from a transient
+ * cause (background fetch, image, slow request) would otherwise nuke the
+ * user's session mid-action. Callers decide how to react; the AuthContext
+ * handles real session expiry on the next /api/auth/me probe.
  */
 export async function authenticatedFetch(
   url: string,
@@ -31,26 +36,10 @@ export async function authenticatedFetch(
     ...options.headers,
   };
 
-  const response = await fetch(url, {
+  return fetch(url, {
     ...options,
     headers,
   });
-
-  // Handle 401 errors (token expired)
-  if (response.status === 401) {
-    console.warn('[API Client] 401 Unauthorized - Token may be expired');
-    
-    // Clear the expired token
-    localStorage.removeItem('token');
-    
-    // Redirect to login if not already there
-    if (typeof window !== 'undefined' && window.location.pathname !== '/auth/login') {
-      console.log('[API Client] Redirecting to login...');
-      window.location.href = '/auth/login?reason=session-expired';
-    }
-  }
-
-  return response;
 }
 
 /**

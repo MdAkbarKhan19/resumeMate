@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { signUp, confirmSignUp, signIn, type SignUpInput } from 'aws-amplify/auth';
+import { signUp, confirmSignUp, signIn, resendSignUpCode, type SignUpInput } from 'aws-amplify/auth';
 import '../../../lib/amplify-config';
 
 export default function SignUpPage() {
@@ -18,6 +18,7 @@ export default function SignUpPage() {
   const [verificationCode, setVerificationCode] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,7 +67,26 @@ export default function SignUpPage() {
       }
     } catch (err: any) {
       console.error('Sign up error:', err);
-      setError(err.message || 'Failed to sign up. Please try again.');
+      // If user exists but never confirmed, resend OTP and jump to verify
+      // (common case: previous signup attempt where OTP email never arrived)
+      if (err.name === 'UsernameExistsException') {
+        try {
+          await resendSignUpCode({ username: formData.email });
+          setStep('verify');
+          setError('');
+        } catch (resendErr: any) {
+          // If resend fails because account is already confirmed,
+          // user should sign in instead.
+          if (resendErr.name === 'InvalidParameterException' ||
+              resendErr.message?.toLowerCase().includes('already confirmed')) {
+            setError('Account already exists. Please sign in instead.');
+          } else {
+            setError(resendErr.message || 'Account exists but we could not resend the code. Try signing in.');
+          }
+        }
+      } else {
+        setError(err.message || 'Failed to sign up. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -100,9 +120,24 @@ export default function SignUpPage() {
   };
 
   const resendCode = async () => {
-    // Resend code logic will be added
+    if (resendCooldown > 0) return;
     setError('');
-    console.log('Resending verification code...');
+    setLoading(true);
+    try {
+      await resendSignUpCode({ username: formData.email });
+      // 60-second cooldown to prevent spam
+      setResendCooldown(60);
+      const timer = setInterval(() => {
+        setResendCooldown((prev) => {
+          if (prev <= 1) { clearInterval(timer); return 0; }
+          return prev - 1;
+        });
+      }, 1000);
+    } catch (err: any) {
+      setError(err.message || 'Failed to resend code. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -368,9 +403,12 @@ export default function SignUpPage() {
                   <button
                     type="button"
                     onClick={resendCode}
-                    className="text-sm text-indigo-600 hover:text-indigo-500 font-medium"
+                    disabled={resendCooldown > 0 || loading}
+                    className="text-sm text-indigo-600 hover:text-indigo-500 font-medium disabled:text-gray-400 disabled:cursor-not-allowed"
                   >
-                    Didn't receive the code? Resend
+                    {resendCooldown > 0
+                      ? `Resend in ${resendCooldown}s`
+                      : "Didn't receive the code? Resend"}
                   </button>
                 </div>
               </form>

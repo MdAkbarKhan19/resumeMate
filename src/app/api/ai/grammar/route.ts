@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/lib/auth/middleware';
 import { OpenAIService } from '@/lib/ai/openai';
+import { canEnhanceBullet } from '@/lib/payment/entitlements';
 import prisma from '@/lib/db/prisma';
 import { z } from 'zod';
 
@@ -30,60 +31,22 @@ async function handleGrammarCheck(request: NextRequest, { user }: { user: any })
 
     const { text } = validation.data;
 
-    // Check plan limits
-    const currentUser = await prisma.user.findUnique({
-      where: { id: user.id },
-      select: {
-        planType: true,
-        aiUsage: {
-          where: {
-            createdAt: {
-              gte: new Date(new Date().setHours(0, 0, 0, 0)),
-            },
-          },
-          select: { id: true },
-        },
-      },
-    });
-
-    if (!currentUser) {
+    // Grammar check counts against the daily bullet-quota bucket.
+    const gate = await canEnhanceBullet(user.id);
+    if (!gate.allowed) {
       return NextResponse.json(
         {
           success: false,
           error: {
-            code: 'USER_NOT_FOUND',
-            message: 'User not found',
+            code: gate.code || 'LIMIT_REACHED',
+            message: gate.reason || 'Daily AI limit reached on your current plan.',
+            tier: gate.tier,
+            used: gate.used,
+            limit: gate.limit,
+            resetsAt: gate.resetsAt?.toISOString(),
           },
         },
-        { status: 404 }
-      );
-    }
-
-    const dailyUsage = currentUser.aiUsage.length;
-
-    if (currentUser.planType === 'FREE' && dailyUsage >= 5) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'LIMIT_REACHED',
-            message: 'Free plan allows 5 AI operations per day. Please upgrade for more.',
-          },
-        },
-        { status: 403 }
-      );
-    }
-
-    if (currentUser.planType === 'TIER1' && dailyUsage >= 50) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'LIMIT_REACHED',
-            message: 'You have reached your daily limit of 50 AI operations.',
-          },
-        },
-        { status: 403 }
+        { status: 429 },
       );
     }
 

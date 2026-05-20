@@ -7,24 +7,24 @@ import { Prisma } from '@prisma/client';
 // Validation schema
 const updateResumeSchema = z.object({
   title: z.string().min(1).max(100).optional(),
-  templateId: z.string().optional(), // Changed from UUID to string for template IDs like 'modern-two-column'
+  templateId: z.string().optional(),
   customization: z.object({
     primaryColor: z.string().optional(),
     accentColor: z.string().optional(),
-    fontFamily: z.enum(['Inter', 'Roboto', 'Georgia', 'Arial']).optional(),
-    fontSize: z.number().optional(),
-    spacing: z.enum(['compact', 'normal', 'spacious']).optional(),
+    fontFamily: z.string().optional(),
+    fontSize: z.union([z.number(), z.string()]).optional(),
+    spacing: z.string().optional(),
     sectionOrder: z.array(z.string()).optional(),
-  }).optional(),
+  }).passthrough().optional(),
   personalInfo: z.object({
     fullName: z.string().min(1),
     title: z.string().optional(),
     email: z.string().email(),
     phone: z.string().optional(),
     location: z.string().optional(),
-    linkedin: z.string().url().optional().or(z.literal('')),
-    website: z.string().url().optional().or(z.literal('')),
-    github: z.string().url().optional().or(z.literal('')),
+    linkedin: z.string().optional().or(z.literal('')),
+    website: z.string().optional().or(z.literal('')),
+    github: z.string().optional().or(z.literal('')),
   }).optional(),
   summary: z.string().optional(),
   experience: z.array(
@@ -62,6 +62,7 @@ const updateResumeSchema = z.object({
       date: z.string().optional(),
       expiryDate: z.string().optional(),
       credentialId: z.string().optional(),
+      url: z.string().optional().or(z.literal('')),
     })
   ).optional(),
   projects: z.array(

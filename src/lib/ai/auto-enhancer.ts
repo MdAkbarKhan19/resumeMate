@@ -296,6 +296,16 @@ If no skills should be added, return: { "skills": [] }`;
   /**
    * Enhance experience bullets to incorporate JD keywords naturally
    */
+  /**
+   * Enhance experience bullets in a SINGLE batched call across all experiences.
+   *
+   * Why one call:
+   *  - Cost: collapses 1-3 OpenAI calls into 1, and the long instructions are
+   *    sent once instead of N times.
+   *  - Quality: the model sees every bullet in every role at once, so it can
+   *    distribute each JD keyword to the single best-matching bullet on its
+   *    own — no need to thread a `usedKeywords` set between calls.
+   */
   private static async enhanceExperience(
     resumeData: any,
     jdAnalysis: JDAnalysisResult
@@ -306,158 +316,178 @@ If no skills should be added, return: { "skills": [] }`;
       return changes;
     }
 
-    // Enhance each experience entry's bullets
-    for (let i = 0; i < resumeData.experience.length; i++) {
-      const exp = resumeData.experience[i];
-
-      // Get bullets (support multiple formats)
+    // Build a flat list of {expIdx, bulletIdx, text} addressing every bullet
+    // we want to consider. Cap at the 3 most recent roles — that's where
+    // recruiters look first; older roles stay untouched.
+    type Addr = { expIdx: number; bulletIdx: number; text: string; field: 'bullets' | 'achievements' | 'description' };
+    const flat: Addr[] = [];
+    const expCount = Math.min(resumeData.experience.length, 3);
+    for (let expIdx = 0; expIdx < expCount; expIdx++) {
+      const exp = resumeData.experience[expIdx];
       let bullets: string[] = [];
+      let field: Addr['field'] = 'bullets';
       if (exp.bullets && Array.isArray(exp.bullets)) {
-        bullets = exp.bullets;
+        bullets = exp.bullets; field = 'bullets';
       } else if (exp.achievements && Array.isArray(exp.achievements)) {
-        bullets = exp.achievements;
+        bullets = exp.achievements; field = 'achievements';
       } else if (exp.description) {
-        bullets = [exp.description];
+        bullets = [exp.description]; field = 'description';
       }
-
-      if (bullets.length === 0) continue;
-
-      // Enhance bullets for this experience
-      const enhancedBulletsResult = await this.enhanceBullets(
-        bullets,
-        {
-          jobTitle: exp.jobTitle || exp.position,
-          company: exp.company,
-        },
-        jdAnalysis,
-        i // Pass index to limit enhancements (focus on recent roles)
-      );
-
-      // Update bullets and track changes with actual keywords incorporated
-      enhancedBulletsResult.forEach((result, bulletIndex) => {
-        if (result.text !== bullets[bulletIndex]) {
-          const keywordsUsed = result.keywordsIncorporated && result.keywordsIncorporated.length > 0
-            ? result.keywordsIncorporated.join(', ')
-            : 'ATS optimization';
-          changes.push({
-            section: 'experience',
-            type: 'modified',
-            before: bullets[bulletIndex],
-            after: result.text,
-            reason: `Incorporated: ${keywordsUsed}`,
-          });
-        }
+      bullets.forEach((text, bulletIdx) => {
+        if (text && text.trim()) flat.push({ expIdx, bulletIdx, text, field });
       });
-
-      // Update in resume data
-      const enhancedTexts = enhancedBulletsResult.map(r => r.text);
-      if (exp.bullets) {
-        exp.bullets = enhancedTexts;
-      } else if (exp.achievements) {
-        exp.achievements = enhancedTexts;
-      } else if (exp.description) {
-        exp.description = enhancedTexts[0];
-      }
     }
+
+    if (flat.length === 0) return changes;
+
+    const enhanced = await this.enhanceAllBullets(flat, resumeData.experience.slice(0, expCount), jdAnalysis);
+
+    // Apply results back to the resume in place, and record changes.
+    enhanced.forEach((result, i) => {
+      const addr = flat[i];
+      const exp = resumeData.experience[addr.expIdx];
+      if (result.text !== addr.text) {
+        const keywordsUsed = result.keywordsIncorporated?.length
+          ? result.keywordsIncorporated.join(', ')
+          : 'ATS optimization';
+        changes.push({
+          section: 'experience',
+          type: 'modified',
+          before: addr.text,
+          after: result.text,
+          reason: `Incorporated: ${keywordsUsed}`,
+        });
+      }
+      if (addr.field === 'description') {
+        exp.description = result.text;
+      } else {
+        const arr = exp[addr.field] as string[];
+        arr[addr.bulletIdx] = result.text;
+      }
+    });
 
     return changes;
   }
 
   /**
-   * Enhance individual bullets with smart technology replacement and JD keyword integration
+   * Batched enhancement of every bullet across all (recent) experiences in a
+   * single OpenAI call. Returns enhanced text + keywordsIncorporated per
+   * bullet in the same order it was passed in.
    */
-  private static async enhanceBullets(
-    bullets: string[],
-    context: { jobTitle?: string; company?: string },
+  private static async enhanceAllBullets(
+    flat: Array<{ expIdx: number; bulletIdx: number; text: string }>,
+    experiences: Array<{ jobTitle?: string; position?: string; company?: string }>,
     jdAnalysis: JDAnalysisResult,
-    experienceIndex: number
   ): Promise<Array<{ text: string; keywordsIncorporated: string[] }>> {
-    // Only enhance recent experiences (first 2-3 positions)
-    if (experienceIndex > 2) {
-      return bullets.map(b => ({ text: b, keywordsIncorporated: [] }));
-    }
-
     const client = this.getOpenAIClient();
 
-    // Categorize JD technologies for the prompt
     const allTechnologies = [...new Set([
       ...jdAnalysis.requiredSkills,
       ...jdAnalysis.tools,
       ...(jdAnalysis.preferredSkills || []),
     ])].filter(t => t.toLowerCase() !== jdAnalysis.jobTitle.toLowerCase());
 
-    const prompt = `You are an expert ATS resume optimizer. Your job is to strategically modify resume bullet points to maximize ATS compatibility with the target job description.
+    // Group bullets by experience for the prompt — easier for the model to
+    // reason about role-appropriate keyword placement.
+    const grouped: Record<number, Array<{ globalIdx: number; text: string }>> = {};
+    flat.forEach((b, globalIdx) => {
+      if (!grouped[b.expIdx]) grouped[b.expIdx] = [];
+      grouped[b.expIdx].push({ globalIdx, text: b.text });
+    });
+
+    const rolesBlock = experiences.map((exp, i) => {
+      const bullets = grouped[i] || [];
+      const title = exp.jobTitle || exp.position || 'Unknown';
+      const company = exp.company || 'Unknown';
+      const lines = bullets.map(b => `  [${b.globalIdx}] ${b.text}`).join('\n');
+      return `### Role ${i + 1}: ${title} at ${company}\n${lines || '  (no bullets)'}`;
+    }).join('\n\n');
+
+    // Two-phase structured-output prompt:
+    //  Phase 1 (plan): for each candidate keyword, the model proposes a primary
+    //  bullet AND at least one alternate, cites EVIDENCE from the original
+    //  bullet text supporting the placement, and either commits or rejects.
+    //  Phase 2 (rewrite): the model executes the committed plan and produces
+    //  the final bullets.
+    // Forcing the plan first inside the JSON shape is "chain-of-thought as a
+    // schema constraint" — the model is required to reason explicitly before
+    // it writes, which catches "force-fitted" keywords that wouldn't survive
+    // a fabrication audit. All in one API call, no extra cost.
+    const prompt = `You are an expert ATS resume optimizer. You will rewrite resume bullets across an ENTIRE candidate's recent experience in ONE structured pass, distributing job-description keywords with evidence-based reasoning.
 
 ## Target Position: ${jdAnalysis.jobTitle}
 
-## Technologies, Tools & Skills from Job Description:
+## Keyword Pool (from JD — these are the candidates you may consider adding):
 ${allTechnologies.join(', ')}
 
 ## Action Verbs from JD:
 ${jdAnalysis.actionVerbs?.slice(0, 10).join(', ') || 'develop, design, implement, lead, build, optimize'}
 
-## Current Role: ${context.jobTitle || 'Unknown'} at ${context.company || 'Unknown'}
+## Candidate's Bullets (each labeled with its global [index]):
+${rolesBlock}
 
-## Current Bullets:
-${bullets.map((b, i) => `${i + 1}. ${b}`).join('\n')}
+================================================================
+## METHOD — you MUST follow this structured reasoning process:
 
-## CRITICAL INSTRUCTIONS - Follow these in priority order:
+### PHASE 1 — Plan (per keyword)
+For EACH keyword in the pool, perform this analysis BEFORE writing anything:
 
-### 1. Smart Technology Replacement (Apple-to-Apple Swap)
-When the resume mentions a technology/framework/tool/database that serves the SAME PURPOSE as one required in the JD, REPLACE it with the JD's version:
-- Framework → Framework (e.g., "Oracle ADF" → "Spring Boot", "Angular" → "React")
-- Database → Database (e.g., "MySQL" → "PostgreSQL", "Oracle DB" → "MongoDB")
-- CI/CD → CI/CD (e.g., "Jenkins" → "GitHub Actions", "Bamboo" → "GitLab CI")
-- Cloud → Cloud (e.g., "Azure" → "AWS", "Heroku" → "AWS Lambda")
-- ORM → ORM (e.g., "Hibernate" → "Spring Data JPA")
-- Messaging → Messaging (e.g., "ActiveMQ" → "Kafka", "RabbitMQ" → "SQS")
-NEVER replace across categories (don't replace a database name with a framework).
+  1. **Hypothesis**: identify the single bullet whose existing content is the most natural carrier for this keyword.
+  2. **Evidence**: quote the EXACT phrase from that bullet's original text that supports adding this keyword (e.g. "Built data pipeline" supports adding "Kafka"). Evidence must be a substring of the original bullet.
+  3. **Alternates**: name up to 2 OTHER bullets you also considered, and one sentence on why they're weaker fits.
+  4. **Decision**:
+     - "place" if the evidence cleanly supports the keyword in the same technical domain (DB→DB, framework→framework, etc.)
+     - "reject" if no bullet has supporting evidence. Authenticity beats coverage — never force.
+  5. **Domain check** (only for "place"): the evidence must be in the SAME category as the keyword. A bullet about UI never gets a database keyword. A bullet about deployment never gets a frontend framework.
 
-### 2. Add JD Technologies Where They Naturally Fit
-If a bullet describes work that would logically involve a technology from the JD but doesn't mention it, ADD the specific technology:
-- "Developed REST APIs" → "Developed REST APIs using Spring Boot with Microservices architecture"
-- "Deployed applications" → "Deployed applications on AWS using Docker and Kubernetes"
-- "Built data pipeline" → "Built data pipeline using Apache Kafka and PostgreSQL"
-- "Implemented authentication" → "Implemented JWT-based authentication with Spring Security"
+Then, GLOBALLY across the plan:
+  - No keyword may be "place"-d into more than one bullet.
+  - If the JD lists alternatives (AWS/GCP/Azure, React/Angular/Vue), pick exactly ONE — prefer what the resume already uses — and apply that single choice everywhere.
 
-### 3. Incorporate JD-Specific Keywords
-Weave specific JD terms (methodologies, patterns, practices) into bullets naturally:
-- If JD mentions "Agile/Scrum" → add "in an Agile environment" or "following Scrum methodology"
-- If JD mentions "Microservices" → add architectural context
-- If JD mentions "CI/CD" → reference deployment pipeline
+### PHASE 2 — Rewrite
+For each bullet that received a "place" decision, weave the keyword in naturally:
+  - **Apple-to-apple replacement** (preferred): if the bullet already names a tech that serves the same purpose as the JD keyword, REPLACE the old tech with the JD's version. ("MySQL" → "PostgreSQL", "Jenkins" → "GitHub Actions".)
+  - **Augmentation** (fallback): if no replacement exists, add the keyword inline where the evidence supports it. ("Built data pipeline" → "Built **Kafka**-backed data pipeline".)
+  - Preserve voice, tone, and every existing number/metric EXACTLY.
+  - No synonym swaps with no information gain ("enhanced" → "improved" is forbidden).
+  - No fabricated metrics, achievements, or responsibilities.
+  - Wrap injected technical keywords in **double asterisks** for bold. Only bold technologies / tools / frameworks / languages / methodologies — never generic words.
 
-### 4. Handle Alternatives (AWS/GCP/Azure, React/Angular/Vue, etc.)
-When the JD lists multiple alternatives like "AWS/GCP/Azure" or "React/Angular/Vue":
-- Pick ONLY ONE. Do NOT spread all alternatives across different bullet points.
-- PREFER the one already mentioned in the resume. If the resume already uses "AWS", keep "AWS".
-- If the resume doesn't mention any of them, pick the most commonly used one (AWS > GCP > Azure for cloud; React > Angular > Vue for frontend).
-- Be CONSISTENT: use the SAME choice across all bullet points.
+For every bullet that received no "place" decision, return its text UNCHANGED.
 
-### 5. What NOT to Do
-- Do NOT just swap synonyms ("enhanced" → "improved", "significant" → "notable")
-- Do NOT change "remarkable 50%" to "notable 50%" - that adds zero value
-- Do NOT fabricate metrics, achievements, or responsibilities
-- Do NOT change the meaning or core truth of a bullet
-- Do NOT add technologies the person clearly never worked with in that context
-- Keep the same person's voice and style
-- Preserve all existing metrics and numbers exactly
+================================================================
+## OUTPUT — return strict JSON in this exact shape:
 
-### 6. Bold Important Keywords
-- Wrap important technologies, tools, frameworks, programming languages, methodologies, and platforms in **double asterisks** for bold emphasis
-- Example: "Developed **REST APIs** using **Spring Boot** and **PostgreSQL**, improving response time by 40%"
-- Only bold technical keywords, not generic words like "team" or "project"
-
-For each bullet, return the enhanced text AND a list of specific technologies/keywords you actually incorporated.
-
-Return JSON:
 {
-  "bullets": [
+  "plan": [
     {
-      "text": "Enhanced bullet text with actual JD technologies woven in",
-      "keywordsIncorporated": ["Spring Boot", "Microservices", "AWS"]
+      "keyword": "Spring Boot",
+      "hypothesis_bullet_index": 3,
+      "evidence_quote": "Built REST APIs",
+      "alternates_considered": [{ "index": 7, "reason_rejected": "UI work, wrong domain" }],
+      "domain_check": "framework→framework — bullet describes API work",
+      "decision": "place"
+    },
+    {
+      "keyword": "Apache Spark",
+      "hypothesis_bullet_index": null,
+      "evidence_quote": "",
+      "alternates_considered": [],
+      "domain_check": "no bullets reference batch/big-data processing",
+      "decision": "reject"
     }
+  ],
+  "bullets": [
+    { "index": 0, "text": "<final text>", "keywordsIncorporated": ["Spring Boot"] },
+    { "index": 1, "text": "<original text unchanged>", "keywordsIncorporated": [] }
+    // ... one entry for every input bullet (0..${flat.length - 1})
   ]
-}`;
+}
+
+Hard constraints:
+- Every input bullet index (0..${flat.length - 1}) MUST appear exactly once in "bullets".
+- Every placed keyword must appear in exactly one bullet's "keywordsIncorporated".
+- evidence_quote must be a verbatim substring of the original bullet text — if you cannot quote it, the decision MUST be "reject".`;
 
     try {
       const response = await client.chat.completions.create({
@@ -465,38 +495,56 @@ Return JSON:
         messages: [
           {
             role: 'system',
-            content: 'You are an expert ATS resume optimizer. Your PRIMARY job is to swap in specific technologies from the job description and add JD-relevant tech where it fits naturally. Do NOT just rephrase or swap synonyms. Every change must incorporate a concrete technology, tool, or specific keyword from the JD. Always return valid JSON.',
+            content:
+              'You are an expert ATS resume optimizer. You ALWAYS produce a per-keyword plan with evidence quoted verbatim from the original bullet text BEFORE writing the final bullets. You never place a keyword without evidence. You never add a keyword to more than one bullet. You never fabricate metrics, responsibilities, or technologies. Authenticity beats coverage. Always return valid JSON in the exact schema requested.',
           },
-          {
-            role: 'user',
-            content: prompt,
-          },
+          { role: 'user', content: prompt },
         ],
-        temperature: 0.4,
-        max_tokens: 2000,
+        temperature: 0.2,
+        max_tokens: 6000,
         response_format: { type: 'json_object' },
       });
 
       const content = response.choices[0]?.message?.content;
       if (!content) {
-        return bullets.map(b => ({ text: b, keywordsIncorporated: [] }));
+        return flat.map(f => ({ text: f.text, keywordsIncorporated: [] }));
       }
 
       const parsed = JSON.parse(content);
-      const resultBullets = parsed.bullets || [];
+      const resultArray = Array.isArray(parsed.bullets) ? parsed.bullets : [];
 
-      return bullets.map((original, i) => {
-        if (i < resultBullets.length && resultBullets[i]) {
-          return {
-            text: resultBullets[i].text || original,
-            keywordsIncorporated: resultBullets[i].keywordsIncorporated || [],
-          };
-        }
-        return { text: original, keywordsIncorporated: [] };
+      // ---- Server-side audit of the model's plan + rewrites ----
+      // The structured plan gives us something concrete to verify. We enforce
+      // two invariants regardless of what the model claimed:
+      //   (A) No keyword is placed in more than one bullet (deduplicate by
+      //       first-seen even if the model violates the rule).
+      //   (B) Any keywordsIncorporated entry must be a token that actually
+      //       appears in the JD pool (no fabricated technologies).
+      const poolLower = new Set(allTechnologies.map(t => t.toLowerCase().trim()));
+      const seenKeyword = new Set<string>();
+
+      const byIndex = new Map<number, { text: string; keywordsIncorporated: string[] }>();
+      resultArray.forEach((r: any) => {
+        if (typeof r?.index !== 'number' || typeof r?.text !== 'string') return;
+        const rawKeywords: string[] = Array.isArray(r.keywordsIncorporated) ? r.keywordsIncorporated : [];
+        const cleanedKeywords = rawKeywords
+          .map(k => String(k || '').trim())
+          .filter(k => k.length > 0)
+          .filter(k => poolLower.has(k.toLowerCase()))          // (B) reject anything not in the JD pool
+          .filter(k => {
+            const key = k.toLowerCase();
+            if (seenKeyword.has(key)) return false;             // (A) first-bullet wins, drop duplicates
+            seenKeyword.add(key);
+            return true;
+          });
+
+        byIndex.set(r.index, { text: r.text, keywordsIncorporated: cleanedKeywords });
       });
+
+      return flat.map((f, i) => byIndex.get(i) || { text: f.text, keywordsIncorporated: [] });
     } catch (error) {
       console.error('Error enhancing bullets:', error);
-      return bullets.map(b => ({ text: b, keywordsIncorporated: [] }));
+      return flat.map(f => ({ text: f.text, keywordsIncorporated: [] }));
     }
   }
 
@@ -669,93 +717,87 @@ Return JSON:
       return changes;
     }
 
-    // Only enhance top 2-3 most relevant projects
-    for (let i = 0; i < Math.min(3, resumeData.projects.length); i++) {
-      const project = resumeData.projects[i];
-      const originalDesc = project.description || '';
+    // Collect top 3 projects with non-empty descriptions
+    const slice = resumeData.projects.slice(0, 3);
+    const targets: Array<{ projIdx: number; name: string; description: string }> = [];
+    slice.forEach((p: any, projIdx: number) => {
+      if (p?.description) targets.push({ projIdx, name: p.name || `Project ${projIdx + 1}`, description: p.description });
+    });
+    if (targets.length === 0) return changes;
 
-      if (!originalDesc) continue;
-
-      const enhancedDesc = await this.enhanceProjectDescription(
-        originalDesc,
-        project.name,
-        jdAnalysis
-      );
-
-      if (enhancedDesc && enhancedDesc !== originalDesc) {
-        project.description = enhancedDesc;
-        changes.push({
-          section: 'projects',
-          type: 'enhanced',
-          before: originalDesc,
-          after: enhancedDesc,
-          reason: 'Aligned project description with JD keywords',
-        });
-      }
-    }
-
-    return changes;
-  }
-
-  /**
-   * Enhance a single project description
-   */
-  private static async enhanceProjectDescription(
-    description: string,
-    projectName: string,
-    jdAnalysis: JDAnalysisResult
-  ): Promise<string> {
     const client = this.getOpenAIClient();
+    const techPool = [...jdAnalysis.requiredSkills.slice(0, 10), ...(jdAnalysis.tools || []).slice(0, 6)];
 
-    const prompt = `Enhance this project description to better align with a ${jdAnalysis.jobTitle} role by incorporating SPECIFIC technologies from the JD.
+    const projectsBlock = targets.map((t, i) => `[${i}] ${t.name}\n  ${t.description}`).join('\n\n');
 
-Project: ${projectName}
-Current Description: "${description}"
+    const prompt = `Rewrite the project descriptions below to align with a ${jdAnalysis.jobTitle} role, incorporating specific technologies from the JD.
 
-Technologies/Skills from JD: ${[...jdAnalysis.requiredSkills.slice(0, 8), ...(jdAnalysis.tools || []).slice(0, 4)].join(', ')}
+## Technologies / Tools from JD (the keyword pool):
+${techPool.join(', ')}
 
-Instructions:
-1. REPLACE equivalent technologies with JD's versions (Framework → Framework, DB → DB)
-2. ADD specific JD technologies where they naturally fit
-3. Emphasize results and impact
-4. Keep it concise (2-3 sentences max)
-5. Do NOT fabricate technologies that don't fit the project context
-6. Do NOT just swap synonyms
+## Projects (labeled by [index]):
+${projectsBlock}
+
+## Rules:
+1. Each keyword from the pool may appear in AT MOST ONE project description across the resume — pick the best-matching project for each.
+2. Replace equivalent technologies (Framework→Framework, DB→DB) with the JD's versions.
+3. Add specific JD technologies only where they naturally fit the project's domain.
+4. Keep each description to 2-3 sentences. Emphasize results and impact.
+5. Do NOT fabricate technologies. Do NOT just swap synonyms.
+6. Wrap technical keywords in **double asterisks** for bold emphasis.
 
 Return JSON:
 {
-  "description": "Enhanced description with specific JD technologies"
-}`;
+  "projects": [
+    { "index": 0, "description": "Rewritten description with **Spring Boot** and **PostgreSQL**..." },
+    ...
+  ]
+}
+
+The "projects" array MUST contain one entry per input index (0..${targets.length - 1}).`;
 
     try {
       const response = await client.chat.completions.create({
         model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
         messages: [
-          {
-            role: 'system',
-            content: 'You are an expert resume writer. Always return valid JSON.',
-          },
-          {
-            role: 'user',
-            content: prompt,
-          },
+          { role: 'system', content: 'You are an expert resume writer. Always return valid JSON keyed by the input project index.' },
+          { role: 'user', content: prompt },
         ],
-        temperature: 0.6,
-        max_tokens: 200,
+        temperature: 0.4,
+        max_tokens: 800,
         response_format: { type: 'json_object' },
       });
 
       const content = response.choices[0]?.message?.content;
-      if (!content) {
-        return description;
-      }
+      if (!content) return changes;
 
       const parsed = JSON.parse(content);
-      return parsed.description || description;
+      const resultArray = Array.isArray(parsed.projects) ? parsed.projects : [];
+      const byIndex = new Map<number, string>();
+      resultArray.forEach((r: any) => {
+        if (typeof r?.index === 'number' && typeof r?.description === 'string') {
+          byIndex.set(r.index, r.description);
+        }
+      });
+
+      targets.forEach((t, i) => {
+        const enhanced = byIndex.get(i);
+        if (enhanced && enhanced !== t.description) {
+          resumeData.projects[t.projIdx].description = enhanced;
+          changes.push({
+            section: 'projects',
+            type: 'enhanced',
+            before: t.description,
+            after: enhanced,
+            reason: 'Aligned project description with JD keywords',
+          });
+        }
+      });
     } catch (error) {
-      console.error('Error enhancing project:', error);
-      return description;
+      console.error('Error enhancing projects:', error);
     }
+
+    return changes;
   }
 
   /**

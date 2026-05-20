@@ -38,23 +38,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(true);
       setError(null);
 
-      let token: string | null = null;
+      // Prefer the local-JWT stored in localStorage (7-day TTL from /api/auth/login).
+      // Only fall through to Cognito if no local token exists, so we never clobber a
+      // long-lived local JWT with a 1h Cognito idToken (the main cause of frequent logouts).
+      let token: string | null = localStorage.getItem('token');
 
-      // Try Cognito session first
-      try {
-        const { fetchAuthSession } = await import('aws-amplify/auth');
-        const session = await fetchAuthSession({ forceRefresh: false });
-        if (session.tokens?.idToken) {
-          token = session.tokens.idToken.toString();
-          localStorage.setItem('token', token);
-        }
-      } catch {
-        // Cognito not configured or no session - that's fine
-      }
-
-      // Fall back to localStorage token (from local /api/auth/login)
       if (!token) {
-        token = localStorage.getItem('token');
+        try {
+          const { fetchAuthSession } = await import('aws-amplify/auth');
+          const session = await fetchAuthSession({ forceRefresh: false });
+          if (session.tokens?.idToken) {
+            token = session.tokens.idToken.toString();
+            localStorage.setItem('token', token);
+          }
+        } catch {
+          // Cognito not configured or no session - that's fine
+        }
       }
 
       if (!token) {
@@ -64,22 +63,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      // Fetch user from API
       const response = await fetch('/api/auth/me', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
+      // Genuine session failure — clear and bail.
+      if (response.status === 401) {
+        localStorage.removeItem('token');
+        setUser(null);
+        setIsAuthenticated(false);
+        setIsLoading(false);
+        return;
+      }
+
+      // Other transient errors (5xx, network) — keep existing session so the user
+      // isn't bounced out on a flaky request.
       if (!response.ok) {
-        if (response.status === 401) {
-          localStorage.removeItem('token');
-        }
-        throw new Error('Failed to fetch user');
+        setIsLoading(false);
+        return;
       }
 
       const data = await response.json();
-
       if (data.success && data.data?.user) {
         setUser(data.data.user);
         setIsAuthenticated(true);
@@ -88,10 +92,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setIsAuthenticated(false);
       }
     } catch (err: any) {
+      // Network/parse errors: don't drop the session, just stop loading.
       console.error('[Auth] Error:', err);
       setError(err.message);
-      setUser(null);
-      setIsAuthenticated(false);
     } finally {
       setIsLoading(false);
     }

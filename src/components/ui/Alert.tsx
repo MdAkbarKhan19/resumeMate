@@ -29,9 +29,9 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
   ) => {
     const variants = {
       info: {
-        container: 'bg-indigo-50 border-indigo-200 text-indigo-800',
-        icon: 'text-indigo-500',
-        title: 'text-indigo-800',
+        container: 'bg-emerald-50 border-emerald-200 text-emerald-800',
+        icon: 'text-emerald-500',
+        title: 'text-emerald-800',
       },
       success: {
         container: 'bg-emerald-50 border-emerald-200 text-emerald-800',

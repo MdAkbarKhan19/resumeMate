@@ -85,13 +85,13 @@ body {
     focus:ring-offset-2 transition-all duration-200;
 }
 .btn-primary {
-  @apply btn bg-gradient-to-r from-indigo-600 to-violet-600 text-white
-    hover:from-indigo-500 hover:to-violet-500 focus:ring-indigo-500
-    shadow-lg shadow-indigo-500/25;
+  @apply btn bg-gradient-to-r from-emerald-600 to-emerald-500 text-white
+    hover:from-emerald-500 hover:to-emerald-400 focus:ring-emerald-500
+    shadow-lg shadow-emerald-500/25;
 }
 .btn-secondary {
-  @apply btn bg-indigo-50 text-indigo-700 border-indigo-200
-    hover:bg-indigo-100 focus:ring-indigo-400;
+  @apply btn bg-emerald-50 text-emerald-700 border-emerald-200
+    hover:bg-emerald-100 focus:ring-emerald-400;
 }
 .btn-danger {
   @apply btn bg-red-600 text-white hover:bg-red-500 focus:ring-red-400;
@@ -119,16 +119,18 @@ body {
 
 /* ─── Landing-page brand helpers (ported from design) ─── */
 
-.brand-bg { background-image: linear-gradient(to right, #4f46e5, #7c3aed); }
-.brand-bg-3 { background-image: linear-gradient(120deg, #4f46e5, #7c3aed 55%, #d946ef); }
+/* Brand palette: Charcoal (#0f172a) + single Emerald accent (#10b981 / #059669).
+   Intentional, restrained — minimal gradient, mostly solid ink + green accents. */
+.brand-bg { background-image: linear-gradient(to right, #10b981, #059669); }
+.brand-bg-3 { background-image: linear-gradient(135deg, #0f172a, #064e3b 70%, #0f172a); }
 .brand-text {
-  background-image: linear-gradient(to right, #4f46e5, #7c3aed 60%, #d946ef);
+  background-image: linear-gradient(to right, #047857, #10b981);
   -webkit-background-clip: text; background-clip: text; color: transparent;
 }
-.brand-1 { color: #4f46e5; }
-.bg-brand-soft { background: rgba(79, 70, 229, 0.07); }
-.border-brand-soft { border-color: rgba(79, 70, 229, 0.16); }
-.ring-brand { box-shadow: 0 12px 30px rgba(79, 70, 229, 0.28); }
+.brand-1 { color: #059669; }
+.bg-brand-soft { background: rgba(16, 185, 129, 0.08); }
+.border-brand-soft { border-color: rgba(16, 185, 129, 0.20); }
+.ring-brand { box-shadow: 0 12px 30px rgba(16, 185, 129, 0.28); }
 
 /* Gentle float + soft pulse used on landing mockups */
 .floaty { animation: float 3s ease-in-out infinite; }
@@ -142,7 +144,7 @@ body {
 /* ─── Gradient text utilities ─── */
 
 .gradient-text-brand {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500;
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-emerald-700 to-emerald-500;
 }
 .gradient-text-cool {
   @apply bg-clip-text text-transparent bg-gradient-to-r from-sky-500 to-indigo-600;

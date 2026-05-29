@@ -36,7 +36,7 @@ const Navbar: React.FC = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="group">
-            <div className="relative inline-flex items-center h-9 px-3 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 shadow-lg shadow-indigo-500/20 group-hover:shadow-indigo-500/30 transition-shadow">
+            <div className="relative inline-flex items-center h-9 px-3 rounded-xl bg-slate-900 shadow-lg shadow-slate-900/20 group-hover:shadow-slate-900/30 transition-shadow">
               <span className="font-extrabold text-base tracking-tight text-amber-300 drop-shadow-sm">JD</span>
               <span className="font-bold text-base tracking-tight text-white ml-0.5">sync</span>
               {/* Pulsing agent dot */}
@@ -56,14 +56,14 @@ const Navbar: React.FC = () => {
                 className={cn(
                   'relative text-sm font-medium transition-all duration-200 px-3 py-2 rounded-md',
                   isActive(item.href)
-                    ? 'text-indigo-600 font-semibold'
-                    : 'text-gray-500 hover:text-indigo-600 hover:bg-indigo-50/60'
+                    ? 'text-emerald-600 font-semibold'
+                    : 'text-gray-500 hover:text-emerald-600 hover:bg-emerald-50/60'
                 )}
               >
                 {item.name}
                 {/* Active indicator dot */}
                 {isActive(item.href) && (
-                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-indigo-500"></span>
+                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-emerald-500"></span>
                 )}
               </Link>
             ))}
@@ -74,13 +74,13 @@ const Navbar: React.FC = () => {
             {isLoading ? (
               // Show loading state while checking authentication
               <div className="flex items-center space-x-2">
-                <div className="w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
                 <span className="text-sm text-gray-500">Loading...</span>
               </div>
             ) : isAuthenticated ? (
               <>
                 <Link href="/dashboard/settings">
-                  <Button variant="ghost" size="sm" className="text-gray-600 hover:text-indigo-700 hover:bg-indigo-50 border-0">
+                  <Button variant="ghost" size="sm" className="text-gray-600 hover:text-emerald-700 hover:bg-emerald-50 border-0">
                     <svg
                       className="w-5 h-5 mr-2"
                       fill="none"
@@ -97,19 +97,19 @@ const Navbar: React.FC = () => {
                     {user?.name || user?.email || 'Profile'}
                   </Button>
                 </Link>
-                <Button variant="outline" size="sm" className="border-gray-200 text-gray-600 hover:text-indigo-700 hover:bg-indigo-50 hover:border-indigo-200" onClick={logout}>
+                <Button variant="outline" size="sm" className="border-gray-200 text-gray-600 hover:text-emerald-700 hover:bg-emerald-50 hover:border-emerald-200" onClick={logout}>
                   Logout
                 </Button>
               </>
             ) : (
               <>
                 <Link href="/auth/login">
-                  <Button variant="ghost" size="sm" className="text-gray-600 hover:text-indigo-700 hover:bg-indigo-50 border-0">
+                  <Button variant="ghost" size="sm" className="text-gray-600 hover:text-emerald-700 hover:bg-emerald-50 border-0">
                     Login
                   </Button>
                 </Link>
                 <Link href="/auth/signup">
-                  <Button variant="primary" size="sm" className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/30 border-0 text-white transition-all duration-300">
+                  <Button variant="primary" size="sm" className="bg-gradient-to-r from-emerald-600 to-emerald-600 hover:from-emerald-500 hover:to-emerald-500 shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 border-0 text-white transition-all duration-300">
                     Sign Up
                   </Button>
                 </Link>
@@ -120,7 +120,7 @@ const Navbar: React.FC = () => {
           {/* Mobile menu button */}
           <button
             type="button"
-            className="md:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 transition-colors duration-200"
+            className="md:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-500 hover:text-emerald-600 hover:bg-emerald-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-emerald-500 transition-colors duration-200"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-expanded="false"
           >
@@ -171,14 +171,14 @@ const Navbar: React.FC = () => {
                 className={cn(
                   'flex items-center gap-2 px-3 py-2.5 rounded-lg text-base font-medium transition-all duration-200',
                   isActive(item.href)
-                    ? 'bg-indigo-50 text-indigo-600'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-indigo-600'
+                    ? 'bg-emerald-50 text-emerald-600'
+                    : 'text-gray-600 hover:bg-gray-50 hover:text-emerald-600'
                 )}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 {/* Active indicator dot in mobile */}
                 {isActive(item.href) && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 flex-shrink-0"></span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0"></span>
                 )}
                 {item.name}
               </Link>
@@ -187,20 +187,20 @@ const Navbar: React.FC = () => {
           <div className="pt-4 pb-3 border-t border-gray-100">
             {isLoading ? (
               <div className="px-3 py-2 flex items-center space-x-2">
-                <div className="w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
                 <span className="text-sm text-gray-500">Loading...</span>
               </div>
             ) : isAuthenticated ? (
               <div className="px-2 space-y-1">
                 <Link
                   href="/dashboard/settings"
-                  className="block px-3 py-2.5 rounded-lg text-base font-medium text-gray-600 hover:bg-gray-50 hover:text-indigo-600 transition-colors duration-200"
+                  className="block px-3 py-2.5 rounded-lg text-base font-medium text-gray-600 hover:bg-gray-50 hover:text-emerald-600 transition-colors duration-200"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Profile
                 </Link>
                 <button
-                  className="w-full text-left px-3 py-2.5 rounded-lg text-base font-medium text-gray-600 hover:bg-gray-50 hover:text-indigo-600 transition-colors duration-200"
+                  className="w-full text-left px-3 py-2.5 rounded-lg text-base font-medium text-gray-600 hover:bg-gray-50 hover:text-emerald-600 transition-colors duration-200"
                   onClick={() => {
                     setIsMobileMenuOpen(false);
                     logout();
@@ -212,12 +212,12 @@ const Navbar: React.FC = () => {
             ) : (
               <div className="px-2 space-y-2">
                 <Link href="/auth/login" onClick={() => setIsMobileMenuOpen(false)}>
-                  <Button variant="ghost" size="md" className="w-full text-gray-600 hover:text-indigo-700 hover:bg-indigo-50 border-0">
+                  <Button variant="ghost" size="md" className="w-full text-gray-600 hover:text-emerald-700 hover:bg-emerald-50 border-0">
                     Login
                   </Button>
                 </Link>
                 <Link href="/auth/signup" onClick={() => setIsMobileMenuOpen(false)}>
-                  <Button variant="primary" size="md" className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/30 border-0 text-white">
+                  <Button variant="primary" size="md" className="w-full bg-gradient-to-r from-emerald-600 to-emerald-600 hover:from-emerald-500 hover:to-emerald-500 shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 border-0 text-white">
                     Sign Up
                   </Button>
                 </Link>

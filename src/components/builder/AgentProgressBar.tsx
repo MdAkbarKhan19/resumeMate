@@ -53,16 +53,16 @@ export default function AgentProgressBar({ steps, isVisible, onClose }: AgentPro
     }`}>
       {/* Header with gradient */}
       <div className={`px-4 py-3 flex items-center justify-between ${
-        hasError ? 'bg-red-50' : isAllComplete ? 'bg-emerald-50' : 'bg-gradient-to-r from-indigo-50 to-violet-50'
+        hasError ? 'bg-red-50' : isAllComplete ? 'bg-emerald-50' : 'bg-gradient-to-r from-emerald-50 to-emerald-50'
       }`}>
         <div className="flex items-center gap-2.5">
           {!isAllComplete && !hasError && (
             <div className="relative w-5 h-5">
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-3 h-3 rounded-md bg-gradient-to-br from-indigo-500 to-violet-500 animate-agent-think" />
+                <div className="w-3 h-3 rounded-md bg-gradient-to-br from-emerald-500 to-emerald-500 animate-agent-think" />
               </div>
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-5 h-5 rounded-lg border border-indigo-300/50 animate-pulse-ring" />
+                <div className="w-5 h-5 rounded-lg border border-emerald-300/50 animate-pulse-ring" />
               </div>
             </div>
           )}
@@ -81,7 +81,7 @@ export default function AgentProgressBar({ steps, isVisible, onClose }: AgentPro
             </div>
           )}
           <span className={`text-sm font-semibold ${
-            hasError ? 'text-red-700' : isAllComplete ? 'text-emerald-700' : 'text-indigo-700'
+            hasError ? 'text-red-700' : isAllComplete ? 'text-emerald-700' : 'text-emerald-700'
           }`}>
             {hasError ? 'Error occurred' : isAllComplete ? 'All tasks complete!' : 'Agent working...'}
           </span>
@@ -101,14 +101,14 @@ export default function AgentProgressBar({ steps, isVisible, onClose }: AgentPro
           <div
             className={`h-2 rounded-full transition-all duration-500 ${
               hasError ? 'bg-red-500' : isAllComplete ? 'bg-emerald-500'
-                : 'bg-gradient-to-r from-indigo-500 via-violet-500 to-pink-500 animate-progress-stripe'
+                : 'bg-gradient-to-r from-emerald-500 via-emerald-500 to-pink-500 animate-progress-stripe'
             }`}
             style={{ width: `${overallProgress}%` }}
           />
         </div>
         <div className="flex items-center justify-between mt-1">
           <p className="text-xs text-gray-400">{completedCount}/{steps.length} tasks</p>
-          <p className="text-xs font-mono text-indigo-500">{overallProgress}%</p>
+          <p className="text-xs font-mono text-emerald-500">{overallProgress}%</p>
         </div>
       </div>
 
@@ -116,16 +116,16 @@ export default function AgentProgressBar({ steps, isVisible, onClose }: AgentPro
       <div className="px-4 pb-4 pt-2 space-y-2 max-h-60 overflow-y-auto">
         {steps.map((step, index) => (
           <div key={index} className={`flex items-center gap-3 p-2 rounded-xl transition-colors ${
-            step.status === 'running' ? 'bg-indigo-50/60' : ''
+            step.status === 'running' ? 'bg-emerald-50/60' : ''
           }`}>
             {/* Step icon */}
             <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
               step.status === 'idle' ? 'bg-gray-100' :
-              step.status === 'running' ? 'bg-gradient-to-br from-indigo-100 to-violet-100' :
+              step.status === 'running' ? 'bg-gradient-to-br from-emerald-100 to-emerald-100' :
               step.status === 'complete' ? 'bg-emerald-50' : 'bg-red-50'
             }`}>
               {step.status === 'running' ? (
-                <svg className="w-4 h-4 text-indigo-600 animate-spin" fill="none" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 text-emerald-600 animate-spin" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                 </svg>
@@ -144,14 +144,14 @@ export default function AgentProgressBar({ steps, isVisible, onClose }: AgentPro
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between">
                 <span className={`text-xs font-semibold truncate ${
-                  step.status === 'running' ? 'text-indigo-700' :
+                  step.status === 'running' ? 'text-emerald-700' :
                   step.status === 'complete' ? 'text-emerald-700' :
                   step.status === 'error' ? 'text-red-600' : 'text-gray-500'
                 }`}>
                   {AGENT_LABELS[step.agent] || step.agent}
                 </span>
                 {step.progress !== undefined && step.status === 'running' && (
-                  <span className="text-xs font-mono text-indigo-500">{step.progress}%</span>
+                  <span className="text-xs font-mono text-emerald-500">{step.progress}%</span>
                 )}
                 {step.status === 'complete' && (
                   <svg className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">

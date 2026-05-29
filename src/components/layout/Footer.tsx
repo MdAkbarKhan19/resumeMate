@@ -26,11 +26,11 @@ const Footer: React.FC = () => {
       {/* Top gradient line */}
       <div
         aria-hidden="true"
-        className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent"
+        className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent"
       />
       <div
         aria-hidden="true"
-        className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-indigo-500/[0.03] via-violet-500/[0.02] to-transparent pointer-events-none"
+        className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-emerald-500/[0.03] via-emerald-500/[0.02] to-transparent pointer-events-none"
       />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -38,7 +38,7 @@ const Footer: React.FC = () => {
           {/* Brand */}
           <div className="col-span-1">
             <Link href="/" className="inline-flex mb-4">
-              <div className="inline-flex items-center h-9 px-3 rounded-lg bg-gradient-to-r from-indigo-600 to-violet-600 shadow-sm shadow-indigo-500/20">
+              <div className="inline-flex items-center h-9 px-3 rounded-lg bg-slate-900 shadow-sm shadow-slate-900/20">
                 <span className="font-extrabold text-base tracking-tight text-amber-300 drop-shadow-sm">JD</span>
                 <span className="font-bold text-base tracking-tight text-white ml-0.5">sync</span>
               </div>
@@ -54,7 +54,7 @@ const Footer: React.FC = () => {
                   href={item.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-gray-400 hover:text-indigo-600 transition-colors"
+                  className="text-gray-400 hover:text-emerald-600 transition-colors"
                   aria-label={item.name}
                 >
                   {item.icon}
@@ -73,7 +73,7 @@ const Footer: React.FC = () => {
                 <li key={item.name}>
                   <Link
                     href={item.href}
-                    className="text-sm text-gray-500 hover:text-indigo-600 transition-colors"
+                    className="text-sm text-gray-500 hover:text-emerald-600 transition-colors"
                   >
                     {item.name}
                   </Link>
@@ -92,7 +92,7 @@ const Footer: React.FC = () => {
                 <li key={item.name}>
                   <a
                     href={item.href}
-                    className="text-sm text-gray-500 hover:text-indigo-600 transition-colors"
+                    className="text-sm text-gray-500 hover:text-emerald-600 transition-colors"
                   >
                     {item.name}
                   </a>
@@ -111,7 +111,7 @@ const Footer: React.FC = () => {
                 <li key={item.name}>
                   <Link
                     href={item.href}
-                    className="text-sm text-gray-500 hover:text-indigo-600 transition-colors"
+                    className="text-sm text-gray-500 hover:text-emerald-600 transition-colors"
                   >
                     {item.name}
                   </Link>
@@ -129,7 +129,7 @@ const Footer: React.FC = () => {
             </p>
             <a
               href="mailto:support@prepdunya.com"
-              className="text-sm text-gray-400 hover:text-indigo-600 transition-colors mt-4 md:mt-0"
+              className="text-sm text-gray-400 hover:text-emerald-600 transition-colors mt-4 md:mt-0"
             >
               support@prepdunya.com
             </a>

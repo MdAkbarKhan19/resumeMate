@@ -29,13 +29,13 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     const variants = {
       primary:
-        'bg-gradient-to-r from-indigo-600 to-violet-600 text-white hover:from-indigo-500 hover:to-violet-500 focus:ring-indigo-500 shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/30',
+        'bg-gradient-to-r from-emerald-600 to-emerald-500 text-white hover:from-emerald-500 hover:to-emerald-400 focus:ring-emerald-500 shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30',
       secondary:
-        'bg-indigo-50 text-indigo-700 border border-indigo-100 hover:bg-indigo-100 focus:ring-indigo-400',
+        'bg-emerald-50 text-emerald-700 border border-emerald-100 hover:bg-emerald-100 focus:ring-emerald-400',
       outline:
-        'border-2 border-indigo-200 text-indigo-600 hover:bg-indigo-50 focus:ring-indigo-400',
+        'border-2 border-emerald-200 text-emerald-700 hover:bg-emerald-50 focus:ring-emerald-400',
       ghost:
-        'text-gray-600 hover:bg-gray-100 hover:text-indigo-700 focus:ring-gray-300',
+        'text-gray-600 hover:bg-gray-100 hover:text-emerald-700 focus:ring-gray-300',
       danger:
         'bg-red-600 text-white hover:bg-red-500 focus:ring-red-400 shadow-lg shadow-red-500/20',
     };

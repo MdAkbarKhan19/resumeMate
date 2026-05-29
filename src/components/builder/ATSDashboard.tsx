@@ -63,10 +63,10 @@ export default function ATSDashboard({
   return (
     <div className="space-y-6">
       {/* Main Score Card */}
-      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg shadow-lg p-8">
+      <div className="bg-gradient-to-br from-blue-50 to-emerald-50 rounded-lg shadow-lg p-8">
         {isLoading ? (
           <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
             <p className="text-gray-600">Analyzing resume...</p>
           </div>
         ) : (
@@ -116,7 +116,7 @@ export default function ATSDashboard({
             <div className="mb-6">
               <button
                 onClick={() => setShowDetails(!showDetails)}
-                className="text-indigo-600 hover:text-indigo-800 text-sm font-medium flex items-center gap-2 mx-auto"
+                className="text-emerald-600 hover:text-emerald-800 text-sm font-medium flex items-center gap-2 mx-auto"
               >
                 {showDetails ? 'Hide' : 'Show'} Detailed Breakdown
                 <svg
@@ -158,7 +158,7 @@ export default function ATSDashboard({
               <button
                 onClick={onEnhance}
                 disabled={isLoading}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <SparklesIcon className="h-5 w-5" />
                 AI Auto-Enhance Resume

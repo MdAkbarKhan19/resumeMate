@@ -270,7 +270,7 @@ export default function Home() {
               <div className="bg-white rounded-2xl p-7 shadow-elevated relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-40 h-40 brand-bg-3 opacity-10 blur-2xl rounded-full" />
                 <p className="text-sm font-bold brand-1 uppercase tracking-wide mb-5 flex items-center gap-2">
-                  <span className="inline-flex items-center h-6 px-2 rounded-lg brand-bg text-[11px]"><span className="font-extrabold text-amber-300">JD</span><span className="font-bold text-white">sync</span></span>
+                  <span className="inline-flex items-center h-6 px-2 rounded-lg bg-slate-900 text-[11px]"><span className="font-extrabold text-amber-300">JD</span><span className="font-bold text-white">sync</span></span>
                 </p>
                 <ul className="space-y-4">
                   {['Re-tailored to each job description', 'Keywords pulled from the actual JD', 'A live ATS match score', 'You approve every single change', 'Free to start · ₹149 one-time option'].map(t => (

@@ -1,7 +1,9 @@
 /**
  * Razorpay Payment Service
  * Handles all payment operations including orders, subscriptions, and webhooks
- * Supports: UPI, Cards, Net Banking, Wallets, EMI, and all Indian payment methods
+ * Supports: UPI, Credit/Debit Cards, Net Banking. EMI and wallets are
+ * intentionally disabled at the Razorpay dashboard level. The getPaymentMethodName
+ * map still includes them so older payment records render correctly.
  */
 
 import Razorpay from 'razorpay';

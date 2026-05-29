@@ -26,11 +26,6 @@ const comparisonRows: {
 
 const faqs = [
   {
-    question: 'How is JDsync 5× cheaper than Resume.io or Enhancv?',
-    answer:
-      "We're built in India for Indian job seekers — same OpenAI models under the hood, no inflated US pricing. Our Pro Monthly is ₹299 vs ₹3,400/mo for Resume.io.",
-  },
-  {
     question: 'Which plan should I pick?',
     answer:
       'If you\'re applying to one specific job, grab the ₹149 Single Resume Pack — pay once, no subscription. If you\'re actively job-hunting, Pro Monthly (₹299) is the sweet spot. Pro Annual (₹1,999) is the best value if you know you\'ll use it for 6+ months.',
@@ -43,7 +38,7 @@ const faqs = [
   {
     question: 'What payment methods do you accept?',
     answer:
-      'UPI, Credit/Debit Cards (Visa, Mastercard, RuPay), Net Banking, Wallets (Paytm, PhonePe, Google Pay), and EMI — all via Razorpay.',
+      'UPI and Credit/Debit Cards (Visa, Mastercard, RuPay) and Net Banking — all secured via Razorpay.',
   },
   {
     question: 'Will my resume look the same in the downloaded PDF as in the preview?',
@@ -62,13 +57,11 @@ const faqs = [
   },
 ];
 
-type IconKey = 'upi' | 'card' | 'bank' | 'wallet' | 'emi';
+type IconKey = 'upi' | 'card' | 'bank';
 const paymentMethods: { name: string; icon: IconKey }[] = [
   { name: 'UPI', icon: 'upi' },
   { name: 'Credit / Debit Cards', icon: 'card' },
   { name: 'Net Banking', icon: 'bank' },
-  { name: 'Wallets', icon: 'wallet' },
-  { name: 'EMI', icon: 'emi' },
 ];
 
 const PAYMENT_ICONS: Record<IconKey, React.ReactNode> = {
@@ -90,20 +83,6 @@ const PAYMENT_ICONS: Record<IconKey, React.ReactNode> = {
       <path d="M3 10l9-6 9 6" strokeLinecap="round" strokeLinejoin="round" />
       <path d="M5 10v8M9 10v8M15 10v8M19 10v8" strokeLinecap="round" />
       <path d="M3 20h18" strokeLinecap="round" />
-    </svg>
-  ),
-  wallet: (
-    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-      <path d="M3 7a2 2 0 012-2h12a2 2 0 012 2v2H5a2 2 0 00-2 2v-4z" />
-      <rect x="3" y="9" width="18" height="11" rx="2" />
-      <circle cx="17" cy="14.5" r="1.25" fill="currentColor" stroke="none" />
-    </svg>
-  ),
-  emi: (
-    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
-      <rect x="3" y="5" width="18" height="14" rx="2" />
-      <path d="M3 10h18" />
-      <path d="M7 15h4M14 15h3" strokeLinecap="round" />
     </svg>
   ),
 };
@@ -156,7 +135,7 @@ const PricingPage: React.FC = () => {
           <p className="text-xl md:text-2xl text-indigo-100 max-w-3xl mx-auto">
             Pay once for a single application, or subscribe for unlimited.
             <span className="block mt-2 text-base text-indigo-200">
-              ₹299/mo · 5× cheaper than Resume.io · Same AI under the hood
+              From ₹149 · Best price guaranteed · Cancel anytime
             </span>
           </p>
         </div>
@@ -252,30 +231,18 @@ const PricingPage: React.FC = () => {
           ))}
         </div>
 
-        {/* Compare-to-competitors strip */}
-        <div className="mb-12 bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-          <h3 className="text-center text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
-            Pro Monthly vs. global resume builders
-          </h3>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
-            {[
-              { name: 'JDsync', price: '₹299', highlight: true },
-              { name: 'LinkedIn Premium', price: '₹1,500' },
-              { name: 'Enhancv', price: '₹2,100' },
-              { name: 'Resume.io', price: '₹3,400' },
-            ].map((row) => (
-              <div
-                key={row.name}
-                className={`px-3 py-4 rounded-xl ${
-                  row.highlight ? 'bg-indigo-50 border-2 border-indigo-200' : 'bg-gray-50 border border-gray-100'
-                }`}
-              >
-                <div className={`text-2xl font-bold ${row.highlight ? 'text-indigo-700' : 'text-gray-700'}`}>
-                  {row.price}
-                </div>
-                <div className="text-xs text-gray-500 mt-1">{row.name}</div>
-              </div>
-            ))}
+        {/* Best-price-guaranteed badge */}
+        <div className="mb-12 bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 text-center">
+          <span className="inline-flex w-10 h-10 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 flex-shrink-0">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </span>
+          <div className="min-w-0">
+            <h3 className="text-base font-semibold text-gray-900">Best price guaranteed</h3>
+            <p className="text-sm text-gray-500 mt-0.5">
+              Built in India, priced for Indian job seekers. No subscription traps.
+            </p>
           </div>
         </div>
 
@@ -329,7 +296,7 @@ const PricingPage: React.FC = () => {
             ))}
           </div>
           <p className="mt-4 text-xs text-gray-400">
-            Secured by Razorpay · UPI · Cards · Net Banking · Wallets · EMI
+            Secured by Razorpay · UPI · Cards · Net Banking
           </p>
         </div>
 

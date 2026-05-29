@@ -9,12 +9,12 @@ import Footer from '@/components/layout/Footer';
 import { ToastContainer } from '@/components/ui/Alert';
 
 export const metadata: Metadata = {
-  title: 'ResumeMate - AI-Powered Resume Builder',
+  title: 'JDsync - AI-Powered Resume Builder',
   description: 'Create professional, ATS-optimized resumes with AI assistance',
   keywords: ['resume builder', 'CV creator', 'ATS optimization', 'AI resume', 'job application'],
-  authors: [{ name: 'ResumeMate Team' }],
+  authors: [{ name: 'JDsync Team' }],
   openGraph: {
-    title: 'ResumeMate - AI-Powered Resume Builder',
+    title: 'JDsync - AI-Powered Resume Builder',
     description: 'Create professional, ATS-optimized resumes with AI assistance',
     type: 'website',
   },

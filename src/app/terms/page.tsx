@@ -1,5 +1,5 @@
 export const metadata = {
-  title: 'Terms of Service — ResumeMate',
+  title: 'Terms of Service — JDsync',
 };
 
 export default function TermsOfServicePage() {
@@ -11,7 +11,7 @@ export default function TermsOfServicePage() {
 
       <h2>1. Acceptance</h2>
       <p>
-        By creating an account or using ResumeMate, you agree to these terms. If you
+        By creating an account or using JDsync, you agree to these terms. If you
         do not agree, do not use the service.
       </p>
 
@@ -24,7 +24,7 @@ export default function TermsOfServicePage() {
 
       <h2>3. Plans and billing</h2>
       <p>
-        ResumeMate is offered on three tiers: Free, Pack (one-time), and Pro
+        JDsync is offered on three tiers: Free, Pack (one-time), and Pro
         (subscription). Plan limits and pricing are listed on{' '}
         <a href="/pricing">/pricing</a>. Subscriptions auto-renew until you cancel.
         Cancellation takes effect at the end of the current billing period.
@@ -32,7 +32,7 @@ export default function TermsOfServicePage() {
 
       <h2>4. AI-generated content</h2>
       <p>
-        ResumeMate uses AI to suggest improvements to your resume. You are
+        JDsync uses AI to suggest improvements to your resume. You are
         responsible for reviewing AI suggestions and ensuring they accurately
         represent your experience. We do not guarantee that AI-suggested content
         will be factually correct, and we are not liable for any misrepresentation
@@ -57,7 +57,7 @@ export default function TermsOfServicePage() {
 
       <h2>7. Disclaimer</h2>
       <p>
-        ResumeMate is provided "as is". We do not guarantee job placement, interview
+        JDsync is provided "as is". We do not guarantee job placement, interview
         callbacks, or any specific outcome from using the service. To the maximum
         extent permitted by law, our total liability is limited to the amount you
         paid us in the preceding 12 months.

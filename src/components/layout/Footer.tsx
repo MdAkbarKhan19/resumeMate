@@ -37,11 +37,11 @@ const Footer: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="col-span-1">
-            <Link href="/" className="flex items-center space-x-2 mb-4">
-              <div className="w-8 h-8 bg-gradient-to-r from-indigo-600 to-violet-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-xl">R</span>
+            <Link href="/" className="inline-flex mb-4">
+              <div className="inline-flex items-center h-9 px-3 rounded-lg bg-gradient-to-r from-indigo-600 to-violet-600 shadow-sm shadow-indigo-500/20">
+                <span className="font-extrabold text-base tracking-tight text-amber-300 drop-shadow-sm">JD</span>
+                <span className="font-bold text-base tracking-tight text-white ml-0.5">sync</span>
               </div>
-              <span className="text-xl font-bold text-gray-900">ResumeMate</span>
             </Link>
             <p className="text-sm text-gray-500 mb-4">
               Create professional, ATS-optimized resumes with AI-powered assistance.
@@ -125,7 +125,7 @@ const Footer: React.FC = () => {
         <div className="mt-12 pt-8 border-t border-gray-100">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-sm text-gray-400">
-              &copy; {currentYear} ResumeMate. All rights reserved.
+              &copy; {currentYear} JDsync. All rights reserved.
             </p>
             <a
               href="mailto:support@prepdunya.com"

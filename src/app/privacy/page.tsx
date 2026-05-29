@@ -1,5 +1,5 @@
 export const metadata = {
-  title: 'Privacy Policy — ResumeMate',
+  title: 'Privacy Policy — JDsync',
 };
 
 export default function PrivacyPolicyPage() {
@@ -11,7 +11,7 @@ export default function PrivacyPolicyPage() {
 
       <h2>1. What we collect</h2>
       <p>
-        When you create a ResumeMate account, we collect your name, email address,
+        When you create a JDsync account, we collect your name, email address,
         and the content you place in your resume (work experience, education, skills,
         contact details, etc.). When you make a purchase we receive a payment
         confirmation from our processor (Razorpay) — we do not store your card details.

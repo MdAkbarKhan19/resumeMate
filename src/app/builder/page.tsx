@@ -123,7 +123,11 @@ const BuilderPage: React.FC = () => {
   const autoSaveRef = useRef<NodeJS.Timeout>();
 
   // State
-  const [activeSection, setActiveSection] = useState<SectionKey>('personal');
+  const [activeSection, setActiveSection] = useState<string>('personal');
+  // Mobile drill-in: on screens <lg we hide the long-scroll layout and show a
+  // section index. Tapping a section sets this to true and renders only that
+  // section full-screen with a back bar. Desktop ignores this flag.
+  const [mobileDrilledIn, setMobileDrilledIn] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoadingResume, setIsLoadingResume] = useState(false);
   const [resumeTitle, setResumeTitle] = useState('Untitled Resume');
@@ -319,11 +323,22 @@ const BuilderPage: React.FC = () => {
   // Navigation
   const scrollToSection = useCallback((key: SectionKey) => {
     setActiveSection(key);
+    setMobileDrilledIn(true);
     const el = sectionRefs.current[key];
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }, []);
+
+  // Mobile: visible only when this section is the active drill-in.
+  // Desktop (lg+): always visible (long-scroll layout unchanged).
+  const mobileSectionCls = useCallback((key: string) => {
+    return mobileDrilledIn && activeSection === key ? '' : 'hidden lg:block';
+  }, [mobileDrilledIn, activeSection]);
+
+  const activeSectionLabel = SECTIONS.find(s => s.key === activeSection)?.label
+    || customSections.find(s => s.id === activeSection)?.title
+    || '';
 
   // Personal info helpers
   const updatePersonalInfo = useCallback((field: keyof ResumeData['personalInfo'], value: string) => {
@@ -716,8 +731,8 @@ const BuilderPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Section Navigation Pills */}
-          <div className="flex gap-1 mt-3 overflow-x-auto pb-1 -mb-3 border-b-0">
+          {/* Section Navigation Pills (desktop only) */}
+          <div className="hidden lg:flex gap-1 mt-3 overflow-x-auto pb-1 -mb-3 border-b-0">
             {SECTIONS.map(section => {
               const isComplete = getSectionCompletion(section.key);
               const isActive = activeSection === section.key;
@@ -750,14 +765,82 @@ const BuilderPage: React.FC = () => {
         </div>
       </div>
 
+      {/* Mobile back bar — visible only when drilled into a section on mobile */}
+      {mobileDrilledIn && (
+        <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setMobileDrilledIn(false)}
+            className="text-gray-600 hover:text-gray-900 flex items-center gap-1.5 text-sm font-medium"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+            Sections
+          </button>
+          <span className="text-base font-semibold text-gray-900 truncate">{activeSectionLabel}</span>
+        </div>
+      )}
+
+      {/* Mobile section index — visible only when NOT drilled in, on mobile */}
+      {!mobileDrilledIn && (
+        <div className="lg:hidden max-w-[1600px] mx-auto px-4 py-4 space-y-2">
+          <p className="text-xs uppercase tracking-wide text-gray-500 font-medium px-1 pb-1">Resume sections</p>
+          {SECTIONS.map(section => {
+            const isComplete = getSectionCompletion(section.key);
+            return (
+              <button
+                key={section.key}
+                type="button"
+                onClick={() => scrollToSection(section.key)}
+                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3.5 flex items-center gap-3 hover:border-blue-400 hover:bg-blue-50/30 transition-colors text-left"
+              >
+                <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${isComplete ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500'}`}>
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d={section.icon} />
+                  </svg>
+                </div>
+                <span className="flex-1 font-medium text-gray-900">{section.label}</span>
+                {isComplete && (
+                  <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                )}
+                <svg className="w-4 h-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            );
+          })}
+          {customSections.map(section => (
+            <button
+              key={section.id}
+              type="button"
+              onClick={() => { setActiveSection(section.id); setMobileDrilledIn(true); }}
+              className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3.5 flex items-center gap-3 hover:border-blue-400 hover:bg-blue-50/30 transition-colors text-left"
+            >
+              <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${section.content ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500'}`}>
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </div>
+              <span className="flex-1 font-medium text-gray-900 truncate">{section.title}</span>
+              <svg className="w-4 h-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Main Content */}
-      <div className="max-w-[1600px] mx-auto px-4 py-6">
+      <div className={`max-w-[1600px] mx-auto px-4 py-6 ${!mobileDrilledIn ? 'hidden lg:block' : ''}`}>
         <div className="flex gap-6">
           {/* Left: Form */}
           <div className={`flex-1 min-w-0 space-y-6 ${showPreview ? 'lg:max-w-[55%]' : ''}`}>
 
             {/* Personal Information */}
-            <div ref={(el) => { sectionRefs.current['personal'] = el; }}>
+            <div ref={(el) => { sectionRefs.current['personal'] = el; }} className={mobileSectionCls('personal')}>
               <SectionCard title="Personal Information" sectionKey="personal" isComplete={getSectionCompletion('personal')}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Input label="Full Name *" value={resumeData.personalInfo.name} onChange={(e) => updatePersonalInfo('name', e.target.value)} placeholder="John Smith" />
@@ -773,7 +856,7 @@ const BuilderPage: React.FC = () => {
             </div>
 
             {/* Summary */}
-            <div ref={(el) => { sectionRefs.current['summary'] = el; }}>
+            <div ref={(el) => { sectionRefs.current['summary'] = el; }} className={mobileSectionCls('summary')}>
               <SectionCard title="Professional Summary" sectionKey="summary" isComplete={getSectionCompletion('summary')}>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
@@ -799,7 +882,7 @@ const BuilderPage: React.FC = () => {
             </div>
 
             {/* Experience */}
-            <div ref={(el) => { sectionRefs.current['experience'] = el; }}>
+            <div ref={(el) => { sectionRefs.current['experience'] = el; }} className={mobileSectionCls('experience')}>
               <SectionCard title="Work Experience" sectionKey="experience" isComplete={getSectionCompletion('experience')}>
                 <ExperienceSection
                   experiences={resumeData.experience}
@@ -811,7 +894,7 @@ const BuilderPage: React.FC = () => {
             </div>
 
             {/* Education */}
-            <div ref={(el) => { sectionRefs.current['education'] = el; }}>
+            <div ref={(el) => { sectionRefs.current['education'] = el; }} className={mobileSectionCls('education')}>
               <SectionCard title="Education" sectionKey="education" isComplete={getSectionCompletion('education')}>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
@@ -839,7 +922,7 @@ const BuilderPage: React.FC = () => {
             </div>
 
             {/* Skills */}
-            <div ref={(el) => { sectionRefs.current['skills'] = el; }}>
+            <div ref={(el) => { sectionRefs.current['skills'] = el; }} className={mobileSectionCls('skills')}>
               <SectionCard title="Skills" sectionKey="skills" isComplete={getSectionCompletion('skills')}>
                 <SkillsSection
                   skills={resumeData.skills}
@@ -850,7 +933,7 @@ const BuilderPage: React.FC = () => {
             </div>
 
             {/* Projects */}
-            <div ref={(el) => { sectionRefs.current['projects'] = el; }}>
+            <div ref={(el) => { sectionRefs.current['projects'] = el; }} className={mobileSectionCls('projects')}>
               <SectionCard title="Projects" sectionKey="projects" isComplete={getSectionCompletion('projects')}>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
@@ -877,7 +960,7 @@ const BuilderPage: React.FC = () => {
             </div>
 
             {/* Certifications */}
-            <div ref={(el) => { sectionRefs.current['certifications'] = el; }}>
+            <div ref={(el) => { sectionRefs.current['certifications'] = el; }} className={mobileSectionCls('certifications')}>
               <SectionCard title="Certifications" sectionKey="certifications" isComplete={getSectionCompletion('certifications')}>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
@@ -903,7 +986,7 @@ const BuilderPage: React.FC = () => {
             </div>
 
             {/* Languages */}
-            <div ref={(el) => { sectionRefs.current['languages'] = el; }}>
+            <div ref={(el) => { sectionRefs.current['languages'] = el; }} className={mobileSectionCls('languages')}>
               <SectionCard title="Languages" sectionKey="languages" isComplete={getSectionCompletion('languages')}>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
@@ -933,7 +1016,7 @@ const BuilderPage: React.FC = () => {
             </div>
 
             {/* Volunteer */}
-            <div ref={(el) => { sectionRefs.current['volunteer'] = el; }}>
+            <div ref={(el) => { sectionRefs.current['volunteer'] = el; }} className={mobileSectionCls('volunteer')}>
               <SectionCard title="Volunteer Experience" sectionKey="volunteer" isComplete={getSectionCompletion('volunteer')}>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
@@ -966,7 +1049,8 @@ const BuilderPage: React.FC = () => {
 
             {/* Custom Sections */}
             {customSections.map(section => (
-              <SectionCard key={section.id} title={section.title} sectionKey={section.id} isComplete={!!section.content}>
+              <div key={section.id} className={mobileSectionCls(section.id)}>
+              <SectionCard title={section.title} sectionKey={section.id} isComplete={!!section.content}>
                 <div className="space-y-3">
                   <Input label="Section Title" value={section.title} onChange={(e) => updateCustomSection(section.id, 'title', e.target.value)} />
                   <Textarea label="Content" value={section.content} onChange={(e) => updateCustomSection(section.id, 'content', e.target.value)} rows={4} />
@@ -975,10 +1059,11 @@ const BuilderPage: React.FC = () => {
                   </div>
                 </div>
               </SectionCard>
+              </div>
             ))}
 
-            {/* Add Custom Section */}
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-blue-400 transition-colors">
+            {/* Add Custom Section (desktop only — mobile users add via the section index) */}
+            <div className="hidden lg:block border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-blue-400 transition-colors">
               <div className="flex gap-2 items-center">
                 <Input
                   value={newCustomSectionTitle}
@@ -994,7 +1079,7 @@ const BuilderPage: React.FC = () => {
             </div>
 
             {/* Template Selection */}
-            <div ref={(el) => { sectionRefs.current['template'] = el; }}>
+            <div ref={(el) => { sectionRefs.current['template'] = el; }} className={mobileSectionCls('template')}>
               <SectionCard title="Template & Style" sectionKey="template" isComplete={getSectionCompletion('template')}>
                 <div className="space-y-6">
                   <TemplateGallery selectedTemplateId={selectedTemplateId} onTemplateSelect={setSelectedTemplateId} />
@@ -1066,7 +1151,7 @@ function SectionCard({ title, sectionKey, isComplete, children }: {
 }) {
   return (
     <Card className="overflow-hidden">
-      <div className="px-5 py-3 bg-white border-b border-gray-100 flex items-center justify-between">
+      <div className="px-4 lg:px-5 py-3 bg-white border-b border-gray-100 flex items-center justify-between">
         <h3 className="font-semibold text-gray-900">{title}</h3>
         {isComplete && (
           <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
@@ -1074,7 +1159,7 @@ function SectionCard({ title, sectionKey, isComplete, children }: {
           </svg>
         )}
       </div>
-      <CardContent className="p-5">
+      <CardContent className="p-3 sm:p-4 lg:p-5">
         {children}
       </CardContent>
     </Card>

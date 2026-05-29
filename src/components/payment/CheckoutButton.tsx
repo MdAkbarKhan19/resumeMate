@@ -95,7 +95,7 @@ const CheckoutButton: React.FC<CheckoutButtonProps> = ({
           key: order.key,
           amount: order.amount,
           currency: order.currency,
-          name: 'ResumeMate',
+          name: 'JDsync',
           description: plan.name,
           order_id: order.orderId,
           prefill: {
@@ -187,7 +187,7 @@ const CheckoutButton: React.FC<CheckoutButtonProps> = ({
       const rzp = new window.Razorpay({
         key: sub.key,
         subscription_id: sub.subscriptionId,
-        name: 'ResumeMate',
+        name: 'JDsync',
         description: plan.name,
         prefill: { name, email: userInfo.email || '', contact },
         theme: { color: '#4f46e5' },

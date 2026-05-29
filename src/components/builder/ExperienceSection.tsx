@@ -216,39 +216,43 @@ export default function ExperienceSection({
                     </Button>
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     {exp.bullets.map((bullet, bIndex) => (
-                      <div key={bIndex} className="flex gap-2 items-start">
-                        <span className="mt-2.5 text-gray-400 text-sm select-none">&#8226;</span>
+                      <div key={bIndex} className="border border-gray-200 rounded-lg bg-white focus-within:border-blue-400 focus-within:ring-1 focus-within:ring-blue-100 transition-colors">
                         <Textarea
                           value={bullet}
                           onChange={(e) => updateBullet(exp.id, bIndex, e.target.value)}
-                          rows={2}
+                          rows={3}
                           placeholder="Led development of a microservices architecture, reducing deployment time by 40%..."
-                          className="flex-1 text-sm"
+                          className="w-full text-sm border-0 focus:ring-0 focus:outline-none bg-transparent resize-y"
                         />
-                        <div className="flex flex-col gap-1 mt-1">
-                          <button
-                            type="button"
-                            onClick={() => onEnhanceBullet(index, bIndex)}
-                            disabled={isProcessing || !bullet.trim()}
-                            className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors disabled:opacity-30"
-                            title="AI Enhance"
-                          >
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                            </svg>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => removeBullet(exp.id, bIndex)}
-                            className="p-1.5 text-red-400 hover:bg-red-50 rounded transition-colors"
-                            title="Remove"
-                          >
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                          </button>
+                        <div className="flex items-center justify-between px-2 py-1.5 border-t border-gray-100 bg-gray-50/60 rounded-b-lg">
+                          <span className="text-xs text-gray-400 select-none">&#8226; Bullet {bIndex + 1}</span>
+                          <div className="flex items-center gap-1">
+                            <button
+                              type="button"
+                              onClick={() => onEnhanceBullet(index, bIndex)}
+                              disabled={isProcessing || !bullet.trim()}
+                              className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-blue-600 hover:bg-blue-100 rounded transition-colors disabled:opacity-30"
+                              title="AI Enhance this bullet"
+                            >
+                              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                              </svg>
+                              AI Enhance
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => removeBullet(exp.id, bIndex)}
+                              className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-red-500 hover:bg-red-100 rounded transition-colors"
+                              title="Remove bullet"
+                            >
+                              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                              Remove
+                            </button>
+                          </div>
                         </div>
                       </div>
                     ))}

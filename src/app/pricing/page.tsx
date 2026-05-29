@@ -26,7 +26,7 @@ const comparisonRows: {
 
 const faqs = [
   {
-    question: 'How is ResumeMate 5× cheaper than Resume.io or Enhancv?',
+    question: 'How is JDsync 5× cheaper than Resume.io or Enhancv?',
     answer:
       "We're built in India for Indian job seekers — same OpenAI models under the hood, no inflated US pricing. Our Pro Monthly is ₹299 vs ₹3,400/mo for Resume.io.",
   },
@@ -259,7 +259,7 @@ const PricingPage: React.FC = () => {
           </h3>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
             {[
-              { name: 'ResumeMate', price: '₹299', highlight: true },
+              { name: 'JDsync', price: '₹299', highlight: true },
               { name: 'LinkedIn Premium', price: '₹1,500' },
               { name: 'Enhancv', price: '₹2,100' },
               { name: 'Resume.io', price: '₹3,400' },

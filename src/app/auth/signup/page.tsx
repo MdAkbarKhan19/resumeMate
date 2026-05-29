@@ -228,7 +228,7 @@ export default function SignUpPage() {
           {/* Header */}
           <div className="text-center mb-8">
             <Link href="/" className="text-3xl font-bold gradient-text-brand">
-              ResumeMate
+              JDsync
             </Link>
             <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
               {step === 'signup' ? 'Create your account' : 'Verify your email'}

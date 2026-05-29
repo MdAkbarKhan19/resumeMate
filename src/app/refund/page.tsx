@@ -1,5 +1,5 @@
 export const metadata = {
-  title: 'Refund Policy — ResumeMate',
+  title: 'Refund Policy — JDsync',
 };
 
 export default function RefundPolicyPage() {
@@ -11,7 +11,7 @@ export default function RefundPolicyPage() {
 
       <h2>Free trial</h2>
       <p>
-        ResumeMate offers a free tier so you can try the full builder, watermarked
+        JDsync offers a free tier so you can try the full builder, watermarked
         PDF download, and a limited number of AI features before paying. We
         encourage you to use the free tier first.
       </p>

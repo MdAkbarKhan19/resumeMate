@@ -35,20 +35,16 @@ const Navbar: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2.5 group">
-            <div className="relative">
-              <div className="w-8 h-8 bg-gradient-to-br from-indigo-600 to-violet-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:shadow-indigo-500/30 transition-shadow">
-                <span className="text-white font-bold text-xl">R</span>
-              </div>
+          <Link href="/" className="group">
+            <div className="relative inline-flex items-center h-9 px-3 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 shadow-lg shadow-indigo-500/20 group-hover:shadow-indigo-500/30 transition-shadow">
+              <span className="font-extrabold text-base tracking-tight text-amber-300 drop-shadow-sm">JD</span>
+              <span className="font-bold text-base tracking-tight text-white ml-0.5">sync</span>
               {/* Pulsing agent dot */}
               <span className="absolute -top-0.5 -right-0.5 flex h-2.5 w-2.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400"></span>
               </span>
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-indigo-700 to-violet-600 bg-clip-text text-transparent">
-              ResumeMate
-            </span>
           </Link>
 
           {/* Desktop Navigation */}

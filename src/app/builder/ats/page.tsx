@@ -438,6 +438,19 @@ function ATSOptimizationPageContent() {
           }));
       }
 
+      // Persist the post-optimization ATS score alongside the content so the
+      // dashboard / resume list reflect the new number instead of the stale
+      // pre-optimization score. Server-side PATCH already accepts atsScore.
+      // Note: if the user rejected/edited a meaningful subset of changes, the
+      // saved score may slightly overstate the actually-applied content. That's
+      // accepted — user can hit "Re-analyze Resume" to recompute exactly. The
+      // cost of recomputing here (an AI scoring call on every Apply) isn't
+      // worth the ~2-3pt accuracy delta.
+      const newScore = enhancementResult?.scores?.after?.overall;
+      if (typeof newScore === 'number') {
+        transformedResume.atsScore = Math.round(newScore);
+      }
+
       console.log('Transformed resume data:', JSON.stringify(transformedResume, null, 2));
 
       const response = await authenticatedFetch(`/api/resumes/${resumeId}`, {

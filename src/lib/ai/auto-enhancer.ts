@@ -223,17 +223,30 @@ Tools & Technologies: ${filterJobTitle(missingTools).join(', ') || 'None'}
 
 ## Target Position: ${jdAnalysis.jobTitle}
 
-## Rules:
-1. ADD skills that the candidate demonstrably has based on their experience bullets (e.g., if they "developed REST APIs" they likely know HTTP, API Design, etc.)
-2. ADD tools/technologies mentioned in the JD that are closely related to what the candidate already uses (e.g., if they use PostgreSQL, adding SQL is legitimate)
-3. ADD methodologies/practices implied by their work (e.g., if they worked in sprints, add "Agile" and "Scrum")
-4. Do NOT add skills completely unrelated to their background
-5. Categorize each skill precisely:
-   - "Technical" for programming languages, frameworks, libraries, databases, cloud services
-   - "Tools" for specific software tools, platforms, IDEs, DevOps tools
-   - "Soft" for methodologies, practices, interpersonal skills
-6. NEVER add the job title itself as a skill
-7. Prioritize: Required > Tools > Preferred
+## Goal
+Aim to add as MANY missing JD skills as defensible — the skills section is the highest-leverage ATS surface. Default to ADD; only skip a skill when there is genuinely no link to the candidate's domain. Conservative under-listing of skills costs the candidate ATS points.
+
+## What counts as "defensible to add" (any ONE is enough):
+1. **Directly demonstrated** — the bullet explicitly names the skill or uses it ("developed REST APIs" → API Design, HTTP, REST).
+2. **Strongly implied by the work** — the work described is impossible (or atypical) without this skill. Examples:
+   - "built CI/CD pipeline" → Jenkins / GitHub Actions / GitLab CI (whichever the JD wants)
+   - "production microservices on AWS" → Docker, Kubernetes, IAM, CloudWatch
+   - "data pipeline at scale" → Kafka, Spark, ETL, batch processing
+   - "high-traffic web app" → caching (Redis), load balancing, CDN
+3. **Co-technology in the same stack** — a sibling/companion tool of something they DO use. If they use PostgreSQL → add SQL, query optimization, indexing. If they use React → add JSX, ES6, component architecture, Redux/Zustand if JD lists it. If they use Spring Boot → add Maven/Gradle, JUnit, REST.
+4. **Methodology/practice implied by the work** — sprints → Agile, Scrum; PR reviews → code review, Git; on-call → incident response, monitoring.
+5. **Foundational under the framework they use** — if they use Spring Boot → Java; if they use Pandas → Python; if they use Next.js → React, Node.js, TypeScript.
+
+## What NOT to add:
+- Skills in a completely different domain (no iOS/Swift to a backend resume; no UX/Figma to a data engineer).
+- Specific products they couldn't plausibly have touched given their roles (e.g., Salesforce Apex on a generic backend resume with no CRM context).
+- Skills that contradict their seniority signals.
+
+## Output rules:
+- Categorize: "Technical" (languages/frameworks/libraries/DBs/cloud), "Tools" (IDEs/DevOps/platforms), "Soft" (methodologies/practices).
+- NEVER add the job title itself as a skill.
+- Prioritize: Required > Tools > Preferred — but include all three tiers liberally if defensible.
+- It is OK and EXPECTED to return 8-15 skills if the JD pool is large and the candidate's domain matches; do not artificially cap at 3-5.
 
 Return a JSON array:
 {
@@ -346,23 +359,67 @@ If no skills should be added, return: { "skills": [] }`;
     enhanced.forEach((result, i) => {
       const addr = flat[i];
       const exp = resumeData.experience[addr.expIdx];
-      if (result.text !== addr.text) {
-        const keywordsUsed = result.keywordsIncorporated?.length
-          ? result.keywordsIncorporated.join(', ')
-          : 'ATS optimization';
+
+      // Honest change-classification. The model returns keywordsIncorporated,
+      // but that list can include keywords that were ALREADY present in the
+      // original bullet (it just bolded them). We split those out here so the
+      // UI never claims to have added a keyword that the candidate already had.
+      const original = addr.text;
+      const rewritten = result.text;
+      // Strip bold markers to compare semantic content honestly.
+      const rewrittenPlain = rewritten.replace(/\*\*/g, '');
+      const originalLower = original.toLowerCase();
+      const claimed = result.keywordsIncorporated || [];
+      const newlyAdded = claimed.filter(
+        (k) => !originalLower.includes(k.toLowerCase()),
+      );
+      const alreadyPresent = claimed.filter((k) =>
+        originalLower.includes(k.toLowerCase()),
+      );
+      const textMateriallyChanged = rewrittenPlain.trim() !== original.trim();
+
+      if (textMateriallyChanged && newlyAdded.length > 0) {
+        const tail =
+          alreadyPresent.length > 0
+            ? ` (also highlighted: ${alreadyPresent.join(', ')})`
+            : '';
         changes.push({
           section: 'experience',
           type: 'modified',
-          before: addr.text,
-          after: result.text,
-          reason: `Incorporated: ${keywordsUsed}`,
+          before: original,
+          after: rewritten,
+          reason: `Incorporated: ${newlyAdded.join(', ')}${tail}`,
+        });
+      } else if (textMateriallyChanged) {
+        const tail =
+          alreadyPresent.length > 0
+            ? ` Highlighted: ${alreadyPresent.join(', ')}.`
+            : '';
+        changes.push({
+          section: 'experience',
+          type: 'modified',
+          before: original,
+          after: rewritten,
+          reason: `Rewritten for impact and JD-tone alignment.${tail}`,
+        });
+      } else if (rewritten !== original && alreadyPresent.length > 0) {
+        // Only difference is **bold** markers around words already in the
+        // bullet. Don't pretend we incorporated anything.
+        changes.push({
+          section: 'experience',
+          type: 'enhanced',
+          before: original,
+          after: rewritten,
+          reason: `Highlighted for ATS visibility: ${alreadyPresent.join(', ')}`,
         });
       }
+      // else: identical text, no claim — do not push a change record.
+
       if (addr.field === 'description') {
-        exp.description = result.text;
+        exp.description = rewritten;
       } else {
         const arr = exp[addr.field] as string[];
-        arr[addr.bulletIdx] = result.text;
+        arr[addr.bulletIdx] = rewritten;
       }
     });
 
@@ -430,30 +487,63 @@ ${rolesBlock}
 ## METHOD — you MUST follow this structured reasoning process:
 
 ### PHASE 1 — Plan (per keyword)
+
+Your goal is **maximum honest coverage**. Default to "place" — only "reject" when there is genuinely no bullet whose work domain touches this keyword. Conservative under-placement is just as bad as fabrication: it leaves the candidate's ATS score on the table.
+
 For EACH keyword in the pool, perform this analysis BEFORE writing anything:
 
   1. **Hypothesis**: identify the single bullet whose existing content is the most natural carrier for this keyword.
-  2. **Evidence**: quote the EXACT phrase from that bullet's original text that supports adding this keyword (e.g. "Built data pipeline" supports adding "Kafka"). Evidence must be a substring of the original bullet.
+  2. **Evidence** — accept EITHER of these:
+     - **Direct evidence**: a verbatim phrase from the bullet that names the same concept (e.g. "Built REST APIs" supports "Spring Boot" or "API design").
+     - **Implied evidence**: the bullet describes work where this keyword is a *standard, expected tool* in that domain. Examples:
+        - "data pipeline processing 10M events/day" → implies Kafka / Spark / Kinesis (pick whichever the JD asks for)
+        - "CI/CD pipeline" → implies Jenkins / GitHub Actions / GitLab CI
+        - "containerized services" → implies Docker / Kubernetes
+        - "production microservices" → implies AWS / GCP / Azure, observability, service mesh
+        - "scaled to N users / N requests" → implies caching (Redis), load balancing, sharding
+     - Quote the supporting phrase verbatim in evidence_quote either way. For implied evidence, the quote is the *work description that implies the tool*, not the tool itself.
   3. **Alternates**: name up to 2 OTHER bullets you also considered, and one sentence on why they're weaker fits.
   4. **Decision**:
-     - "place" if the evidence cleanly supports the keyword in the same technical domain (DB→DB, framework→framework, etc.)
-     - "reject" if no bullet has supporting evidence. Authenticity beats coverage — never force.
-  5. **Domain check** (only for "place"): the evidence must be in the SAME category as the keyword. A bullet about UI never gets a database keyword. A bullet about deployment never gets a frontend framework.
+     - "place" if direct OR implied evidence supports the keyword in the same technical domain.
+     - "reject" ONLY if no bullet's work touches this keyword's domain at all. Reject is rare — most JD keywords will find a home if you think about the domain.
+  5. **Domain check** (only for "place"): the evidence must be in the SAME category as the keyword. A bullet about UI never gets a database keyword. A bullet about deployment never gets a frontend framework. iOS/mobile keywords don't go into backend bullets.
 
 Then, GLOBALLY across the plan:
-  - No keyword may be "place"-d into more than one bullet.
-  - If the JD lists alternatives (AWS/GCP/Azure, React/Angular/Vue), pick exactly ONE — prefer what the resume already uses — and apply that single choice everywhere.
+  - No keyword may be "place"-d into more than one bullet (one placement per bullet keeps the rewrite natural; the skills section catches the rest).
+  - If the JD lists alternatives (AWS/GCP/Azure, React/Angular/Vue, MySQL/Postgres), pick exactly ONE — prefer what the resume already uses — and apply that single choice everywhere.
+  - Aim to place at least 60-80% of the JD pool. If you're rejecting more than 40% of keywords, you are being too conservative — re-examine the bullets through an implied-evidence lens.
 
-### PHASE 2 — Rewrite
-For each bullet that received a "place" decision, weave the keyword in naturally:
+### PHASE 2 — Rewrite (EVERY bullet, not just the ones with keywords)
+
+You MUST rewrite EVERY bullet for impact — not only the ones that received a "place" decision. Returning a bullet unchanged is only acceptable when (a) no keyword was placed AND (b) the bullet is already a strong, specific, action-led sentence with no weasel words. That is rare. Default to rewriting.
+
+The rewrite has TWO independent axes — apply both:
+
+**Axis A — Keyword integration** (only for bullets with a "place" decision):
   - **Apple-to-apple replacement** (preferred): if the bullet already names a tech that serves the same purpose as the JD keyword, REPLACE the old tech with the JD's version. ("MySQL" → "PostgreSQL", "Jenkins" → "GitHub Actions".)
   - **Augmentation** (fallback): if no replacement exists, add the keyword inline where the evidence supports it. ("Built data pipeline" → "Built **Kafka**-backed data pipeline".)
-  - Preserve voice, tone, and every existing number/metric EXACTLY.
-  - No synonym swaps with no information gain ("enhanced" → "improved" is forbidden).
-  - No fabricated metrics, achievements, or responsibilities.
-  - Wrap injected technical keywords in **double asterisks** for bold. Only bold technologies / tools / frameworks / languages / methodologies — never generic words.
 
-For every bullet that received no "place" decision, return its text UNCHANGED.
+**Axis B — Impact rewrite** (EVERY bullet):
+  1. **Strong opening action verb.** If the bullet starts with a weak verb ("Worked on", "Helped", "Involved in", "Responsible for", "Assisted with", "Participated in"), replace it with a precise active verb from this pool (prefer ones that match the JD's voice): Architected, Engineered, Designed, Built, Delivered, Led, Drove, Owned, Shipped, Scaled, Optimized, Reduced, Automated, Migrated, Refactored, Integrated, Implemented, Launched, Developed, Established, Streamlined.
+  2. **Remove weasel words and filler.** Cut "responsible for", "helped to", "involved in", "tasked with", "assisted in", "worked on a team that". The active verb already implies ownership.
+  3. **Tighten verbose phrasing.** "in order to" → "to". "due to the fact that" → "because". "utilized" → "used". "functionality" → name what the feature actually did.
+  4. **JD-tone alignment.** Where the bullet uses a generic word and the JD uses a more specific/elevated synonym in the SAME domain, prefer the JD's version. Example: bullet says "service", JD says "microservice" → use "microservice". This is NOT a free synonym swap — only when the JD term is more specific AND clearly applies.
+  5. **Preserve voice and POV.** First-person implied, no pronouns. Past tense for past roles, present for current.
+
+**Hard rules — non-negotiable:**
+  - Preserve EVERY number, metric, percentage, date, dollar/rupee figure, team size, and user count EXACTLY. Do not round, scale, or invent any.
+  - No fabricated achievements, responsibilities, technologies, or outcomes. If the original bullet did not state an outcome, do not invent one.
+  - No pure synonym swaps with no information gain ("enhanced" → "improved" is forbidden when there's no JD keyword in play).
+  - Wrap ONLY injected/highlighted technical keywords (technologies, tools, frameworks, languages, methodologies) in **double asterisks**. Never bold generic verbs or domain nouns.
+  - Each rewritten bullet must be a single sentence, 18–32 words ideally, max 40.
+
+**Worked examples:**
+  - WEAK: "Worked on building a REST API to handle copy order processing for the UI team"
+    STRONG: "Engineered a **multi-threaded REST API in Java** that processes copy orders online and offline, eliminating UI blocking for 50K+ daily requests" (only if the metric existed in the original; otherwise omit the number)
+  - WEAK: "Responsible for testing the application and fixing bugs"
+    STRONG: "Drove end-to-end testing and defect triage across the application, reducing escaped defects through systematic regression coverage"
+  - WEAK: "Helped to migrate legacy services to AWS"
+    STRONG: "Led migration of legacy services to **AWS**, modernizing the deployment pipeline and removing on-prem dependencies"
 
 ================================================================
 ## OUTPUT — return strict JSON in this exact shape:
@@ -487,7 +577,8 @@ For every bullet that received no "place" decision, return its text UNCHANGED.
 Hard constraints:
 - Every input bullet index (0..${flat.length - 1}) MUST appear exactly once in "bullets".
 - Every placed keyword must appear in exactly one bullet's "keywordsIncorporated".
-- evidence_quote must be a verbatim substring of the original bullet text — if you cannot quote it, the decision MUST be "reject".`;
+- evidence_quote must be a verbatim substring of the original bullet text — for direct evidence, quote the supporting phrase; for implied evidence, quote the work-description phrase that implies the tool (e.g. quote "data pipeline" when placing Kafka on a pipeline bullet).
+- Default to "place". Only "reject" when no bullet's domain touches the keyword at all.`;
 
     try {
       const response = await client.chat.completions.create({
@@ -496,7 +587,7 @@ Hard constraints:
           {
             role: 'system',
             content:
-              'You are an expert ATS resume optimizer. You ALWAYS produce a per-keyword plan with evidence quoted verbatim from the original bullet text BEFORE writing the final bullets. You never place a keyword without evidence. You never add a keyword to more than one bullet. You never fabricate metrics, responsibilities, or technologies. Authenticity beats coverage. Always return valid JSON in the exact schema requested.',
+              'You are an expert ATS resume optimizer. You ALWAYS produce a per-keyword plan with evidence quoted verbatim from the original bullet text BEFORE writing the final bullets. You then REWRITE EVERY bullet for impact — strong action verbs, weasel-words removed, verbose phrasing tightened, JD-tone aligned — independent of whether a keyword was placed. Returning a bullet unchanged is the exception, not the default. You never place a keyword without evidence. You never add a keyword to more than one bullet. You never fabricate metrics, responsibilities, or technologies, and you preserve every existing number EXACTLY. Authenticity beats coverage. Always return valid JSON in the exact schema requested.',
           },
           { role: 'user', content: prompt },
         ],

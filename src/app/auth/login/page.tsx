@@ -17,11 +17,14 @@ function LoginPageContent() {
   const [loading, setLoading] = useState(false);
   const [sessionExpiredMessage, setSessionExpiredMessage] = useState('');
 
-  // Check if redirected due to session expiry
+  // Check if redirected due to session expiry, or back from a password reset.
   useEffect(() => {
     const reason = searchParams.get('reason');
     if (reason === 'session-expired') {
       setSessionExpiredMessage('Your session has expired. Please log in again.');
+    }
+    if (searchParams.get('reset') === 'success') {
+      setSessionExpiredMessage('Password reset successful. Please log in with your new password.');
     }
   }, [searchParams]);
 

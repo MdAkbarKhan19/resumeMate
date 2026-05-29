@@ -334,16 +334,18 @@ const BuilderPage: React.FC = () => {
   const toggleMobileSection = useCallback((key: string) => {
     setMobileOpenSection(prev => {
       const next = prev === key ? null : key;
-      // When opening a section on mobile, scroll its header to the top of
-      // the viewport on the next frame (after the body renders), so the
-      // expanded content appears below the header instead of off-screen.
+      // When opening a section on mobile, snap its header to the top of the
+      // viewport instantly. A smooth animation here races against the layout
+      // shift caused by closing the previously open section, producing a
+      // visible "scroll down then up" wobble — instant scroll feels natural
+      // because it lines up with the tap.
       if (next === key) {
         requestAnimationFrame(() => {
           const el = sectionRefs.current[key];
           if (el) {
             const top = el.getBoundingClientRect().top + window.scrollY;
-            const toolbarHeight = 64; // sticky top toolbar
-            window.scrollTo({ top: Math.max(0, top - toolbarHeight - 8), behavior: 'smooth' });
+            const toolbarHeight = 64;
+            window.scrollTo({ top: Math.max(0, top - toolbarHeight - 8), behavior: 'auto' });
           }
         });
       }

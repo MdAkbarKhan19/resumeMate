@@ -4,6 +4,12 @@ const nextConfig = {
   swcMinify: true,
   output: 'standalone', // Smaller build output — only includes what's needed
   generateBuildId: async () => `resumemate-${Date.now()}`,
+  // EC2 prod runs on a t3.micro (1GB RAM). The Next build's type-check + lint
+  // pass routinely OOMs there even with 2GB swap. We type-check locally
+  // (npm run type-check) and lint locally, so skipping them at build time is
+  // safe and keeps prod deploys reliable.
+  eslint: { ignoreDuringBuilds: true },
+  typescript: { ignoreBuildErrors: true },
   images: {
     domains: ['resumemate-uploads.s3.amazonaws.com', 'resumemate-uploads-3155.s3.amazonaws.com'],
     formats: ['image/avif', 'image/webp'],

@@ -70,30 +70,30 @@ function ResumeSelector({ onSelect }: { onSelect: (id: string) => void }) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-3xl mx-auto px-4">
-        <div className="mb-8 text-center">
-          <DocumentCheckIcon className="h-12 w-12 text-indigo-600 mx-auto mb-4" />
-          <h1 className="text-3xl font-bold text-gray-900">ATS Resume Optimizer</h1>
-          <p className="text-gray-600 mt-2">Select a resume to optimize against a job description</p>
+    <div className="min-h-screen bg-gray-50 py-6 sm:py-8">
+      <div className="max-w-3xl mx-auto px-3 sm:px-4">
+        <div className="mb-6 sm:mb-8 text-center">
+          <DocumentCheckIcon className="h-10 w-10 sm:h-12 sm:w-12 text-indigo-600 mx-auto mb-3 sm:mb-4" />
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">ATS Resume Optimizer</h1>
+          <p className="text-sm sm:text-base text-gray-600 mt-2">Choose a resume to optimize against a job description</p>
         </div>
         <div className="space-y-3">
           {resumes.map((resume) => (
             <button
               key={resume.id}
               onClick={() => onSelect(resume.id)}
-              className="w-full text-left p-4 bg-white rounded-lg shadow-sm border border-gray-200 hover:border-indigo-400 hover:shadow-md transition-all"
+              className="w-full text-left p-3 sm:p-4 bg-white rounded-lg shadow-sm border border-gray-200 hover:border-indigo-400 hover:shadow-md transition-all"
             >
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-medium text-gray-900">{resume.title}</h3>
-                  <p className="text-sm text-gray-500 mt-1">
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-medium text-gray-900 truncate">{resume.title}</h3>
+                  <p className="text-xs sm:text-sm text-gray-500 mt-1 truncate">
                     {resume.personalInfo?.fullName || 'No name'} &middot; Updated {new Date(resume.updatedAt).toLocaleDateString()}
                   </p>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                   {resume.atsScore !== null && (
-                    <span className="text-sm font-medium text-indigo-600">ATS: {resume.atsScore}%</span>
+                    <span className="text-xs sm:text-sm font-medium text-indigo-600 whitespace-nowrap">ATS: {resume.atsScore}%</span>
                   )}
                   <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

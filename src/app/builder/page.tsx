@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { getResume } from '@/hooks/useResumes';
 import { useAI } from '@/hooks/useAI';
-import { Button, Input, Textarea, Card, PageLoading } from '@/components/ui';
+import { Button, Input, Textarea, Card, PageLoading, Modal } from '@/components/ui';
 import { toast } from '@/components/ui/Alert';
 import { ResumeData } from '@/types/resume';
 import { TemplateCustomization, DEFAULT_CUSTOMIZATION } from '@/types/template';
@@ -132,6 +132,11 @@ const BuilderPage: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [isLoadingResume, setIsLoadingResume] = useState(false);
   const [resumeTitle, setResumeTitle] = useState('Untitled Resume');
+  // New-resume name prompt: shows once on first load when there's no ?id in the URL.
+  // Lets the user give the resume a meaningful name up front instead of editing
+  // "Untitled Resume" later. Skipping keeps the default.
+  const [nameModalOpen, setNameModalOpen] = useState(!resumeId);
+  const [nameDraft, setNameDraft] = useState('');
   const [showPreview, setShowPreview] = useState(true);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState('modern-two-column');
@@ -669,6 +674,53 @@ const BuilderPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* New-resume name prompt */}
+      <Modal
+        isOpen={nameModalOpen}
+        onClose={() => setNameModalOpen(false)}
+        title="Name your resume"
+        description="Give this resume a memorable name so it's easy to find later. You can rename it any time."
+        size="sm"
+        showCloseButton={false}
+        closeOnOverlayClick={false}
+      >
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            const v = nameDraft.trim();
+            if (v) setResumeTitle(v);
+            setNameModalOpen(false);
+          }}
+          className="space-y-4"
+        >
+          <Input
+            autoFocus
+            value={nameDraft}
+            onChange={(e) => setNameDraft(e.target.value)}
+            placeholder="e.g. Software Engineer — Acme Corp"
+            maxLength={80}
+          />
+          <div className="flex flex-col sm:flex-row gap-2 sm:justify-end">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setNameModalOpen(false)}
+              className="w-full sm:w-auto"
+            >
+              Skip for now
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+              disabled={!nameDraft.trim()}
+              className="w-full sm:w-auto"
+            >
+              Continue
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
       {/* Agent Progress Bar */}
       <AgentProgressBar
         steps={agentSteps}

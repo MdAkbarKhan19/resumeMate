@@ -240,7 +240,7 @@ const DashboardPage: React.FC = () => {
               </p>
             </div>
             {recentResumes.length > 0 ? (
-              <Link href={`/builder/ats?resumeId=${recentResumes[0].id}`} className="block sm:flex-shrink-0">
+              <Link href="/builder/ats" className="block sm:flex-shrink-0">
                 <button
                   className="w-full sm:w-auto bg-white text-indigo-700 font-semibold hover:bg-indigo-50 rounded-xl shadow-lg px-5 sm:px-6 py-2.5 sm:py-3 text-base sm:text-lg transition-all duration-200"
                 >

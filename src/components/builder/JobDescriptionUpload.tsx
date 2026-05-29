@@ -5,8 +5,14 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { DocumentTextIcon, ArrowUpTrayIcon, SparklesIcon } from '@heroicons/react/24/outline';
+import { DocumentTextIcon, ArrowUpTrayIcon, SparklesIcon, LinkIcon } from '@heroicons/react/24/outline';
 import { authenticatedFetch } from '@/lib/api-client';
+
+const SUPPORTED_JOB_URL = /^https?:\/\/([a-z0-9-]+\.)*(linkedin\.com|indeed\.com|indeed\.co\.in)\//i;
+// Naukri ships a SPA shell with no JD content in the initial HTML — a plain
+// server fetch will never see the description. Detect it up-front so users
+// don't wait for a guaranteed parse failure.
+const NAUKRI_URL = /^https?:\/\/([a-z0-9-]+\.)*naukri\.com\//i;
 
 interface JobDescriptionUploadProps {
   resumeId: string;
@@ -24,7 +30,45 @@ export default function JobDescriptionUpload({
   const [companyName, setCompanyName] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [uploadMode, setUploadMode] = useState<'paste' | 'upload'>('paste');
+  const [jdUrl, setJdUrl] = useState('');
+  const [isFetchingUrl, setIsFetchingUrl] = useState(false);
+  const [urlError, setUrlError] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const trimmedUrl = jdUrl.trim();
+  const urlIsSupported = SUPPORTED_JOB_URL.test(trimmedUrl);
+  const urlIsNaukri = NAUKRI_URL.test(trimmedUrl);
+
+  const handleFetchFromUrl = async () => {
+    const url = jdUrl.trim();
+    if (!url) return;
+    if (!SUPPORTED_JOB_URL.test(url)) {
+      setUrlError('Only LinkedIn, Naukri, and Indeed links are supported.');
+      return;
+    }
+
+    setUrlError(null);
+    setIsFetchingUrl(true);
+    try {
+      const response = await authenticatedFetch('/api/jd/fetch-url', {
+        method: 'POST',
+        body: JSON.stringify({ url }),
+      });
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        setUrlError(data?.error?.message || 'Could not fetch this job page. Please paste the JD text instead.');
+        return;
+      }
+      const { title, company, description } = data.data || {};
+      if (description) setJobDescription(description);
+      if (title && !jobTitle) setJobTitle(title);
+      if (company && !companyName) setCompanyName(company);
+    } catch (err) {
+      setUrlError('Could not reach the job site. Please paste the JD text instead.');
+    } finally {
+      setIsFetchingUrl(false);
+    }
+  };
 
   // Sync state from the actual DOM value (handles paste, autofill, drag-drop, etc.)
   const syncFromDom = useCallback(() => {
@@ -163,6 +207,59 @@ export default function JobDescriptionUpload({
         </div>
       </div>
 
+      {/* URL Fetch — only meaningful in paste mode */}
+      {uploadMode === 'paste' && (
+        <div className="mb-4 rounded-lg border border-indigo-100 bg-indigo-50/50 p-3">
+          <label htmlFor="jdUrl" className="block text-sm font-medium text-gray-700 mb-2">
+            <LinkIcon className="h-4 w-4 inline-block mr-1 -mt-0.5" />
+            Paste a job link (LinkedIn, Naukri, Indeed)
+          </label>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <input
+              type="url"
+              id="jdUrl"
+              value={jdUrl}
+              onChange={(e) => {
+                setJdUrl(e.target.value);
+                if (urlError) setUrlError(null);
+              }}
+              placeholder="https://www.linkedin.com/jobs/view/..."
+              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+              disabled={isFetchingUrl || isAnalyzing}
+            />
+            <button
+              type="button"
+              onClick={handleFetchFromUrl}
+              disabled={!urlIsSupported || urlIsNaukri || isFetchingUrl || isAnalyzing}
+              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {isFetchingUrl ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  Fetching...
+                </>
+              ) : (
+                'Fetch JD'
+              )}
+            </button>
+          </div>
+          {urlError && (
+            <p className="text-xs text-red-600 mt-2">{urlError}</p>
+          )}
+          {!urlError && urlIsNaukri && (
+            <p className="text-xs text-amber-700 mt-2">
+              Naukri loads the JD with JavaScript and can&apos;t be fetched automatically.
+              Open the job, copy the description, and paste it below.
+            </p>
+          )}
+          {!urlError && jdUrl && !urlIsSupported && !urlIsNaukri && (
+            <p className="text-xs text-gray-500 mt-2">
+              Supported: LinkedIn and Indeed. (Naukri requires paste.)
+            </p>
+          )}
+        </div>
+      )}
+
       {/* Input Area */}
       {uploadMode === 'paste' ? (
         <div className="mb-4">
@@ -251,6 +348,8 @@ export default function JobDescriptionUpload({
               setJobDescription('');
               setJobTitle('');
               setCompanyName('');
+              setJdUrl('');
+              setUrlError(null);
             }}
             disabled={isAnalyzing}
             className="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"

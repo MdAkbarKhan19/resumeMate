@@ -155,7 +155,7 @@ export default function JobDescriptionUpload({
           onClick={() => setUploadMode('paste')}
           className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
             uploadMode === 'paste'
-              ? 'bg-emerald-600 text-white'
+              ? 'bg-amber-600 text-white'
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           }`}
         >
@@ -166,7 +166,7 @@ export default function JobDescriptionUpload({
           onClick={() => setUploadMode('upload')}
           className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
             uploadMode === 'upload'
-              ? 'bg-emerald-600 text-white'
+              ? 'bg-amber-600 text-white'
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           }`}
         >
@@ -187,7 +187,7 @@ export default function JobDescriptionUpload({
             value={jobTitle}
             onChange={(e) => setJobTitle(e.target.value)}
             placeholder="e.g., Senior Software Engineer"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
             disabled={isAnalyzing}
           />
         </div>
@@ -201,7 +201,7 @@ export default function JobDescriptionUpload({
             value={companyName}
             onChange={(e) => setCompanyName(e.target.value)}
             placeholder="e.g., Google"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
             disabled={isAnalyzing}
           />
         </div>
@@ -209,7 +209,7 @@ export default function JobDescriptionUpload({
 
       {/* URL Fetch — only meaningful in paste mode */}
       {uploadMode === 'paste' && (
-        <div className="mb-4 rounded-lg border border-emerald-100 bg-emerald-50/50 p-3">
+        <div className="mb-4 rounded-lg border border-amber-100 bg-amber-50/50 p-3">
           <label htmlFor="jdUrl" className="block text-sm font-medium text-gray-700 mb-2">
             <LinkIcon className="h-4 w-4 inline-block mr-1 -mt-0.5" />
             Paste a job link (LinkedIn, Naukri, Indeed)
@@ -224,14 +224,14 @@ export default function JobDescriptionUpload({
                 if (urlError) setUrlError(null);
               }}
               placeholder="https://www.linkedin.com/jobs/view/..."
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm"
+              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm"
               disabled={isFetchingUrl || isAnalyzing}
             />
             <button
               type="button"
               onClick={handleFetchFromUrl}
               disabled={!urlIsSupported || urlIsNaukri || isFetchingUrl || isAnalyzing}
-              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isFetchingUrl ? (
                 <>
@@ -282,11 +282,11 @@ export default function JobDescriptionUpload({
             }}
             placeholder="Paste the full job description here including requirements, responsibilities, and qualifications..."
             rows={12}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none"
             disabled={isAnalyzing}
           />
           <div className="flex justify-between items-center mt-2">
-            <span className={`text-sm ${isValid ? 'text-green-600' : 'text-orange-600'}`}>
+            <span className={`text-sm ${isValid ? 'text-amber-600' : 'text-orange-600'}`}>
               {characterCount} / {minCharacters} characters minimum
             </span>
             {characterCount > 0 && !isValid && (
@@ -301,10 +301,10 @@ export default function JobDescriptionUpload({
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Upload Job Description
           </label>
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-emerald-400 transition-colors">
+          <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-amber-400 transition-colors">
             <ArrowUpTrayIcon className="h-12 w-12 text-gray-400 mx-auto mb-3" />
             <label htmlFor="fileUpload" className="cursor-pointer">
-              <span className="text-emerald-600 hover:text-emerald-700 font-medium">
+              <span className="text-amber-600 hover:text-amber-700 font-medium">
                 Click to upload
               </span>
               <span className="text-gray-600"> or drag and drop</span>
@@ -327,7 +327,7 @@ export default function JobDescriptionUpload({
         <button
           onClick={handleAnalyze}
           disabled={!isValid || isAnalyzing}
-          className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          className="flex-1 bg-amber-600 hover:bg-amber-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
           {isAnalyzing ? (
             <>

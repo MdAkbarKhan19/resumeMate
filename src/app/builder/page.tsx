@@ -788,7 +788,7 @@ const BuilderPage: React.FC = () => {
                   variant="secondary"
                   size="sm"
                   onClick={() => router.push(`/builder/ats?resumeId=${resumeId}`)}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white border-0"
+                  className="bg-amber-600 hover:bg-amber-700 text-white border-0"
                 >
                   ATS Score
                 </Button>
@@ -810,7 +810,7 @@ const BuilderPage: React.FC = () => {
                     isActive
                       ? 'bg-white text-blue-600 border-blue-600'
                       : isComplete
-                        ? 'text-green-600 border-transparent hover:bg-gray-100'
+                        ? 'text-amber-600 border-transparent hover:bg-gray-100'
                         : 'text-gray-500 border-transparent hover:bg-gray-100 hover:text-gray-700'
                   }`}
                 >
@@ -819,7 +819,7 @@ const BuilderPage: React.FC = () => {
                   </svg>
                   {section.label}
                   {isComplete && !isActive && (
-                    <svg className="w-3 h-3 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-3 h-3 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
                   )}
@@ -870,7 +870,7 @@ const BuilderPage: React.FC = () => {
                   />
                   <div className="flex justify-between text-xs text-gray-400">
                     <span>{resumeData.summary.length} characters</span>
-                    <span className={resumeData.summary.length > 100 && resumeData.summary.length < 400 ? 'text-green-500' : 'text-orange-500'}>
+                    <span className={resumeData.summary.length > 100 && resumeData.summary.length < 400 ? 'text-amber-500' : 'text-orange-500'}>
                       Recommended: 100-400 characters
                     </span>
                   </div>
@@ -1159,7 +1159,7 @@ function SectionCard({ title, isComplete, isMobileOpen, onMobileToggle, children
         <h3 className="font-semibold text-gray-900 truncate">{title}</h3>
         <div className="flex items-center gap-2 flex-shrink-0">
           {isComplete && (
-            <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+            <svg className="w-4 h-4 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
             </svg>
           )}

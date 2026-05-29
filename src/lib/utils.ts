@@ -101,16 +101,16 @@ export async function copyToClipboard(text: string): Promise<boolean> {
  * Calculate ATS score color
  */
 export function getScoreColor(score: number): string {
-  if (score >= 80) return 'text-green-600';
-  if (score >= 60) return 'text-yellow-600';
-  return 'text-red-600';
+  if (score >= 80) return 'text-amber-600';   // great → brand gold
+  if (score >= 60) return 'text-gray-600';     // ok → neutral
+  return 'text-red-600';                        // poor → red
 }
 
 /**
  * Calculate ATS score background color
  */
 export function getScoreBgColor(score: number): string {
-  if (score >= 80) return 'bg-green-100';
-  if (score >= 60) return 'bg-yellow-100';
+  if (score >= 80) return 'bg-amber-100';
+  if (score >= 60) return 'bg-gray-100';
   return 'bg-red-100';
 }

@@ -6,7 +6,7 @@ import HeroDemo from '@/components/HeroDemo';
 import Reveal from '@/components/landing/Reveal';
 import BeforeAfter from '@/components/landing/BeforeAfter';
 
-const Check = ({ className = 'w-4 h-4 text-emerald-500' }: { className?: string }) => (
+const Check = ({ className = 'w-4 h-4 text-amber-500' }: { className?: string }) => (
   <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
   </svg>
@@ -160,7 +160,7 @@ export default function Home() {
                 <div className="mt-3 flex items-center gap-2 bg-white rounded-lg border border-gray-100 px-3 py-2">
                   <div className="w-7 h-8 rounded bg-red-50 grid place-items-center text-[9px] font-bold text-red-500">PDF</div>
                   <div className="flex-1 min-w-0"><div className="h-1.5 w-24 rounded bg-gray-200 mb-1" /><div className="h-1 w-16 rounded bg-gray-100" /></div>
-                  <span className="text-[10px] font-semibold text-emerald-600">parsed ✓</span>
+                  <span className="text-[10px] font-semibold text-amber-600">parsed ✓</span>
                 </div>
               </div>
             </Reveal>
@@ -179,7 +179,7 @@ export default function Home() {
                 </div>
                 <div className="flex items-center gap-4 bg-white rounded-xl border border-gray-100 p-3">
                   <div className="relative w-16 h-16 flex-shrink-0">
-                    <div className="w-16 h-16 rounded-full" style={{ background: 'conic-gradient(#10b981 230deg, #e5e7eb 230deg)' }} />
+                    <div className="w-16 h-16 rounded-full" style={{ background: 'conic-gradient(#f59e0b 230deg, #e5e7eb 230deg)' }} />
                     <div className="absolute inset-[5px] rounded-full bg-white grid place-items-center"><span className="text-sm font-extrabold text-gray-900">64%</span></div>
                   </div>
                   <div>
@@ -236,7 +236,7 @@ export default function Home() {
                   </div>
                   <div className="mt-3 flex gap-1.5">
                     <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-red-50 text-red-500">PDF</span>
-                    <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-600">No watermark</span>
+                    <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-amber-50 text-amber-600">No watermark</span>
                   </div>
                 </div>
               </div>
@@ -275,7 +275,7 @@ export default function Home() {
                 <ul className="space-y-4">
                   {['Re-tailored to each job description', 'Keywords pulled from the actual JD', 'A live ATS match score', 'You approve every single change', 'Free to start · ₹149 one-time option'].map(t => (
                     <li key={t} className="flex items-start gap-3 text-gray-800 text-[15px] font-medium">
-                      <Check className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" />
+                      <Check className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
                       {t}
                     </li>
                   ))}

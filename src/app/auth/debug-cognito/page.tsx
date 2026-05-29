@@ -143,7 +143,7 @@ export default function AuthDebugPage() {
               <button
                 onClick={testSession}
                 disabled={loading}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+                className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 disabled:opacity-50"
               >
                 Check Session
               </button>
@@ -161,7 +161,7 @@ export default function AuthDebugPage() {
         
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-xl font-semibold mb-4">Debug Logs</h2>
-          <div className="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm space-y-1 max-h-96 overflow-y-auto">
+          <div className="bg-gray-900 text-amber-400 p-4 rounded-lg font-mono text-sm space-y-1 max-h-96 overflow-y-auto">
             {logs.length === 0 ? (
               <div className="text-gray-500">No logs yet...</div>
             ) : (

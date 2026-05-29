@@ -18,7 +18,7 @@ function renderMarkdownBold(text: string): React.ReactNode {
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
   return parts.map((part, i) => {
     const m = part.match(/^\*\*([^*]+)\*\*$/);
-    return m ? <strong key={i} className="font-bold text-emerald-700">{m[1]}</strong> : <span key={i}>{part}</span>;
+    return m ? <strong key={i} className="font-bold text-amber-700">{m[1]}</strong> : <span key={i}>{part}</span>;
   });
 }
 
@@ -46,7 +46,7 @@ function ResumeSelector({ onSelect }: { onSelect: (id: string) => void }) {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600"></div>
       </div>
     );
   }
@@ -60,7 +60,7 @@ function ResumeSelector({ onSelect }: { onSelect: (id: string) => void }) {
           <p className="text-gray-600 mb-6">Create a resume first, then come back to optimize it for ATS.</p>
           <a
             href="/builder"
-            className="inline-flex items-center px-6 py-3 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700"
+            className="inline-flex items-center px-6 py-3 bg-amber-600 text-white font-semibold rounded-lg hover:bg-amber-700"
           >
             Create Resume
           </a>
@@ -73,7 +73,7 @@ function ResumeSelector({ onSelect }: { onSelect: (id: string) => void }) {
     <div className="min-h-screen bg-gray-50 py-6 sm:py-8">
       <div className="max-w-3xl mx-auto px-3 sm:px-4">
         <div className="mb-6 sm:mb-8 text-center">
-          <DocumentCheckIcon className="h-10 w-10 sm:h-12 sm:w-12 text-emerald-600 mx-auto mb-3 sm:mb-4" />
+          <DocumentCheckIcon className="h-10 w-10 sm:h-12 sm:w-12 text-amber-600 mx-auto mb-3 sm:mb-4" />
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">ATS Resume Optimizer</h1>
           <p className="text-sm sm:text-base text-gray-600 mt-2">Choose a resume to optimize against a job description</p>
         </div>
@@ -82,7 +82,7 @@ function ResumeSelector({ onSelect }: { onSelect: (id: string) => void }) {
             <button
               key={resume.id}
               onClick={() => onSelect(resume.id)}
-              className="w-full text-left p-3 sm:p-4 bg-white rounded-lg shadow-sm border border-gray-200 hover:border-emerald-400 hover:shadow-md transition-all"
+              className="w-full text-left p-3 sm:p-4 bg-white rounded-lg shadow-sm border border-gray-200 hover:border-amber-400 hover:shadow-md transition-all"
             >
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0 flex-1">
@@ -93,7 +93,7 @@ function ResumeSelector({ onSelect }: { onSelect: (id: string) => void }) {
                 </div>
                 <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                   {resume.atsScore !== null && (
-                    <span className="text-xs sm:text-sm font-medium text-emerald-600 whitespace-nowrap">ATS: {resume.atsScore}%</span>
+                    <span className="text-xs sm:text-sm font-medium text-amber-600 whitespace-nowrap">ATS: {resume.atsScore}%</span>
                   )}
                   <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -496,7 +496,7 @@ function ATSOptimizationPageContent() {
             Back to Builder
           </button>
           <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-            <DocumentCheckIcon className="h-8 w-8 text-emerald-600" />
+            <DocumentCheckIcon className="h-8 w-8 text-amber-600" />
             ATS Optimization
           </h1>
           <p className="text-gray-600 mt-2">
@@ -506,14 +506,14 @@ function ATSOptimizationPageContent() {
 
         {/* Success/Error Messages */}
         {successMessage && (
-          <div className="mb-6 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg">
+          <div className="mb-6 bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-lg">
             <div className="flex items-center justify-between">
               <span>{successMessage}</span>
               {(successMessage.includes('applied') || successMessage.includes('updated')) && (
                 <div className="flex gap-2 ml-4">
                   <button
                     onClick={() => window.location.href = `/builder?id=${resumeId}`}
-                    className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors"
+                    className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium rounded-lg transition-colors"
                   >
                     View in Builder
                   </button>
@@ -561,10 +561,10 @@ function ATSOptimizationPageContent() {
                 </div>
 
                 {/* Summary */}
-                <div className="mb-6 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-4">
+                <div className="mb-6 bg-gradient-to-r from-amber-50 to-blue-50 rounded-lg p-4">
                   <div className="grid grid-cols-2 gap-4 text-center">
                     <div>
-                      <div className="text-2xl font-bold text-green-600">
+                      <div className="text-2xl font-bold text-amber-600">
                         {enhancementResult.summary.skillsAdded}
                       </div>
                       <div className="text-sm text-gray-600">Skills Added</div>
@@ -601,7 +601,7 @@ function ATSOptimizationPageContent() {
                           {/* Type Badge */}
                           <div className="flex-shrink-0">
                             {change.type === 'added' && (
-                              <span className="inline-block bg-green-100 text-green-800 text-xs font-semibold px-2 py-1 rounded">
+                              <span className="inline-block bg-amber-100 text-amber-800 text-xs font-semibold px-2 py-1 rounded">
                                 Added
                               </span>
                             )}
@@ -639,13 +639,13 @@ function ATSOptimizationPageContent() {
                                   value={editText}
                                   onChange={(e) => setEditText(e.target.value)}
                                   rows={3}
-                                  className="w-full px-3 py-2 border border-emerald-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm resize-none"
+                                  className="w-full px-3 py-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm resize-none"
                                   autoFocus
                                 />
                                 <div className="flex gap-2 mt-2">
                                   <button
                                     onClick={() => saveEdit(index)}
-                                    className="px-3 py-1 bg-emerald-600 text-white text-xs font-medium rounded-md hover:bg-emerald-700 flex items-center gap-1"
+                                    className="px-3 py-1 bg-amber-600 text-white text-xs font-medium rounded-md hover:bg-amber-700 flex items-center gap-1"
                                   >
                                     <CheckIcon className="h-3 w-3" />
                                     Save
@@ -682,7 +682,7 @@ function ATSOptimizationPageContent() {
                               {(change.type === 'modified' || change.type === 'enhanced') && !isRejected && (
                                 <button
                                   onClick={() => startEditing(index, displayText)}
-                                  className="p-1.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-md transition-colors"
+                                  className="p-1.5 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-md transition-colors"
                                   title="Edit this change"
                                 >
                                   <PencilSquareIcon className="h-4 w-4" />
@@ -693,7 +693,7 @@ function ATSOptimizationPageContent() {
                                 onClick={() => toggleReject(index)}
                                 className={`p-1.5 rounded-md transition-colors ${
                                   isRejected
-                                    ? 'text-green-600 hover:text-green-700 hover:bg-green-50'
+                                    ? 'text-amber-600 hover:text-amber-700 hover:bg-amber-50'
                                     : 'text-gray-400 hover:text-red-600 hover:bg-red-50'
                                 }`}
                                 title={isRejected ? 'Undo reject (accept this change)' : 'Reject this change'}
@@ -717,7 +717,7 @@ function ATSOptimizationPageContent() {
                   <button
                     onClick={() => applyEnhancements(enhancementResult.enhancedResume)}
                     disabled={getAcceptedChangeCount() === 0}
-                    className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 bg-amber-600 hover:bg-amber-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Apply {getAcceptedChangeCount()} Change{getAcceptedChangeCount() !== 1 ? 's' : ''} to Resume
                   </button>
@@ -752,8 +752,8 @@ function ATSOptimizationPageContent() {
           <h2 className="text-2xl font-bold text-gray-900 mb-6">How ATS Optimization Works</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center">
-              <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-emerald-600">1</span>
+              <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl font-bold text-amber-600">1</span>
               </div>
               <h3 className="font-semibold text-gray-900 mb-2">Upload Job Description</h3>
               <p className="text-sm text-gray-600">
@@ -761,8 +761,8 @@ function ATSOptimizationPageContent() {
               </p>
             </div>
             <div className="text-center">
-              <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-emerald-600">2</span>
+              <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl font-bold text-amber-600">2</span>
               </div>
               <h3 className="font-semibold text-gray-900 mb-2">AI Analysis</h3>
               <p className="text-sm text-gray-600">
@@ -770,8 +770,8 @@ function ATSOptimizationPageContent() {
               </p>
             </div>
             <div className="text-center">
-              <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-emerald-600">3</span>
+              <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl font-bold text-amber-600">3</span>
               </div>
               <h3 className="font-semibold text-gray-900 mb-2">Auto-Enhance</h3>
               <p className="text-sm text-gray-600">

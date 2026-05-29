@@ -102,13 +102,13 @@ export default function BulletEditorWithAI({ value, onChange, context }: BulletE
               </div>
 
               {/* Main Improved Version */}
-              <div className="mb-4 p-4 bg-green-50 border-2 border-green-200 rounded-lg">
+              <div className="mb-4 p-4 bg-amber-50 border-2 border-amber-200 rounded-lg">
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-sm font-medium text-green-800">✨ Recommended:</p>
+                  <p className="text-sm font-medium text-amber-800">✨ Recommended:</p>
                   <Button
                     size="sm"
                     onClick={() => applySuggestion(suggestions.improved)}
-                    className="bg-green-600 hover:bg-green-700"
+                    className="bg-amber-600 hover:bg-amber-700"
                   >
                     ✓ Use This
                   </Button>

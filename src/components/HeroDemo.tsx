@@ -74,11 +74,11 @@ export default function HeroDemo() {
           <div className="space-y-2.5">
             {['Contact details', 'Work experience', 'Education', 'Skills'].map((f, i) => (
               <div key={f} className="flex items-center gap-2" style={{ animation: step === 0 ? `slideUp 0.4s ease-out ${i * 0.18}s both` : undefined }}>
-                <span className="w-4 h-4 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                  <svg className="w-2.5 h-2.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                <span className="w-4 h-4 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                  <svg className="w-2.5 h-2.5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
                 </span>
                 <span className="text-sm text-gray-700">{f}</span>
-                <span className="ml-auto text-[10px] text-emerald-600 font-medium">imported</span>
+                <span className="ml-auto text-[10px] text-amber-600 font-medium">imported</span>
               </div>
             ))}
           </div>
@@ -90,7 +90,7 @@ export default function HeroDemo() {
           <div className="flex items-start gap-4 mb-4">
             {/* ATS ring */}
             <div className="relative w-20 h-20 flex-shrink-0">
-              <div className="w-20 h-20 rounded-full" style={{ background: `conic-gradient(#10b981 ${ringDeg}deg, #e5e7eb ${ringDeg}deg)` }} />
+              <div className="w-20 h-20 rounded-full" style={{ background: `conic-gradient(#f59e0b ${ringDeg}deg, #e5e7eb ${ringDeg}deg)` }} />
               <div className="absolute inset-[6px] rounded-full bg-white flex flex-col items-center justify-center">
                 <span className="text-lg font-extrabold text-gray-900 leading-none">{score}%</span>
                 <span className="text-[9px] text-gray-400 font-medium">ATS match</span>
@@ -129,7 +129,7 @@ export default function HeroDemo() {
               <div className="h-1 w-full rounded bg-gray-100" />
             </div>
           </div>
-          <div className="flex items-center justify-center gap-2 text-sm font-semibold text-emerald-600">
+          <div className="flex items-center justify-center gap-2 text-sm font-semibold text-amber-600">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             Recruiter-ready PDF
           </div>

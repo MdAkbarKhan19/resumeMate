@@ -17,7 +17,7 @@ interface SkillsSectionProps {
 
 const CATEGORY_COLORS: Record<string, { bg: string; text: string; border: string }> = {
   technical: { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
-  soft: { bg: 'bg-green-50', text: 'text-green-700', border: 'border-green-200' },
+  soft: { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' },
   language: { bg: 'bg-slate-100', text: 'text-slate-700', border: 'border-slate-300' },
   tools: { bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-200' },
 };

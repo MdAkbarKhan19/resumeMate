@@ -135,9 +135,9 @@ export default function AIFeaturesPanel({ resumeData, onApplySuggestion, resumeI
             </ul>
           </div>
           
-          <div className="p-4 bg-green-50 rounded-lg">
-            <h4 className="font-semibold text-green-900 mb-2">✅ Quick Stats</h4>
-            <div className="space-y-2 text-sm text-green-800">
+          <div className="p-4 bg-amber-50 rounded-lg">
+            <h4 className="font-semibold text-amber-900 mb-2">✅ Quick Stats</h4>
+            <div className="space-y-2 text-sm text-amber-800">
               <div className="flex justify-between">
                 <span>Summary:</span>
                 <span className="font-medium">
@@ -201,7 +201,7 @@ export default function AIFeaturesPanel({ resumeData, onApplySuggestion, resumeI
                   <span
                     className={`text-3xl font-bold ${
                       atsAnalysis.score >= 80
-                        ? 'text-green-600'
+                        ? 'text-amber-600'
                         : atsAnalysis.score >= 60
                         ? 'text-yellow-600'
                         : 'text-red-600'
@@ -214,7 +214,7 @@ export default function AIFeaturesPanel({ resumeData, onApplySuggestion, resumeI
                   <div
                     className={`h-2 rounded-full ${
                       atsAnalysis.score >= 80
-                        ? 'bg-green-600'
+                        ? 'bg-amber-600'
                         : atsAnalysis.score >= 60
                         ? 'bg-yellow-600'
                         : 'bg-red-600'

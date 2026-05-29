@@ -90,7 +90,7 @@ const PAYMENT_ICONS: Record<IconKey, React.ReactNode> = {
 const renderFeatureCell = (val: string | boolean) => {
   if (val === true) {
     return (
-      <span className="inline-flex w-5 h-5 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
+      <span className="inline-flex w-5 h-5 items-center justify-center rounded-full bg-amber-50 text-amber-600">
         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
         </svg>
@@ -132,9 +132,9 @@ const PricingPage: React.FC = () => {
           <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white">
             Pricing that fits your job hunt
           </h1>
-          <p className="text-xl md:text-2xl text-emerald-100 max-w-3xl mx-auto">
+          <p className="text-xl md:text-2xl text-amber-100 max-w-3xl mx-auto">
             Pay once for a single application, or subscribe for unlimited.
-            <span className="block mt-2 text-base text-emerald-200">
+            <span className="block mt-2 text-base text-amber-200">
               From ₹149 · Best price guaranteed · Cancel anytime
             </span>
           </p>
@@ -149,20 +149,20 @@ const PricingPage: React.FC = () => {
               key={plan.id}
               className={`relative bg-white rounded-2xl transition-all flex flex-col ${
                 plan.popular
-                  ? 'border-2 border-emerald-300 shadow-lg shadow-emerald-200/40 hover:-translate-y-1'
+                  ? 'border-2 border-amber-300 shadow-lg shadow-amber-200/40 hover:-translate-y-1'
                   : 'border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-0.5'
               }`}
             >
               {plan.popular && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="bg-gradient-to-r from-emerald-600 to-emerald-600 text-white px-3 py-1 rounded-full text-xs font-semibold shadow shadow-emerald-500/25 whitespace-nowrap">
+                  <span className="bg-gradient-to-r from-amber-600 to-amber-600 text-white px-3 py-1 rounded-full text-xs font-semibold shadow shadow-amber-500/25 whitespace-nowrap">
                     Most Popular
                   </span>
                 </div>
               )}
               {plan.savingsLabel && !plan.popular && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="bg-emerald-500 text-white px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap">
+                  <span className="bg-amber-500 text-white px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap">
                     {plan.savingsLabel}
                   </span>
                 </div>
@@ -193,8 +193,8 @@ const PricingPage: React.FC = () => {
                 <ul className="space-y-2 mb-6 flex-1">
                   {plan.features.map((feature, i) => (
                     <li key={i} className="flex items-start gap-2">
-                      <span className="flex-shrink-0 w-4 h-4 mt-0.5 bg-emerald-50 rounded-full inline-flex items-center justify-center">
-                        <svg className="w-2.5 h-2.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                      <span className="flex-shrink-0 w-4 h-4 mt-0.5 bg-amber-50 rounded-full inline-flex items-center justify-center">
+                        <svg className="w-2.5 h-2.5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                         </svg>
                       </span>
@@ -208,7 +208,7 @@ const PricingPage: React.FC = () => {
                     <Button
                       variant="outline"
                       size="md"
-                      className="w-full bg-emerald-50 text-emerald-700 border-emerald-100 hover:bg-emerald-100"
+                      className="w-full bg-amber-50 text-amber-700 border-amber-100 hover:bg-amber-100"
                     >
                       Get Started Free
                     </Button>
@@ -220,8 +220,8 @@ const PricingPage: React.FC = () => {
                     variant={plan.popular ? 'primary' : 'outline'}
                     className={`w-full ${
                       plan.popular
-                        ? 'bg-gradient-to-r from-emerald-600 to-emerald-600 text-white hover:from-emerald-700 hover:to-emerald-700 shadow-md shadow-emerald-500/25 border-0'
-                        : 'bg-emerald-50 text-emerald-700 border-emerald-100 hover:bg-emerald-100'
+                        ? 'bg-gradient-to-r from-amber-600 to-amber-600 text-white hover:from-amber-700 hover:to-amber-700 shadow-md shadow-amber-500/25 border-0'
+                        : 'bg-amber-50 text-amber-700 border-amber-100 hover:bg-amber-100'
                     }`}
                     buttonText={plan.kind === 'one_time' ? `Buy for ₹${plan.displayAmount}` : `Choose ${plan.name}`}
                   />
@@ -233,7 +233,7 @@ const PricingPage: React.FC = () => {
 
         {/* Best-price-guaranteed badge */}
         <div className="mb-12 bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 text-center">
-          <span className="inline-flex w-10 h-10 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 flex-shrink-0">
+          <span className="inline-flex w-10 h-10 items-center justify-center rounded-full bg-amber-50 text-amber-600 flex-shrink-0">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
@@ -260,7 +260,7 @@ const PricingPage: React.FC = () => {
                       <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Feature</th>
                       <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">Free</th>
                       <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">Pack ₹149</th>
-                      <th className="px-6 py-4 text-center text-sm font-semibold text-emerald-700">Pro</th>
+                      <th className="px-6 py-4 text-center text-sm font-semibold text-amber-700">Pro</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
@@ -290,7 +290,7 @@ const PricingPage: React.FC = () => {
                 key={method.name}
                 className="flex items-center gap-2.5 bg-white px-5 py-3 rounded-xl border border-gray-100 shadow-sm text-gray-700"
               >
-                <span className="text-emerald-600">{PAYMENT_ICONS[method.icon]}</span>
+                <span className="text-amber-600">{PAYMENT_ICONS[method.icon]}</span>
                 <span className="font-medium text-sm">{method.name}</span>
               </div>
             ))}
@@ -337,13 +337,13 @@ const PricingPage: React.FC = () => {
           <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">
             Try it free — no card needed
           </h2>
-          <p className="text-lg text-emerald-100 mb-8 max-w-2xl mx-auto">
+          <p className="text-lg text-amber-100 mb-8 max-w-2xl mx-auto">
             Upload your existing resume or start from scratch. Try an ATS
             optimization on us — see the score jump before you pay a rupee.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/auth/signup">
-              <Button variant="secondary" size="lg" className="bg-white text-emerald-700 hover:bg-emerald-50 shadow-lg">
+              <Button variant="secondary" size="lg" className="bg-white text-amber-700 hover:bg-amber-50 shadow-lg">
                 Start Free
               </Button>
             </Link>

@@ -127,7 +127,7 @@ export default function ExperienceSection({
                     <div className="flex items-center gap-2">
                       <span className="font-semibold text-gray-900 truncate">{exp.jobTitle || 'Untitled Position'}</span>
                       {exp.current && (
-                        <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full font-medium">Current</span>
+                        <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-xs rounded-full font-medium">Current</span>
                       )}
                     </div>
                     <p className="text-sm text-gray-500 truncate">

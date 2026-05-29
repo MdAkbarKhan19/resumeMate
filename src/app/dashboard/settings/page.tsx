@@ -177,9 +177,9 @@ const SettingsPage: React.FC = () => {
       case 'FREE':
         return 'bg-gray-100 text-gray-600';
       case 'TIER1':
-        return 'bg-emerald-50 text-emerald-700';
+        return 'bg-amber-50 text-amber-700';
       case 'TIER2':
-        return 'bg-emerald-50 text-emerald-700';
+        return 'bg-amber-50 text-amber-700';
       default:
         return 'bg-gray-100 text-gray-600';
     }
@@ -227,7 +227,7 @@ const SettingsPage: React.FC = () => {
                   font-medium text-sm transition-all
                   ${
                     activeTab === tab.id
-                      ? 'bg-white text-emerald-700 font-semibold rounded-lg px-4 py-2 shadow-sm'
+                      ? 'bg-white text-amber-700 font-semibold rounded-lg px-4 py-2 shadow-sm'
                       : 'text-gray-500 hover:text-gray-700 rounded-lg px-4 py-2 hover:bg-gray-50'
                   }
                 `}
@@ -251,7 +251,7 @@ const SettingsPage: React.FC = () => {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
                     <input
-                      className="w-full px-4 py-2.5 bg-white border border-gray-200 text-gray-900 placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 outline-none transition-all"
+                      className="w-full px-4 py-2.5 bg-white border border-gray-200 text-gray-900 placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 outline-none transition-all"
                       value={profileForm.name}
                       onChange={(e) =>
                         setProfileForm({ ...profileForm, name: e.target.value })
@@ -262,7 +262,7 @@ const SettingsPage: React.FC = () => {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                     <input
-                      className="w-full px-4 py-2.5 bg-white border border-gray-200 text-gray-900 placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 outline-none transition-all"
+                      className="w-full px-4 py-2.5 bg-white border border-gray-200 text-gray-900 placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 outline-none transition-all"
                       type="email"
                       value={profileForm.email}
                       onChange={(e) =>
@@ -274,7 +274,7 @@ const SettingsPage: React.FC = () => {
                   <button
                     type="submit"
                     disabled={isUpdating}
-                    className="bg-gradient-to-r from-emerald-600 to-emerald-600 text-white rounded-xl px-6 py-2.5 font-medium hover:from-emerald-500 hover:to-emerald-500 transition-all disabled:opacity-50"
+                    className="bg-gradient-to-r from-amber-600 to-amber-600 text-white rounded-xl px-6 py-2.5 font-medium hover:from-amber-500 hover:to-amber-500 transition-all disabled:opacity-50"
                   >
                     {isUpdating ? 'Saving...' : 'Save Changes'}
                   </button>
@@ -291,7 +291,7 @@ const SettingsPage: React.FC = () => {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
                     <input
-                      className="w-full px-4 py-2.5 bg-white border border-gray-200 text-gray-900 placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 outline-none transition-all"
+                      className="w-full px-4 py-2.5 bg-white border border-gray-200 text-gray-900 placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 outline-none transition-all"
                       type="password"
                       value={passwordForm.currentPassword}
                       onChange={(e) =>
@@ -306,7 +306,7 @@ const SettingsPage: React.FC = () => {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
                     <input
-                      className="w-full px-4 py-2.5 bg-white border border-gray-200 text-gray-900 placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 outline-none transition-all"
+                      className="w-full px-4 py-2.5 bg-white border border-gray-200 text-gray-900 placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 outline-none transition-all"
                       type="password"
                       value={passwordForm.newPassword}
                       onChange={(e) =>
@@ -322,7 +322,7 @@ const SettingsPage: React.FC = () => {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
                     <input
-                      className="w-full px-4 py-2.5 bg-white border border-gray-200 text-gray-900 placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 outline-none transition-all"
+                      className="w-full px-4 py-2.5 bg-white border border-gray-200 text-gray-900 placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 outline-none transition-all"
                       type="password"
                       value={passwordForm.confirmPassword}
                       onChange={(e) =>
@@ -337,7 +337,7 @@ const SettingsPage: React.FC = () => {
                   <button
                     type="submit"
                     disabled={isUpdating}
-                    className="bg-gradient-to-r from-emerald-600 to-emerald-600 text-white rounded-xl px-6 py-2.5 font-medium hover:from-emerald-500 hover:to-emerald-500 transition-all disabled:opacity-50"
+                    className="bg-gradient-to-r from-amber-600 to-amber-600 text-white rounded-xl px-6 py-2.5 font-medium hover:from-amber-500 hover:to-amber-500 transition-all disabled:opacity-50"
                   >
                     {isUpdating ? 'Changing...' : 'Change Password'}
                   </button>
@@ -385,7 +385,7 @@ const SettingsPage: React.FC = () => {
                 </div>
                 {user.planType !== 'TIER2' && (
                   <Link href="/pricing">
-                    <button className="bg-gradient-to-r from-emerald-600 to-emerald-600 text-white rounded-xl px-6 py-2.5 font-medium hover:from-emerald-500 hover:to-emerald-500 transition-all">
+                    <button className="bg-gradient-to-r from-amber-600 to-amber-600 text-white rounded-xl px-6 py-2.5 font-medium hover:from-amber-500 hover:to-amber-500 transition-all">
                       Upgrade Plan
                     </button>
                   </Link>
@@ -397,7 +397,7 @@ const SettingsPage: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-gray-500">Status</p>
-                      <p className="font-semibold text-emerald-600">Active</p>
+                      <p className="font-semibold text-amber-600">Active</p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">Next Billing Date</p>
@@ -436,7 +436,7 @@ const SettingsPage: React.FC = () => {
                 </div>
                 {user.planType !== 'TIER2' && user.resumeCredits === 0 && (
                   <Link href="/pricing">
-                    <button className="bg-gradient-to-r from-emerald-600 to-emerald-600 text-white rounded-xl px-6 py-2.5 font-medium hover:from-emerald-500 hover:to-emerald-500 transition-all">
+                    <button className="bg-gradient-to-r from-amber-600 to-amber-600 text-white rounded-xl px-6 py-2.5 font-medium hover:from-amber-500 hover:to-amber-500 transition-all">
                       Get More Credits
                     </button>
                   </Link>
@@ -476,7 +476,7 @@ const SettingsPage: React.FC = () => {
                     </div>
                     <div className="w-full bg-gray-100 rounded-full h-2">
                       <div
-                        className="bg-gradient-to-r from-emerald-500 to-emerald-500 h-2 rounded-full transition-all"
+                        className="bg-gradient-to-r from-amber-500 to-amber-500 h-2 rounded-full transition-all"
                         style={{
                           width:
                             user.planType === 'FREE'
@@ -502,7 +502,7 @@ const SettingsPage: React.FC = () => {
                     </div>
                     <div className="w-full bg-gray-100 rounded-full h-2">
                       <div
-                        className="bg-gradient-to-r from-emerald-400 to-emerald-500 h-2 rounded-full transition-all"
+                        className="bg-gradient-to-r from-amber-400 to-amber-500 h-2 rounded-full transition-all"
                         style={{
                           width:
                             user.planType === 'FREE'
@@ -528,7 +528,7 @@ const SettingsPage: React.FC = () => {
                     </div>
                     <div className="w-full bg-gray-100 rounded-full h-2">
                       <div
-                        className="bg-gradient-to-r from-emerald-400 to-emerald-500 h-2 rounded-full transition-all"
+                        className="bg-gradient-to-r from-amber-400 to-amber-500 h-2 rounded-full transition-all"
                         style={{
                           width:
                             user.planType === 'FREE'
@@ -572,7 +572,7 @@ const SettingsPage: React.FC = () => {
                         operations. Upgrade to get unlimited AI assistance.
                       </p>
                       <Link href="/pricing">
-                        <button className="bg-gradient-to-r from-emerald-600 to-emerald-600 text-white rounded-xl px-6 py-2.5 font-medium hover:from-emerald-500 hover:to-emerald-500 transition-all">
+                        <button className="bg-gradient-to-r from-amber-600 to-amber-600 text-white rounded-xl px-6 py-2.5 font-medium hover:from-amber-500 hover:to-amber-500 transition-all">
                           Upgrade Now
                         </button>
                       </Link>

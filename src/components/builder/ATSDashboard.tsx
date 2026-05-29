@@ -63,10 +63,10 @@ export default function ATSDashboard({
   return (
     <div className="space-y-6">
       {/* Main Score Card */}
-      <div className="bg-gradient-to-br from-blue-50 to-emerald-50 rounded-lg shadow-lg p-8">
+      <div className="bg-gradient-to-br from-blue-50 to-amber-50 rounded-lg shadow-lg p-8">
         {isLoading ? (
           <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600 mx-auto mb-4"></div>
             <p className="text-gray-600">Analyzing resume...</p>
           </div>
         ) : (
@@ -74,7 +74,7 @@ export default function ATSDashboard({
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold text-gray-900">ATS Compatibility Score</h2>
               {hasComparison && improvement && improvement > 0 && (
-                <div className="flex items-center gap-2 text-green-600 bg-green-50 px-4 py-2 rounded-full">
+                <div className="flex items-center gap-2 text-amber-600 bg-amber-50 px-4 py-2 rounded-full">
                   <ArrowTrendingUpIcon className="h-5 w-5" />
                   <span className="font-semibold">+{improvement} points</span>
                 </div>
@@ -116,7 +116,7 @@ export default function ATSDashboard({
             <div className="mb-6">
               <button
                 onClick={() => setShowDetails(!showDetails)}
-                className="text-emerald-600 hover:text-emerald-800 text-sm font-medium flex items-center gap-2 mx-auto"
+                className="text-amber-600 hover:text-amber-800 text-sm font-medium flex items-center gap-2 mx-auto"
               >
                 {showDetails ? 'Hide' : 'Show'} Detailed Breakdown
                 <svg
@@ -158,7 +158,7 @@ export default function ATSDashboard({
               <button
                 onClick={onEnhance}
                 disabled={isLoading}
-                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <SparklesIcon className="h-5 w-5" />
                 AI Auto-Enhance Resume
@@ -172,13 +172,13 @@ export default function ATSDashboard({
       {hasComparison && keyImprovements && keyImprovements.length > 0 && (
         <div className="bg-white rounded-lg shadow-md p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <ArrowTrendingUpIcon className="h-5 w-5 text-green-600" />
+            <ArrowTrendingUpIcon className="h-5 w-5 text-amber-600" />
             Key Improvements Made
           </h3>
           <ul className="space-y-2">
             {keyImprovements.map((improvement, index) => (
               <li key={index} className="flex items-start gap-2 text-gray-700">
-                <CheckCircleIcon className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                <CheckCircleIcon className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
                 <span className="text-sm">{improvement}</span>
               </li>
             ))}
@@ -190,14 +190,14 @@ export default function ATSDashboard({
       {currentScore && currentScore.matchedKeywords.length > 0 && (
         <div className="bg-white rounded-lg shadow-md p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <CheckCircleIcon className="h-5 w-5 text-green-600" />
+            <CheckCircleIcon className="h-5 w-5 text-amber-600" />
             Matched Keywords ({currentScore.matchedKeywords.length})
           </h3>
           <div className="flex flex-wrap gap-2">
             {currentScore.matchedKeywords.slice(0, 20).map((keyword, index) => (
               <span
                 key={index}
-                className="inline-block bg-green-50 text-green-700 px-3 py-1 rounded-full text-sm font-medium"
+                className="inline-block bg-amber-50 text-amber-700 px-3 py-1 rounded-full text-sm font-medium"
               >
                 {keyword}
               </span>
@@ -266,13 +266,13 @@ export default function ATSDashboard({
 
 // Helper functions
 function getScoreColor(score: number): string {
-  if (score >= 80) return 'text-green-600';
+  if (score >= 80) return 'text-amber-600';
   if (score >= 60) return 'text-yellow-600';
   return 'text-red-600';
 }
 
 function getScoreBadge(score: number): string {
-  if (score >= 80) return 'bg-green-100 text-green-800';
+  if (score >= 80) return 'bg-amber-100 text-amber-800';
   if (score >= 60) return 'bg-yellow-100 text-yellow-800';
   return 'bg-red-100 text-red-800';
 }
@@ -286,7 +286,7 @@ function getScoreLabel(score: number): string {
 }
 
 function getProgressBarColor(score: number): string {
-  if (score >= 80) return 'bg-green-500';
+  if (score >= 80) return 'bg-amber-500';
   if (score >= 60) return 'bg-yellow-500';
   return 'bg-red-500';
 }

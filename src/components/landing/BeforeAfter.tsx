@@ -53,13 +53,13 @@ export default function BeforeAfter() {
       {/* Score badge */}
       <div className="absolute -top-5 left-1/2 -translate-x-1/2 z-20">
         <div className="flex items-center gap-3 bg-white rounded-full shadow-elevated border border-gray-100 pl-2 pr-5 py-2">
-          <div className="relative w-12 h-12">
+          <div className="relative w-12 h-12 flex-shrink-0">
             <div className="w-12 h-12 rounded-full" style={{ background: `conic-gradient(#7c3aed ${deg}deg, #ece9fb ${deg}deg)` }} />
             <div className="absolute inset-[4px] rounded-full bg-white grid place-items-center">
               <span className="text-xs font-extrabold text-gray-900">{score}</span>
             </div>
           </div>
-          <div className="leading-tight">
+          <div className="leading-tight whitespace-nowrap">
             <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">ATS match</p>
             <p className="text-sm font-bold text-gray-900">climbing as we tailor →</p>
           </div>

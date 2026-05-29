@@ -70,21 +70,22 @@ const ResumesPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 py-6 sm:py-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">My Resumes</h1>
-            <p className="mt-2 text-gray-600">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 sm:mb-8">
+          <div className="min-w-0">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">My Resumes</h1>
+            <p className="mt-1 sm:mt-2 text-sm sm:text-base text-gray-600">
               Manage and organize all your resumes in one place
             </p>
           </div>
-          <div className="mt-4 md:mt-0">
-            <Link href="/builder">
+          <div className="mt-4 md:mt-0 w-full md:w-auto">
+            <Link href="/builder" className="block">
               <Button
                 variant="primary"
                 size="lg"
+                className="w-full md:w-auto"
                 leftIcon={
                   <svg
                     className="w-5 h-5"
@@ -108,10 +109,10 @@ const ResumesPage: React.FC = () => {
         </div>
 
         {/* Search and Filters */}
-        <Card className="mb-6">
-          <CardContent className="p-4">
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="flex-1">
+        <Card padding="none" className="mb-6">
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex flex-col md:flex-row gap-3 md:gap-4">
+              <div className="flex-1 min-w-0">
                 <Input
                   placeholder="Search resumes..."
                   value={searchQuery}
@@ -133,8 +134,8 @@ const ResumesPage: React.FC = () => {
                   }
                 />
               </div>
-              <div className="flex gap-2">
-                <Button variant="outline" size="md">
+              <div className="flex gap-2 flex-shrink-0">
+                <Button variant="outline" size="md" className="flex-1 md:flex-none">
                   <svg
                     className="w-5 h-5 mr-2"
                     fill="none"
@@ -150,7 +151,7 @@ const ResumesPage: React.FC = () => {
                   </svg>
                   Filter
                 </Button>
-                <Button variant="outline" size="md">
+                <Button variant="outline" size="md" className="flex-1 md:flex-none">
                   <svg
                     className="w-5 h-5 mr-2"
                     fill="none"
@@ -247,27 +248,27 @@ const ResumesPage: React.FC = () => {
           </Card>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
               {filteredResumes.map((resume) => (
-                <Card key={resume.id} variant="bordered" hoverable>
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-gray-900 truncate">
+                <Card key={resume.id} variant="bordered" padding="none" hoverable>
+                  <CardContent className="p-4 sm:p-6">
+                    <div className="flex items-start justify-between gap-3 mb-4">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate">
                           {resume.title}
                         </h3>
-                        <p className="text-sm text-gray-500 mt-1">
+                        <p className="text-xs sm:text-sm text-gray-500 mt-1">
                           {formatDate(resume.updatedAt)}
                         </p>
                       </div>
                       {resume.atsScore !== null && (
                         <div
-                          className={`px-2 py-1 rounded-full ${getScoreBgColor(
+                          className={`px-2 py-1 rounded-full flex-shrink-0 ${getScoreBgColor(
                             resume.atsScore
                           )}`}
                         >
                           <span
-                            className={`text-xs font-medium ${getScoreColor(
+                            className={`text-xs font-medium whitespace-nowrap ${getScoreColor(
                               resume.atsScore
                             )}`}
                           >
@@ -277,9 +278,9 @@ const ResumesPage: React.FC = () => {
                       )}
                     </div>
 
-                    <div className="border-t border-gray-200 pt-4 mt-4">
-                      <div className="flex items-center justify-between">
-                        <Link href={`/builder?id=${resume.id}`}>
+                    <div className="border-t border-gray-200 pt-3 sm:pt-4 mt-3 sm:mt-4">
+                      <div className="flex items-center justify-between gap-2">
+                        <Link href={`/builder?id=${resume.id}`} className="flex-shrink-0">
                           <Button variant="primary" size="sm">
                             Edit
                           </Button>

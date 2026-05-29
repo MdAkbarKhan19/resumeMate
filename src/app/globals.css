@@ -298,3 +298,53 @@ body {
   @apply agent-dot bg-red-500;
   box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
 }
+
+/* ─── Mobile overflow guardrails ─────────────────────────────
+   Catches the common overflow culprits in one place so individual
+   components don't have to remember word-break/min-width tricks.
+   Desktop is unaffected because each rule is scoped or capped at
+   ≤640px (sm: breakpoint).
+   ───────────────────────────────────────────── */
+
+/* 1. Stop horizontal page scroll. Anything that overflows the
+   viewport on mobile is almost always a bug. */
+html, body { overflow-x: hidden; }
+
+@media (max-width: 640px) {
+  /* 2. Long URLs, emails, code, and pasted strings without spaces
+     are the #1 overflow cause. Break them anywhere on mobile. */
+  p, span, h1, h2, h3, h4, h5, h6, li, td, dd, dt, a, label,
+  button, input, textarea, select {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  /* 3. Flex children that contain text need min-width:0 or they
+     refuse to shrink and push their parent wider than the viewport.
+     This catches most flex-row card layouts. */
+  .flex > *,
+  .inline-flex > * {
+    min-width: 0;
+  }
+
+  /* 4. Inputs/textareas/selects should never exceed their container.
+     Some 3rd-party components set a fixed min-width that breaks. */
+  input, textarea, select {
+    max-width: 100%;
+  }
+
+  /* 5. Tables don't reflow — wrap them in horizontal scroll instead
+     of letting them blow out the page. */
+  table { display: block; overflow-x: auto; max-width: 100%; }
+
+  /* 6. Images and media never overflow. */
+  img, video, canvas, svg:not([width]) { max-width: 100%; height: auto; }
+}
+
+/* 7. DEV-ONLY overflow detector. In DevTools, set
+   `document.documentElement.dataset.debugOverflow = "1"` to outline
+   every element that exceeds the viewport width — useful for finding
+   stray fixed widths or unwrapped strings. No effect in normal use. */
+html[data-debug-overflow] body * {
+  outline: 1px dashed rgba(239, 68, 68, 0.4);
+}

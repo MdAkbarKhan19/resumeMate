@@ -125,7 +125,7 @@ const Footer: React.FC = () => {
         <div className="mt-12 pt-8 border-t border-gray-100">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-sm text-gray-400">
-              &copy; {currentYear} JDsync. All rights reserved.
+              {currentYear} JDsync
             </p>
             <a
               href="mailto:support@prepdunya.com"

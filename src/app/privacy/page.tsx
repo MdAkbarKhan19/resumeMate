@@ -21,9 +21,9 @@ export default function PrivacyPolicyPage() {
       <p>
         Your resume content is used to render previews, generate downloads, and power
         AI features such as ATS optimization and bullet enhancement. AI features send
-        the relevant portion of your resume to OpenAI's API for inference. We do not
-        sell your data, and we do not share it with third parties beyond what is
-        required to deliver these features.
+        the relevant portion of your resume to a third-party AI provider for inference.
+        We do not sell your data, and we do not share it with third parties beyond
+        what is required to deliver these features.
       </p>
 
       <h2>3. Cookies and authentication</h2>
@@ -41,12 +41,12 @@ export default function PrivacyPolicyPage() {
       </p>
 
       <h2>5. Subprocessors</h2>
-      <ul>
-        <li>AWS (hosting, Cognito authentication, S3 file storage) — ap-south-1 / us-east-1</li>
-        <li>Neon (PostgreSQL database)</li>
-        <li>OpenAI (AI inference)</li>
-        <li>Razorpay (payment processing)</li>
-      </ul>
+      <p>
+        We use a small number of trusted third-party services to host the app,
+        store data, run AI features, and process payments. A current list is
+        available on request via{' '}
+        <a href="mailto:support@prepdunya.com">support@prepdunya.com</a>.
+      </p>
 
       <h2>6. Contact</h2>
       <p>

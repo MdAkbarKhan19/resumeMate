@@ -18,7 +18,7 @@ function renderMarkdownBold(text: string): React.ReactNode {
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
   return parts.map((part, i) => {
     const m = part.match(/^\*\*([^*]+)\*\*$/);
-    return m ? <strong key={i} className="font-semibold">{m[1]}</strong> : <span key={i}>{part}</span>;
+    return m ? <strong key={i} className="font-bold text-indigo-700">{m[1]}</strong> : <span key={i}>{part}</span>;
   });
 }
 

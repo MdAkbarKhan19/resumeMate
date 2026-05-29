@@ -157,7 +157,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
   const variantStyles = {
     danger: 'text-red-500',
     warning: 'text-amber-500',
-    info: 'text-emerald-500',
+    info: 'text-amber-500',
   };
 
   const buttonVariant = variant === 'danger' ? 'danger' : 'primary';
@@ -172,7 +172,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
     >
       <div className="text-center">
         <div className={cn('mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full',
-          variant === 'danger' ? 'bg-red-50' : variant === 'warning' ? 'bg-amber-50' : 'bg-emerald-50')}>
+          variant === 'danger' ? 'bg-red-50' : variant === 'warning' ? 'bg-amber-50' : 'bg-amber-50')}>
           <svg
             className={cn('h-6 w-6', variantStyles[variant])}
             fill="none"

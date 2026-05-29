@@ -195,7 +195,7 @@ export default function AIFeaturesPanel({ resumeData, onApplySuggestion, resumeI
           {atsAnalysis && (
             <div className="space-y-4 mt-4">
               {/* Score */}
-              <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
+              <div className="p-4 bg-gradient-to-r from-amber-50 to-gray-50 rounded-lg">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-lg font-semibold">ATS Score</span>
                   <span

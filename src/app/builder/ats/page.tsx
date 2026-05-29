@@ -611,7 +611,7 @@ function ATSOptimizationPageContent() {
                               </span>
                             )}
                             {change.type === 'enhanced' && (
-                              <span className="inline-block bg-purple-100 text-purple-800 text-xs font-semibold px-2 py-1 rounded">
+                              <span className="inline-block bg-amber-100 text-amber-800 text-xs font-semibold px-2 py-1 rounded">
                                 Enhanced
                               </span>
                             )}

@@ -61,14 +61,14 @@ export default function AuthCallbackPage() {
             <p className="text-sm text-gray-600 mb-6">{error}</p>
             <a
               href="/auth/login"
-              className="inline-block px-5 py-2.5 rounded-xl bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition-colors"
+              className="inline-block px-5 py-2.5 rounded-xl bg-amber-600 text-white font-medium hover:bg-amber-700 transition-colors"
             >
               Back to login
             </a>
           </>
         ) : (
           <>
-            <div className="w-12 h-12 mx-auto border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mb-4" />
+            <div className="w-12 h-12 mx-auto border-4 border-amber-200 border-t-amber-600 rounded-full animate-spin mb-4" />
             <p className="text-sm text-gray-600">Finishing sign-in&hellip;</p>
           </>
         )}

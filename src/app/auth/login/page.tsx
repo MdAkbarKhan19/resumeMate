@@ -83,7 +83,7 @@ function LoginPageContent() {
   return (
     <div className="min-h-screen flex lg:grid lg:grid-cols-2">
       {/* LEFT PANEL - Illustration (hidden on mobile) */}
-      <div className="hidden lg:flex bg-gradient-to-br from-indigo-600 via-violet-600 to-purple-700 min-h-screen flex-col items-center justify-center p-12 relative overflow-hidden">
+      <div className="hidden lg:flex bg-gradient-to-br from-slate-900 via-slate-900 to-gray-900 min-h-screen flex-col items-center justify-center p-12 relative overflow-hidden">
         {/* Dot grid overlay */}
         <div className="absolute inset-0 dot-grid opacity-10 pointer-events-none" />
 
@@ -123,7 +123,7 @@ function LoginPageContent() {
 
         {/* Text below the agent character */}
         <h3 className="text-2xl font-bold text-white text-center">Your AI Resume Agent</h3>
-        <p className="mt-2 text-indigo-200 text-center max-w-xs">Let me help you craft the perfect resume</p>
+        <p className="mt-2 text-amber-200 text-center max-w-xs">Let me help you craft the perfect resume</p>
       </div>
 
       {/* RIGHT PANEL - Form */}
@@ -139,7 +139,7 @@ function LoginPageContent() {
             </h2>
             <p className="mt-2 text-sm text-gray-500">
               Don't have an account?{' '}
-              <Link href="/auth/signup" className="font-medium text-indigo-600 hover:text-indigo-500">
+              <Link href="/auth/signup" className="font-medium text-amber-600 hover:text-amber-500">
                 Sign up for free
               </Link>
             </p>
@@ -177,7 +177,7 @@ function LoginPageContent() {
                   autoComplete="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full px-4 py-3 bg-white border border-gray-200 text-gray-900 placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500"
+                  className="w-full px-4 py-3 bg-white border border-gray-200 text-gray-900 placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
                   placeholder="you@example.com"
                 />
               </div>
@@ -190,7 +190,7 @@ function LoginPageContent() {
                   </label>
                   <Link
                     href="/auth/forgot-password"
-                    className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
+                    className="text-sm font-medium text-amber-600 hover:text-amber-500"
                   >
                     Forgot password?
                   </Link>
@@ -202,7 +202,7 @@ function LoginPageContent() {
                   autoComplete="current-password"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full px-4 py-3 bg-white border border-gray-200 text-gray-900 placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500"
+                  className="w-full px-4 py-3 bg-white border border-gray-200 text-gray-900 placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
                   placeholder="Enter your password"
                 />
               </div>
@@ -212,7 +212,7 @@ function LoginPageContent() {
                 <input
                   id="remember"
                   type="checkbox"
-                  className="h-4 w-4 text-indigo-600 border-gray-300 bg-white rounded focus:ring-indigo-500"
+                  className="h-4 w-4 text-amber-600 border-gray-300 bg-white rounded focus:ring-amber-500"
                 />
                 <label htmlFor="remember" className="ml-2 block text-sm text-gray-500">
                   Remember me
@@ -223,7 +223,7 @@ function LoginPageContent() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-indigo-500 hover:to-violet-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg shadow-indigo-500/20"
+                className="w-full bg-gradient-to-r from-amber-600 to-amber-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-amber-500 hover:to-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg shadow-amber-500/20"
               >
                 {loading ? 'Signing in...' : 'Sign In'}
               </button>
@@ -271,11 +271,11 @@ function LoginPageContent() {
           <div className="mt-6 text-center text-sm text-gray-500">
             <p>
               By signing in, you agree to our{' '}
-              <Link href="/terms" className="text-indigo-600 hover:text-indigo-500">
+              <Link href="/terms" className="text-amber-600 hover:text-amber-500">
                 Terms of Service
               </Link>{' '}
               and{' '}
-              <Link href="/privacy" className="text-indigo-600 hover:text-indigo-500">
+              <Link href="/privacy" className="text-amber-600 hover:text-amber-500">
                 Privacy Policy
               </Link>
             </p>
@@ -288,7 +288,7 @@ function LoginPageContent() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#fafafc] flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500 border-t-transparent"></div></div>}>
+    <Suspense fallback={<div className="min-h-screen bg-[#fafafc] flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500 border-t-transparent"></div></div>}>
       <LoginPageContent />
     </Suspense>
   );

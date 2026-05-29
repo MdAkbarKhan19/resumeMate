@@ -54,7 +54,7 @@ export default function BeforeAfter() {
       <div className="absolute -top-5 left-1/2 -translate-x-1/2 z-20">
         <div className="flex items-center gap-3 bg-white rounded-full shadow-elevated border border-gray-100 pl-2 pr-5 py-2">
           <div className="relative w-12 h-12 flex-shrink-0">
-            <div className="w-12 h-12 rounded-full" style={{ background: `conic-gradient(#7c3aed ${deg}deg, #ece9fb ${deg}deg)` }} />
+            <div className="w-12 h-12 rounded-full" style={{ background: `conic-gradient(#10b981 ${deg}deg, #e5e7eb ${deg}deg)` }} />
             <div className="absolute inset-[4px] rounded-full bg-white grid place-items-center">
               <span className="text-xs font-extrabold text-gray-900">{score}</span>
             </div>
@@ -109,7 +109,7 @@ export default function BeforeAfter() {
               {ADDED_SKILLS.map((k, i) => (
                 <span
                   key={k}
-                  className="text-[11px] px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-100 font-medium transition-all duration-500"
+                  className="text-[11px] px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 border border-amber-100 font-medium transition-all duration-500"
                   style={{
                     opacity: revealed ? 1 : 0,
                     transform: revealed ? 'none' : 'translateY(6px)',

@@ -127,14 +127,14 @@ export default function ForgotPasswordPage() {
                   autoComplete="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-3 bg-white border border-gray-200 text-gray-900 placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500"
+                  className="w-full px-4 py-3 bg-white border border-gray-200 text-gray-900 placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
                   placeholder="you@example.com"
                 />
               </div>
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-indigo-500 hover:to-violet-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg shadow-indigo-500/20"
+                className="w-full bg-gradient-to-r from-amber-600 to-amber-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-amber-500 hover:to-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg shadow-amber-500/20"
               >
                 {loading ? 'Sending…' : 'Send reset code'}
               </button>
@@ -152,7 +152,7 @@ export default function ForgotPasswordPage() {
                   required
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
-                  className="w-full px-4 py-3 bg-white border border-gray-200 text-gray-900 placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 tracking-widest"
+                  className="w-full px-4 py-3 bg-white border border-gray-200 text-gray-900 placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 tracking-widest"
                   placeholder="123456"
                 />
               </div>
@@ -167,7 +167,7 @@ export default function ForgotPasswordPage() {
                   autoComplete="new-password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full px-4 py-3 bg-white border border-gray-200 text-gray-900 placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500"
+                  className="w-full px-4 py-3 bg-white border border-gray-200 text-gray-900 placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
                   placeholder="••••••••"
                 />
               </div>
@@ -182,14 +182,14 @@ export default function ForgotPasswordPage() {
                   autoComplete="new-password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full px-4 py-3 bg-white border border-gray-200 text-gray-900 placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500"
+                  className="w-full px-4 py-3 bg-white border border-gray-200 text-gray-900 placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
                   placeholder="••••••••"
                 />
               </div>
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-indigo-500 hover:to-violet-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg shadow-indigo-500/20"
+                className="w-full bg-gradient-to-r from-amber-600 to-amber-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-amber-500 hover:to-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg shadow-amber-500/20"
               >
                 {loading ? 'Resetting…' : 'Reset password'}
               </button>
@@ -206,7 +206,7 @@ export default function ForgotPasswordPage() {
 
         <div className="mt-6 text-center text-sm text-gray-500">
           Remembered it?{' '}
-          <Link href="/auth/login" className="font-medium text-indigo-600 hover:text-indigo-500">
+          <Link href="/auth/login" className="font-medium text-amber-600 hover:text-amber-500">
             Back to login
           </Link>
         </div>

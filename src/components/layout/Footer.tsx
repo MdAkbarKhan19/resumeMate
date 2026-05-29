@@ -26,11 +26,11 @@ const Footer: React.FC = () => {
       {/* Top gradient line */}
       <div
         aria-hidden="true"
-        className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent"
+        className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-500/30 to-transparent"
       />
       <div
         aria-hidden="true"
-        className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-emerald-500/[0.03] via-emerald-500/[0.02] to-transparent pointer-events-none"
+        className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-amber-500/[0.03] via-amber-500/[0.02] to-transparent pointer-events-none"
       />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -54,7 +54,7 @@ const Footer: React.FC = () => {
                   href={item.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-gray-400 hover:text-emerald-600 transition-colors"
+                  className="text-gray-400 hover:text-amber-600 transition-colors"
                   aria-label={item.name}
                 >
                   {item.icon}
@@ -73,7 +73,7 @@ const Footer: React.FC = () => {
                 <li key={item.name}>
                   <Link
                     href={item.href}
-                    className="text-sm text-gray-500 hover:text-emerald-600 transition-colors"
+                    className="text-sm text-gray-500 hover:text-amber-600 transition-colors"
                   >
                     {item.name}
                   </Link>
@@ -92,7 +92,7 @@ const Footer: React.FC = () => {
                 <li key={item.name}>
                   <a
                     href={item.href}
-                    className="text-sm text-gray-500 hover:text-emerald-600 transition-colors"
+                    className="text-sm text-gray-500 hover:text-amber-600 transition-colors"
                   >
                     {item.name}
                   </a>
@@ -111,7 +111,7 @@ const Footer: React.FC = () => {
                 <li key={item.name}>
                   <Link
                     href={item.href}
-                    className="text-sm text-gray-500 hover:text-emerald-600 transition-colors"
+                    className="text-sm text-gray-500 hover:text-amber-600 transition-colors"
                   >
                     {item.name}
                   </Link>
@@ -129,7 +129,7 @@ const Footer: React.FC = () => {
             </p>
             <a
               href="mailto:support@prepdunya.com"
-              className="text-sm text-gray-400 hover:text-emerald-600 transition-colors mt-4 md:mt-0"
+              className="text-sm text-gray-400 hover:text-amber-600 transition-colors mt-4 md:mt-0"
             >
               support@prepdunya.com
             </a>

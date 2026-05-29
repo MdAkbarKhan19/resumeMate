@@ -107,8 +107,8 @@ export default function Home() {
           <div className="grid md:grid-cols-3 gap-5">
             {[
               { d: 1, bg: 'brand-bg', icon: 'M21 21l-5.2-5.2m0 0A7.5 7.5 0 105.2 5.2a7.5 7.5 0 0010.6 10.6z', h: 'It reads the actual job post', p: 'Paste any JD. We extract the exact keywords and skills recruiters’ filters look for — no more guessing what to include.' },
-              { d: 2, bg: 'bg-emerald-500', icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', h: 'A live ATS score, not a vibe', p: 'Watch a real match percentage move as you edit. You’ll know your resume is ready — instead of hoping it is.' },
-              { d: 3, bg: 'bg-sky-500', icon: 'M5 13l4 4L19 7', h: 'You approve every change', p: 'No black box. Every rewrite is shown side-by-side with your original. Accept it, tweak it, or skip it — it’s your resume.' },
+              { d: 2, bg: 'bg-amber-500', icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', h: 'A live ATS score, not a vibe', p: 'Watch a real match percentage move as you edit. You’ll know your resume is ready — instead of hoping it is.' },
+              { d: 3, bg: 'bg-gray-800', icon: 'M5 13l4 4L19 7', h: 'You approve every change', p: 'No black box. Every rewrite is shown side-by-side with your original. Accept it, tweak it, or skip it — it’s your resume.' },
             ].map(c => (
               <Reveal key={c.d} delay={c.d} className="bg-white rounded-2xl border border-gray-100 shadow-card hover:shadow-card-hover hover:-translate-y-0.5 transition p-7">
                 <div className={`w-12 h-12 rounded-xl ${c.bg} grid place-items-center mb-5 shadow-card`}>

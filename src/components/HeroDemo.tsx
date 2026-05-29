@@ -66,9 +66,9 @@ export default function HeroDemo() {
 
         {/* STEP 0 — IMPORT */}
         <div className={`transition-all duration-500 ${step === 0 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 absolute inset-6 pointer-events-none'}`}>
-          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-50 border border-emerald-100 w-fit mb-4">
-            <svg className="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.9A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" /></svg>
-            <span className="text-xs font-medium text-emerald-700">my-resume.pdf</span>
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-50 border border-amber-100 w-fit mb-4">
+            <svg className="w-4 h-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.9A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" /></svg>
+            <span className="text-xs font-medium text-amber-700">my-resume.pdf</span>
           </div>
           <p className="text-xs text-gray-400 mb-3 font-medium uppercase tracking-wide">Auto-filling your resume…</p>
           <div className="space-y-2.5">
@@ -100,7 +100,7 @@ export default function HeroDemo() {
               <p className="text-xs font-medium uppercase tracking-wide text-gray-400 mb-1">Job description matched</p>
               <div className="flex flex-wrap gap-1.5">
                 {['Kafka', 'CI/CD', 'PostgreSQL'].map(k => (
-                  <span key={k} className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">+ {k}</span>
+                  <span key={k} className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-100">+ {k}</span>
                 ))}
               </div>
             </div>
@@ -108,8 +108,8 @@ export default function HeroDemo() {
           {/* Bullet rewrite */}
           <div className="space-y-2">
             <div className="text-xs text-gray-400 line-through">Built data pipelines for analytics</div>
-            <div className="text-sm text-gray-800 bg-emerald-50/60 border border-emerald-100 rounded-lg px-3 py-2">
-              Built <strong className="text-emerald-700">Kafka</strong>-backed data pipelines for analytics
+            <div className="text-sm text-gray-800 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2">
+              Built <strong className="text-amber-700">Kafka</strong>-backed data pipelines for analytics
             </div>
           </div>
           <p className="mt-4 text-xs text-gray-500">Paste a job post — we rewrite your bullets to match. You approve every change.</p>
@@ -119,7 +119,7 @@ export default function HeroDemo() {
         <div className={`transition-all duration-500 ${step === 2 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 absolute inset-6 pointer-events-none'}`}>
           <div className="mx-auto w-40 bg-white rounded-lg border border-gray-200 shadow-sm p-3 mb-4">
             <div className="flex items-center gap-2 mb-2">
-              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-500" />
+              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-amber-400 to-amber-500" />
               <div className="space-y-1"><div className="h-1.5 w-16 rounded bg-gray-300" /><div className="h-1 w-10 rounded bg-gray-200" /></div>
             </div>
             <div className="space-y-1">

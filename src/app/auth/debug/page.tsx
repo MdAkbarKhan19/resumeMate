@@ -154,7 +154,7 @@ export default function AuthDebugPage() {
               </Link>
               <Link
                 href="/dashboard"
-                className="inline-block bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700"
+                className="inline-block bg-amber-600 text-white px-4 py-2 rounded hover:bg-amber-700"
               >
                 Go to Dashboard
               </Link>

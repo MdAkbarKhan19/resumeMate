@@ -27,7 +27,7 @@ const Loading: React.FC<LoadingProps> = ({
 
   const Spinner = () => (
     <svg
-      className={cn('animate-spin text-emerald-600', sizes[size])}
+      className={cn('animate-spin text-amber-600', sizes[size])}
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"
@@ -41,15 +41,15 @@ const Loading: React.FC<LoadingProps> = ({
     const dotSize = { sm: 'h-2 w-2', md: 'h-3 w-3', lg: 'h-4 w-4', xl: 'h-5 w-5' };
     return (
       <div className="flex space-x-2">
-        <div className={cn('rounded-full bg-emerald-500 animate-bounce', dotSize[size])} style={{ animationDelay: '0ms' }} />
-        <div className={cn('rounded-full bg-emerald-500 animate-bounce', dotSize[size])} style={{ animationDelay: '150ms' }} />
+        <div className={cn('rounded-full bg-amber-500 animate-bounce', dotSize[size])} style={{ animationDelay: '0ms' }} />
+        <div className={cn('rounded-full bg-amber-500 animate-bounce', dotSize[size])} style={{ animationDelay: '150ms' }} />
         <div className={cn('rounded-full bg-pink-500 animate-bounce', dotSize[size])} style={{ animationDelay: '300ms' }} />
       </div>
     );
   };
 
   const Pulse = () => (
-    <div className={cn('rounded-full bg-emerald-500 animate-pulse', sizes[size])} />
+    <div className={cn('rounded-full bg-amber-500 animate-pulse', sizes[size])} />
   );
 
   const renderVariant = () => {
@@ -140,7 +140,7 @@ export const PageLoading: React.FC<{ text?: string }> = ({ text = 'Loading...' }
       <div className="relative w-28 h-28">
         {/* Central agent icon */}
         <div className="absolute inset-0 flex items-center justify-center z-10">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-600 to-emerald-600 flex items-center justify-center shadow-xl shadow-emerald-500/25 animate-agent-think">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-600 to-amber-600 flex items-center justify-center shadow-xl shadow-amber-500/25 animate-agent-think">
             <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                 d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
@@ -171,7 +171,7 @@ export const PageLoading: React.FC<{ text?: string }> = ({ text = 'Loading...' }
 
         {/* Pulse ring */}
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-16 h-16 rounded-2xl border-2 border-emerald-300/50 animate-pulse-ring" />
+          <div className="w-16 h-16 rounded-2xl border-2 border-amber-300/50 animate-pulse-ring" />
         </div>
       </div>
 
@@ -180,7 +180,7 @@ export const PageLoading: React.FC<{ text?: string }> = ({ text = 'Loading...' }
         <p className="text-base font-medium text-gray-800">{text}</p>
         <div className="flex items-center justify-center gap-2">
           <span className="agent-dot-active" />
-          <p className="text-sm text-emerald-600 font-mono animate-fade-in" key={msgIndex}>
+          <p className="text-sm text-amber-600 font-mono animate-fade-in" key={msgIndex}>
             {AGENT_MESSAGES[msgIndex]}
           </p>
         </div>

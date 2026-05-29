@@ -120,7 +120,7 @@ const PricingPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#fafafc]">
       {/* Hero */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-emerald-600 via-emerald-600 to-purple-700 text-white py-16">
+      <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-900 to-gray-900 text-white py-16">
         <div
           className="absolute inset-0 pointer-events-none opacity-[0.08]"
           style={{
@@ -333,7 +333,7 @@ const PricingPage: React.FC = () => {
         </div>
 
         {/* Closing CTA */}
-        <div className="bg-gradient-to-r from-emerald-600 via-emerald-600 to-purple-600 rounded-3xl shadow-xl p-8 md:p-12 text-center mb-16">
+        <div className="brand-bg-3 rounded-3xl shadow-xl p-8 md:p-12 text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">
             Try it free — no card needed
           </h2>

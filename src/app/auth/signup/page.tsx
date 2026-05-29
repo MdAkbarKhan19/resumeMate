@@ -174,7 +174,7 @@ export default function SignUpPage() {
   return (
     <div className="min-h-screen flex lg:grid lg:grid-cols-2">
       {/* Left Panel - Colorful Illustration (hidden on mobile) */}
-      <div className="hidden lg:flex bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-700 min-h-screen flex-col items-center justify-center p-12 relative overflow-hidden">
+      <div className="hidden lg:flex bg-gradient-to-br from-slate-900 via-slate-900 to-gray-900 min-h-screen flex-col items-center justify-center p-12 relative overflow-hidden">
         {/* Dot grid overlay */}
         <div
           className="absolute inset-0 opacity-[0.07]"
@@ -219,7 +219,7 @@ export default function SignUpPage() {
         </div>
 
         <h2 className="relative text-2xl font-bold text-white mb-3 text-center">Create Your Account</h2>
-        <p className="relative text-violet-200 text-center max-w-xs">Join thousands building AI-powered resumes</p>
+        <p className="relative text-amber-200 text-center max-w-xs">Join thousands building AI-powered resumes</p>
       </div>
 
       {/* Right Panel - Form */}
@@ -237,7 +237,7 @@ export default function SignUpPage() {
               {step === 'signup' ? (
                 <>
                   Already have an account?{' '}
-                  <Link href="/auth/login" className="font-medium text-indigo-600 hover:text-indigo-500">
+                  <Link href="/auth/login" className="font-medium text-amber-600 hover:text-amber-500">
                     Sign in
                   </Link>
                 </>
@@ -269,7 +269,7 @@ export default function SignUpPage() {
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-4 py-3 bg-white border border-gray-200 text-gray-900 placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-colors"
+                    className="w-full px-4 py-3 bg-white border border-gray-200 text-gray-900 placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-colors"
                     placeholder="John Doe"
                   />
                 </div>
@@ -285,7 +285,7 @@ export default function SignUpPage() {
                     required
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full px-4 py-3 bg-white border border-gray-200 text-gray-900 placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-colors"
+                    className="w-full px-4 py-3 bg-white border border-gray-200 text-gray-900 placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-colors"
                     placeholder="you@example.com"
                   />
                 </div>
@@ -301,7 +301,7 @@ export default function SignUpPage() {
                     required
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    className="w-full px-4 py-3 bg-white border border-gray-200 text-gray-900 placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-colors"
+                    className="w-full px-4 py-3 bg-white border border-gray-200 text-gray-900 placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-colors"
                     placeholder="Min 8 characters, with uppercase, lowercase, number & symbol"
                   />
                   <p className="mt-1 text-xs text-gray-400">
@@ -320,7 +320,7 @@ export default function SignUpPage() {
                     required
                     value={formData.confirmPassword}
                     onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                    className="w-full px-4 py-3 bg-white border border-gray-200 text-gray-900 placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-colors"
+                    className="w-full px-4 py-3 bg-white border border-gray-200 text-gray-900 placeholder-gray-400 rounded-xl focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-colors"
                     placeholder="Re-enter your password"
                   />
                 </div>
@@ -329,7 +329,7 @@ export default function SignUpPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-indigo-500 hover:to-violet-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-indigo-500/25"
+                  className="w-full bg-gradient-to-r from-amber-600 to-amber-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-amber-500 hover:to-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-amber-500/25"
                 >
                   {loading ? 'Creating account...' : 'Sign Up'}
                 </button>
@@ -378,9 +378,9 @@ export default function SignUpPage() {
           {step === 'verify' && (
             <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-8">
               <div className="text-center mb-6">
-                <div className="w-16 h-16 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-4">
                   <svg
-                    className="w-8 h-8 text-indigo-500"
+                    className="w-8 h-8 text-amber-500"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -411,7 +411,7 @@ export default function SignUpPage() {
                     maxLength={6}
                     value={verificationCode}
                     onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, ''))}
-                    className="w-full px-4 py-3 bg-white border border-gray-200 text-gray-900 placeholder-gray-400 rounded-xl text-center text-2xl font-mono tracking-widest focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-colors"
+                    className="w-full px-4 py-3 bg-white border border-gray-200 text-gray-900 placeholder-gray-400 rounded-xl text-center text-2xl font-mono tracking-widest focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-colors"
                     placeholder="000000"
                   />
                 </div>
@@ -420,7 +420,7 @@ export default function SignUpPage() {
                 <button
                   type="submit"
                   disabled={loading || verificationCode.length !== 6}
-                  className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-indigo-500 hover:to-violet-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-indigo-500/25"
+                  className="w-full bg-gradient-to-r from-amber-600 to-amber-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-amber-500 hover:to-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-amber-500/25"
                 >
                   {loading ? 'Verifying...' : 'Verify Email'}
                 </button>
@@ -431,7 +431,7 @@ export default function SignUpPage() {
                     type="button"
                     onClick={resendCode}
                     disabled={resendCooldown > 0 || loading}
-                    className="text-sm text-indigo-600 hover:text-indigo-500 font-medium disabled:text-gray-400 disabled:cursor-not-allowed"
+                    className="text-sm text-amber-600 hover:text-amber-500 font-medium disabled:text-gray-400 disabled:cursor-not-allowed"
                   >
                     {resendCooldown > 0
                       ? `Resend in ${resendCooldown}s`

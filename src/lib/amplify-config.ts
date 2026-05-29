@@ -16,7 +16,7 @@ const amplifyConfig = {
         // Hosted UI OAuth — used by signInWithRedirect({ provider: 'Google' }).
         // Cognito redirects back to one of redirectSignIn URLs after Google auth.
         oauth: {
-          domain: 'jdsync-auth.auth.us-east-1.amazoncognito.com',
+          domain: 'auth.jdsync.com',
           scopes: ['email', 'openid', 'profile'] as ('email' | 'openid' | 'profile')[],
           redirectSignIn: [`${APP_ORIGIN}/auth/callback`, `${APP_ORIGIN}/`],
           redirectSignOut: [`${APP_ORIGIN}/`],

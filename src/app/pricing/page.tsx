@@ -241,7 +241,7 @@ const PricingPage: React.FC = () => {
           <div className="min-w-0">
             <h3 className="text-base font-semibold text-gray-900">Best price guaranteed</h3>
             <p className="text-sm text-gray-500 mt-0.5">
-              Built in India, priced for Indian job seekers. No subscription traps.
+              Honest pricing for job seekers. No subscription traps.
             </p>
           </div>
         </div>
@@ -282,7 +282,7 @@ const PricingPage: React.FC = () => {
         {/* Payment methods */}
         <div className="mb-16 text-center">
           <h2 className="text-xl font-bold text-gray-900 mb-4">
-            All Indian payment methods accepted
+            Payment methods accepted
           </h2>
           <div className="flex flex-wrap justify-center gap-3">
             {paymentMethods.map((method) => (

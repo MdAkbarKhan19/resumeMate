@@ -114,12 +114,12 @@ export default function ExperienceSection({
         const hasContent = exp.jobTitle || exp.company;
 
         return (
-          <Card key={exp.id} className="border border-gray-200 overflow-hidden">
+          <Card key={exp.id} padding="none" className="border border-gray-200 overflow-hidden">
             {/* Compact header - always visible */}
             <button
               type="button"
               onClick={() => toggleExpanded(exp.id)}
-              className="w-full p-4 flex items-center justify-between text-left hover:bg-gray-50 transition-colors"
+              className="w-full px-3 sm:px-4 py-3 flex items-center justify-between text-left hover:bg-gray-50 transition-colors"
             >
               <div className="flex-1 min-w-0">
                 {hasContent ? (
@@ -151,7 +151,7 @@ export default function ExperienceSection({
 
             {/* Expandable form */}
             {isExpanded && (
-              <div className="p-4 pt-0 border-t border-gray-100 space-y-4">
+              <div className="px-3 sm:px-4 pb-4 pt-4 border-t border-gray-100 space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <Input
                     label="Job Title"
@@ -216,35 +216,28 @@ export default function ExperienceSection({
                     </Button>
                   </div>
 
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     {exp.bullets.map((bullet, bIndex) => (
-                      <div key={bIndex} className="border border-gray-200 rounded-lg bg-white focus-within:border-blue-400 focus-within:ring-1 focus-within:ring-blue-100 transition-colors">
-                        <Textarea
-                          value={bullet}
-                          onChange={(e) => updateBullet(exp.id, bIndex, e.target.value)}
-                          rows={3}
-                          placeholder="Led development of a microservices architecture, reducing deployment time by 40%..."
-                          className="w-full text-sm border-0 focus:ring-0 focus:outline-none bg-transparent resize-y"
-                        />
-                        <div className="flex items-center justify-between px-2 py-1.5 border-t border-gray-100 bg-gray-50/60 rounded-b-lg">
-                          <span className="text-xs text-gray-400 select-none">&#8226; Bullet {bIndex + 1}</span>
+                      <div key={bIndex} className="space-y-1.5">
+                        <div className="flex items-center justify-between px-0.5">
+                          <span className="text-xs font-medium text-gray-500 select-none">&#8226; Bullet {bIndex + 1}</span>
                           <div className="flex items-center gap-1">
                             <button
                               type="button"
                               onClick={() => onEnhanceBullet(index, bIndex)}
                               disabled={isProcessing || !bullet.trim()}
-                              className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-blue-600 hover:bg-blue-100 rounded transition-colors disabled:opacity-30"
+                              className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50 rounded transition-colors disabled:opacity-30"
                               title="AI Enhance this bullet"
                             >
                               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                               </svg>
-                              AI Enhance
+                              AI
                             </button>
                             <button
                               type="button"
                               onClick={() => removeBullet(exp.id, bIndex)}
-                              className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-red-500 hover:bg-red-100 rounded transition-colors"
+                              className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-red-500 hover:bg-red-50 rounded transition-colors"
                               title="Remove bullet"
                             >
                               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -254,6 +247,13 @@ export default function ExperienceSection({
                             </button>
                           </div>
                         </div>
+                        <Textarea
+                          value={bullet}
+                          onChange={(e) => updateBullet(exp.id, bIndex, e.target.value)}
+                          rows={4}
+                          placeholder="Led development of a microservices architecture, reducing deployment time by 40%..."
+                          className="text-base leading-relaxed"
+                        />
                       </div>
                     ))}
                   </div>

@@ -88,13 +88,14 @@ export default function SkillsSection({ skills, onSkillsChange, isProcessing }: 
   return (
     <div className="space-y-5">
       {/* Bulk Entry Area */}
-      <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-        <div className="flex items-center gap-2 mb-3">
+      <div className="bg-gray-50 rounded-lg p-3 sm:p-4 border border-gray-200">
+        <div className="mb-3">
           <h4 className="text-sm font-semibold text-gray-700">Quick Add Skills</h4>
-          <span className="text-xs text-gray-500">(paste comma-separated or one per line)</span>
+          <span className="text-xs text-gray-500 block mt-0.5">paste comma-separated or one per line</span>
         </div>
 
-        <div className="flex gap-2 mb-3">
+        {/* Category pills — wrap on narrow screens instead of overflowing */}
+        <div className="flex flex-wrap gap-2 mb-3">
           {categories.map(cat => (
             <button
               key={cat}
@@ -111,7 +112,7 @@ export default function SkillsSection({ skills, onSkillsChange, isProcessing }: 
           ))}
         </div>
 
-        <div className="flex gap-2">
+        <div className="space-y-2">
           <textarea
             value={bulkInput}
             onChange={(e) => setBulkInput(e.target.value)}
@@ -121,8 +122,8 @@ export default function SkillsSection({ skills, onSkillsChange, isProcessing }: 
                 addSkillsFromBulk();
               }
             }}
-            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            rows={2}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm resize-y focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            rows={3}
             placeholder="React, Node.js, Python, TypeScript, AWS, Docker, Kubernetes..."
           />
           <Button
@@ -131,14 +132,14 @@ export default function SkillsSection({ skills, onSkillsChange, isProcessing }: 
             size="sm"
             onClick={addSkillsFromBulk}
             disabled={!bulkInput.trim()}
-            className="self-end"
+            className="w-full sm:w-auto"
           >
             Add All
           </Button>
         </div>
 
         {/* Single skill add (alternative) */}
-        <div className="flex gap-2 mt-2">
+        <div className="flex flex-col sm:flex-row gap-2 mt-3 pt-3 border-t border-gray-200">
           <Input
             value={singleInput}
             onChange={(e) => setSingleInput(e.target.value)}
@@ -149,7 +150,7 @@ export default function SkillsSection({ skills, onSkillsChange, isProcessing }: 
               }
             }}
             placeholder="Or type a single skill and press Enter"
-            className="text-sm"
+            className="text-sm flex-1"
           />
           <Button
             type="button"
@@ -157,6 +158,7 @@ export default function SkillsSection({ skills, onSkillsChange, isProcessing }: 
             size="sm"
             onClick={addSingleSkill}
             disabled={!singleInput.trim()}
+            className="w-full sm:w-auto"
           >
             Add
           </Button>

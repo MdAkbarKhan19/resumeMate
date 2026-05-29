@@ -56,31 +56,31 @@ const DashboardPage: React.FC = () => {
     : user.resumeCredits;
 
   return (
-    <div className="min-h-screen bg-[#fafafc] py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#fafafc] py-6 sm:py-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 break-words">
             Welcome back, {user.name}!
           </h1>
-          <p className="mt-2 text-gray-500">
+          <p className="mt-1 sm:mt-2 text-sm sm:text-base text-gray-500">
             Here's an overview of your resume building activity
           </p>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
           {/* Total Resumes */}
-          <Card variant="elevated">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-500">Total Resumes</p>
-                  <p className="text-3xl font-bold text-gray-900 mt-2">{total}</p>
+          <Card variant="elevated" padding="none">
+            <CardContent className="p-3 sm:p-6">
+              <div className="flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="text-xs sm:text-sm font-medium text-gray-500 truncate">Total Resumes</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-gray-900 mt-1 sm:mt-2">{total}</p>
                 </div>
-                <div className="w-12 h-12 bg-indigo-50 rounded-lg flex items-center justify-center">
+                <div className="w-9 h-9 sm:w-12 sm:h-12 bg-indigo-50 rounded-lg flex items-center justify-center flex-shrink-0">
                   <svg
-                    className="w-6 h-6 text-indigo-600"
+                    className="w-5 h-5 sm:w-6 sm:h-6 text-indigo-600"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -98,16 +98,16 @@ const DashboardPage: React.FC = () => {
           </Card>
 
           {/* Credits Remaining */}
-          <Card variant="elevated">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-500">Credits Left</p>
-                  <p className="text-3xl font-bold text-gray-900 mt-2">{creditsRemaining}</p>
+          <Card variant="elevated" padding="none">
+            <CardContent className="p-3 sm:p-6">
+              <div className="flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="text-xs sm:text-sm font-medium text-gray-500 truncate">Credits Left</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-gray-900 mt-1 sm:mt-2">{creditsRemaining}</p>
                 </div>
-                <div className="w-12 h-12 bg-emerald-50 rounded-lg flex items-center justify-center">
+                <div className="w-9 h-9 sm:w-12 sm:h-12 bg-emerald-50 rounded-lg flex items-center justify-center flex-shrink-0">
                   <svg
-                    className="w-6 h-6 text-emerald-600"
+                    className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-600"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -125,20 +125,20 @@ const DashboardPage: React.FC = () => {
           </Card>
 
           {/* Current Plan */}
-          <Card variant="elevated">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-500">Current Plan</p>
-                  <p className="text-2xl font-bold text-gray-900 mt-2">
+          <Card variant="elevated" padding="none">
+            <CardContent className="p-3 sm:p-6">
+              <div className="flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="text-xs sm:text-sm font-medium text-gray-500 truncate">Current Plan</p>
+                  <p className="text-xl sm:text-2xl font-bold text-gray-900 mt-1 sm:mt-2">
                     {user.planType === 'FREE' && 'Free'}
                     {user.planType === 'TIER1' && 'Tier 1'}
                     {user.planType === 'TIER2' && 'Tier 2'}
                   </p>
                 </div>
-                <div className="w-12 h-12 bg-violet-50 rounded-lg flex items-center justify-center">
+                <div className="w-9 h-9 sm:w-12 sm:h-12 bg-violet-50 rounded-lg flex items-center justify-center flex-shrink-0">
                   <svg
-                    className="w-6 h-6 text-violet-600"
+                    className="w-5 h-5 sm:w-6 sm:h-6 text-violet-600"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -156,23 +156,23 @@ const DashboardPage: React.FC = () => {
           </Card>
 
           {/* Subscription Status */}
-          <Card variant="elevated">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-500">Subscription</p>
-                  <p className="text-2xl font-bold text-gray-900 mt-2">
+          <Card variant="elevated" padding="none">
+            <CardContent className="p-3 sm:p-6">
+              <div className="flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="text-xs sm:text-sm font-medium text-gray-500 truncate">Subscription</p>
+                  <p className="text-xl sm:text-2xl font-bold text-gray-900 mt-1 sm:mt-2">
                     {user.subscriptionActive ? 'Active' : 'Inactive'}
                   </p>
                   {user.subscriptionExpiry && user.subscriptionActive && (
-                    <p className="text-xs text-gray-400 mt-1">
+                    <p className="text-xs text-gray-400 mt-1 truncate">
                       Until {formatDate(user.subscriptionExpiry)}
                     </p>
                   )}
                 </div>
-                <div className={`w-12 h-12 ${user.subscriptionActive ? 'bg-emerald-50' : 'bg-gray-100'} rounded-lg flex items-center justify-center`}>
+                <div className={`w-9 h-9 sm:w-12 sm:h-12 ${user.subscriptionActive ? 'bg-emerald-50' : 'bg-gray-100'} rounded-lg flex items-center justify-center flex-shrink-0`}>
                   <svg
-                    className={`w-6 h-6 ${user.subscriptionActive ? 'text-emerald-600' : 'text-gray-400'}`}
+                    className={`w-5 h-5 sm:w-6 sm:h-6 ${user.subscriptionActive ? 'text-emerald-600' : 'text-gray-400'}`}
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -231,26 +231,26 @@ const DashboardPage: React.FC = () => {
         </Card>
 
         {/* ATS Optimization - Main Feature CTA */}
-        <div className="mb-8 bg-gradient-to-r from-indigo-600 to-violet-600 rounded-2xl shadow-xl shadow-indigo-500/15 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-xl font-bold text-white">ATS Resume Optimizer</h3>
-              <p className="text-indigo-100 mt-1">
+        <div className="mb-6 sm:mb-8 bg-gradient-to-r from-indigo-600 to-violet-600 rounded-2xl shadow-xl shadow-indigo-500/15 p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="min-w-0">
+              <h3 className="text-lg sm:text-xl font-bold text-white">ATS Resume Optimizer</h3>
+              <p className="text-indigo-100 mt-1 text-sm sm:text-base">
                 Paste a job description, get your ATS score, and auto-enhance your resume to match
               </p>
             </div>
             {recentResumes.length > 0 ? (
-              <Link href={`/builder/ats?resumeId=${recentResumes[0].id}`}>
+              <Link href={`/builder/ats?resumeId=${recentResumes[0].id}`} className="block sm:flex-shrink-0">
                 <button
-                  className="bg-white text-indigo-700 font-semibold hover:bg-indigo-50 rounded-xl shadow-lg px-6 py-3 text-lg transition-all duration-200"
+                  className="w-full sm:w-auto bg-white text-indigo-700 font-semibold hover:bg-indigo-50 rounded-xl shadow-lg px-5 sm:px-6 py-2.5 sm:py-3 text-base sm:text-lg transition-all duration-200"
                 >
                   Optimize Resume
                 </button>
               </Link>
             ) : (
-              <Link href="/builder">
+              <Link href="/builder" className="block sm:flex-shrink-0">
                 <button
-                  className="bg-white text-indigo-700 font-semibold hover:bg-indigo-50 rounded-xl shadow-lg px-6 py-3 text-lg transition-all duration-200"
+                  className="w-full sm:w-auto bg-white text-indigo-700 font-semibold hover:bg-indigo-50 rounded-xl shadow-lg px-5 sm:px-6 py-2.5 sm:py-3 text-base sm:text-lg transition-all duration-200"
                 >
                   Create Resume First
                 </button>
@@ -311,19 +311,19 @@ const DashboardPage: React.FC = () => {
                 {recentResumes.map((resume) => (
                   <div
                     key={resume.id}
-                    className="bg-white rounded-2xl border border-gray-100 shadow-card hover:shadow-card-hover hover:-translate-y-0.5 transition-all p-5"
+                    className="bg-white rounded-2xl border border-gray-100 shadow-card hover:shadow-card-hover hover:-translate-y-0.5 transition-all p-4 sm:p-5"
                   >
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex-1">
-                        <h4 className="text-sm font-semibold text-gray-900">{resume.title}</h4>
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-3">
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-sm font-semibold text-gray-900 truncate">{resume.title}</h4>
                         <p className="text-xs text-gray-400 mt-1">
                           Last updated: {formatDate(resume.updatedAt)}
                         </p>
                       </div>
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         {resume.atsScore !== null && (
-                          <div className={`px-3 py-1 rounded-full ${getScoreBgColor(resume.atsScore)}`}>
-                            <span className={`text-sm font-medium ${getScoreColor(resume.atsScore)}`}>
+                          <div className={`px-2.5 sm:px-3 py-1 rounded-full ${getScoreBgColor(resume.atsScore)}`}>
+                            <span className={`text-xs sm:text-sm font-medium whitespace-nowrap ${getScoreColor(resume.atsScore)}`}>
                               ATS: {resume.atsScore}%
                             </span>
                           </div>
@@ -334,7 +334,7 @@ const DashboardPage: React.FC = () => {
                           </Button>
                         </Link>
                         <Link href={`/builder/ats?resumeId=${resume.id}`}>
-                          <Button variant="ghost" size="sm" className="text-indigo-600 hover:text-indigo-500">
+                          <Button variant="ghost" size="sm" className="text-indigo-600 hover:text-indigo-500 whitespace-nowrap">
                             ATS Optimize
                           </Button>
                         </Link>
@@ -344,7 +344,7 @@ const DashboardPage: React.FC = () => {
                     {/* Resume Details Preview */}
                     {resume.personalInfo && (
                       <div className="border-t border-gray-100 pt-3 mt-3">
-                        <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2 text-xs">
                           <div>
                             <span className="font-medium text-gray-500">Name:</span>
                             <span className="text-gray-600 ml-2">

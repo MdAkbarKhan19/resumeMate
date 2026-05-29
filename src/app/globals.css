@@ -117,6 +117,28 @@ body {
     motion-reduce:animate-[spin_1.5s_linear_infinite];
 }
 
+/* ─── Landing-page brand helpers (ported from design) ─── */
+
+.brand-bg { background-image: linear-gradient(to right, #4f46e5, #7c3aed); }
+.brand-bg-3 { background-image: linear-gradient(120deg, #4f46e5, #7c3aed 55%, #d946ef); }
+.brand-text {
+  background-image: linear-gradient(to right, #4f46e5, #7c3aed 60%, #d946ef);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.brand-1 { color: #4f46e5; }
+.bg-brand-soft { background: rgba(79, 70, 229, 0.07); }
+.border-brand-soft { border-color: rgba(79, 70, 229, 0.16); }
+.ring-brand { box-shadow: 0 12px 30px rgba(79, 70, 229, 0.28); }
+
+/* Gentle float + soft pulse used on landing mockups */
+.floaty { animation: float 3s ease-in-out infinite; }
+.pulse-soft { animation: agent-think 2s ease-in-out infinite; }
+
+/* Scroll-reveal: hidden until the .revealed class is added by <Reveal> */
+.reveal-init { transform: translateY(14px); opacity: 0; transition: transform .6s cubic-bezier(.22,1,.36,1), opacity .6s ease; }
+.reveal-init.revealed { transform: none; opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .reveal-init { transform: none; opacity: 1; transition: none; } }
+
 /* ─── Gradient text utilities ─── */
 
 .gradient-text-brand {

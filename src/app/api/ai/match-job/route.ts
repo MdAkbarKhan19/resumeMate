@@ -97,63 +97,6 @@ async function handleMatchJob(request: NextRequest, { user }: { user: any }) {
       );
     }
 
-    // Check plan limits
-    const currentUser = await prisma.user.findUnique({
-      where: { id: user.id },
-      select: {
-        planType: true,
-        aiUsage: {
-          where: {
-            createdAt: {
-              gte: new Date(new Date().setHours(0, 0, 0, 0)),
-            },
-          },
-          select: { id: true },
-        },
-      },
-    });
-
-    if (!currentUser) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'USER_NOT_FOUND',
-            message: 'User not found',
-          },
-        },
-        { status: 404 }
-      );
-    }
-
-    const dailyUsage = currentUser.aiUsage.length;
-
-    if (currentUser.planType === 'FREE' && dailyUsage >= 5) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'LIMIT_REACHED',
-            message: 'Free plan allows 5 AI operations per day. Please upgrade for more.',
-          },
-        },
-        { status: 403 }
-      );
-    }
-
-    if (currentUser.planType === 'TIER1' && dailyUsage >= 50) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'LIMIT_REACHED',
-            message: 'You have reached your daily limit of 50 AI operations.',
-          },
-        },
-        { status: 403 }
-      );
-    }
-
     // Convert resume to text
     const resumeText = `
       ${JSON.stringify(resume.personalInfo)}

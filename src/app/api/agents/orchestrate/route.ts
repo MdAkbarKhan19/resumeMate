@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/lib/auth/middleware';
 import { ResumeOrchestrator } from '@/lib/agents/orchestrator';
+import { canRunAtsOptimization } from '@/lib/payment/entitlements';
 import prisma from '@/lib/db/prisma';
 import { z } from 'zod';
 
@@ -77,31 +78,28 @@ async function handleOrchestrate(request: NextRequest, { user }: { user: any }) 
       resumeData = resume;
     }
 
-    // Check AI usage limits
-    const currentUser = await prisma.user.findUnique({
-      where: { id: user.id },
-      select: {
-        planType: true,
-        aiUsage: {
-          where: {
-            createdAt: { gte: new Date(new Date().setHours(0, 0, 0, 0)) },
+    // ATS quota: gate every AI action except `parse-resume`, which is a
+    // one-time import (file → structured data) and not counted as an
+    // optimization. analyze-jd / score-ats / enhance-resume / full-pipeline
+    // all consume an ATS slot per the documented plan limits.
+    if (action !== 'parse-resume') {
+      const atsGate = await canRunAtsOptimization(user.id);
+      if (!atsGate.allowed) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              code: atsGate.code || 'LIMIT_REACHED',
+              message: atsGate.reason || 'ATS optimization limit reached on your current plan.',
+              tier: atsGate.tier,
+              used: atsGate.used,
+              limit: atsGate.limit,
+              resetsAt: atsGate.resetsAt?.toISOString(),
+            },
           },
-        },
-      },
-    });
-
-    const dailyLimit = currentUser?.planType === 'FREE' ? 5 : currentUser?.planType === 'TIER1' ? 50 : Infinity;
-    if (currentUser && currentUser.aiUsage.length >= dailyLimit) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: 'LIMIT_EXCEEDED',
-            message: 'Daily AI usage limit reached. Upgrade your plan for more.',
-          },
-        },
-        { status: 429 }
-      );
+          { status: 429 },
+        );
+      }
     }
 
     // Run orchestrator

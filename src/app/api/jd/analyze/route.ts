@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth } from '@/lib/auth/middleware';
 import { JobDescriptionAnalyzer } from '@/lib/ai/jd-analyzer';
+import { canRunAtsOptimization } from '@/lib/payment/entitlements';
 import prisma from '@/lib/db/prisma';
 import { z } from 'zod';
 
@@ -81,34 +82,23 @@ async function handleAnalyzeJD(request: NextRequest, { user }: { user: any }) {
       );
     }
 
-    // Check AI usage limits for free tier
-    const currentUser = await prisma.user.findUnique({
-      where: { id: user.id },
-      select: {
-        planType: true,
-        aiUsage: {
-          where: {
-            type: 'JD_MATCHING',
-            createdAt: {
-              gte: new Date(new Date().setHours(0, 0, 0, 0)), // Today
-            },
-          },
-        },
-      },
-    });
-
-    if (currentUser?.planType === 'FREE' && currentUser.aiUsage.length >= 3) {
+    // ATS optimization quota (Free: 3/month, Pack: 5/pack, Pro: unlimited).
+    // Source of truth lives in entitlements.ts so all gated routes stay in sync.
+    const atsGate = await canRunAtsOptimization(user.id);
+    if (!atsGate.allowed) {
       return NextResponse.json(
         {
           success: false,
           error: {
-            code: 'LIMIT_EXCEEDED',
-            message: 'Daily JD analysis limit reached for free plan. Upgrade to continue.',
-            limit: 3,
-            used: currentUser.aiUsage.length,
+            code: atsGate.code || 'LIMIT_REACHED',
+            message: atsGate.reason || 'ATS optimization limit reached on your current plan.',
+            tier: atsGate.tier,
+            used: atsGate.used,
+            limit: atsGate.limit,
+            resetsAt: atsGate.resetsAt?.toISOString(),
           },
         },
-        { status: 429 }
+        { status: 429 },
       );
     }
 

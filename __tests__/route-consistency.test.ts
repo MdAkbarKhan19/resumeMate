@@ -21,24 +21,6 @@ import * as path from 'path';
 //   - a NEW route appears with inline gates not in the list.
 const KNOWN_INLINE_GATES: Array<{ file: string; reason: string }> = [
   {
-    file: 'src/app/api/ai/match-job/route.ts',
-    reason:
-      "Inline daily caps (FREE: 5, TIER1: 50) that don't match entitlements.ts" +
-      ' (which says TIER1/Pack has UNLIMITED bullets and FREE shares a 10/day pool).' +
-      ' KNOWN DRIFT — needs to be migrated to canEnhanceBullet/canRunAtsOptimization.',
-  },
-  {
-    file: 'src/app/api/agents/orchestrate/route.ts',
-    reason:
-      "Inline daily limit (FREE: 5, TIER1: 50). KNOWN DRIFT — needs migration.",
-  },
-  {
-    file: 'src/app/api/jd/analyze/route.ts',
-    reason:
-      'Inline plan check. Verify it routes through canRunAtsOptimization;' +
-      ' otherwise migrate.',
-  },
-  {
     file: 'src/app/api/payments/verify/route.ts',
     reason:
       'Legitimate inline check — this is the route that ASSIGNS planType' +

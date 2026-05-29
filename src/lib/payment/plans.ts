@@ -64,7 +64,7 @@ export const PLAN_CATALOG: Record<string, PlanCatalogEntry> = {
     tagline: 'Try the product end-to-end',
     features: [
       '1 active resume',
-      '3 ATS optimizations / month',
+      '1 ATS optimization / month',
       'PDF download (with watermark)',
       'Both templates',
     ],
@@ -81,7 +81,7 @@ export const PLAN_CATALOG: Record<string, PlanCatalogEntry> = {
     tagline: 'For one specific job application',
     features: [
       '1 polished resume',
-      '5 ATS optimizations',
+      '3 ATS optimizations',
       'Unlimited downloads for 30 days',
       'No watermark',
     ],

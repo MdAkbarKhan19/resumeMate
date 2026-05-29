@@ -285,7 +285,7 @@ export default function Home() {
                 <div className="text-gray-400 mt-0.5 text-sm">forever</div>
               </div>
               <ul className="space-y-3 mb-8 flex-1">
-                {['1 active resume', '3 ATS optimizations / month', '10 AI bullet enhancements / day', 'Watermarked PDF download', 'Both templates'].map(f => (
+                {['1 active resume', '1 ATS optimization / month', '10 AI bullet enhancements / day', 'Watermarked PDF download', 'Both templates'].map(f => (
                   <li key={f} className="flex items-center gap-2.5">
                     <div className="w-5 h-5 rounded-full bg-emerald-50 flex items-center justify-center flex-shrink-0">
                       <svg className="w-3 h-3 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
@@ -308,7 +308,7 @@ export default function Home() {
                 <div className="text-gray-400 mt-0.5 text-sm">one-time</div>
               </div>
               <ul className="space-y-3 mb-8 flex-1">
-                {['1 polished resume', '5 ATS optimizations per pack', 'Unlimited AI bullet enhancements', 'Clean PDF — no watermark', 'Both templates'].map(f => (
+                {['1 polished resume', '3 ATS optimizations per pack', 'Unlimited AI bullet enhancements', 'Clean PDF — no watermark', 'Both templates'].map(f => (
                   <li key={f} className="flex items-center gap-2.5">
                     <div className="w-5 h-5 rounded-full bg-emerald-50 flex items-center justify-center flex-shrink-0">
                       <svg className="w-3 h-3 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>

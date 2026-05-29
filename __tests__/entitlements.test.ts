@@ -6,8 +6,8 @@
  * features they paid for OR free users get features they shouldn't — both
  * are bad. These tests pin every gate against the documented plan table:
  *
- *   FREE   → 1 resume, 3 ATS optimizations / month, 10 bullet AI / day, watermarked
- *   PACK   → 1 resume per pack,  5 ATS optimizations per pack, unlimited bullets, no watermark
+ *   FREE   → 1 resume, 1 ATS optimization / month, 10 bullet AI / day, watermarked
+ *   PACK   → 1 resume per pack,  3 ATS optimizations per pack, unlimited bullets, no watermark
  *   PRO    → unlimited resumes, unlimited ATS, unlimited bullets, no watermark
  */
 
@@ -192,23 +192,23 @@ describe('canCreateResume', () => {
 // ─────────────────────────────────────────────────────────────────────────
 
 describe('canRunAtsOptimization', () => {
-  test('FREE under monthly cap: allowed', async () => {
+  test('FREE under monthly cap: allowed (0 used / 1 limit)', async () => {
     setUser({ planType: 'FREE' });
-    mockedPrisma.aIUsage.count.mockResolvedValue(2);
+    mockedPrisma.aIUsage.count.mockResolvedValue(0);
     const r = await canRunAtsOptimization('u1');
     expect(r.allowed).toBe(true);
-    expect(r.used).toBe(2);
-    expect(r.limit).toBe(3);
+    expect(r.used).toBe(0);
+    expect(r.limit).toBe(1);
     expect(r.resetsAt).toBeInstanceOf(Date);
   });
 
   test('FREE at monthly cap: blocked with ATS_LIMIT_REACHED', async () => {
     setUser({ planType: 'FREE' });
-    mockedPrisma.aIUsage.count.mockResolvedValue(3);
+    mockedPrisma.aIUsage.count.mockResolvedValue(1);
     const r = await canRunAtsOptimization('u1');
     expect(r.allowed).toBe(false);
     expect(r.code).toBe('ATS_LIMIT_REACHED');
-    expect(r.reason).toMatch(/3 ATS/);
+    expect(r.reason).toMatch(/1 ATS/);
     expect(r.reason).toMatch(/1st/i);
   });
 
@@ -242,16 +242,16 @@ describe('canRunAtsOptimization', () => {
   test('PACK under per-pack cap: allowed', async () => {
     setUser({ planType: 'TIER1', resumeCredits: 1 });
     mockedPrisma.payment.findFirst.mockResolvedValue({ createdAt: new Date('2025-01-15') });
-    mockedPrisma.aIUsage.count.mockResolvedValue(4);
+    mockedPrisma.aIUsage.count.mockResolvedValue(2);
     const r = await canRunAtsOptimization('u1');
     expect(r.allowed).toBe(true);
-    expect(r.limit).toBe(5);
+    expect(r.limit).toBe(3);
   });
 
   test('PACK at per-pack cap: blocked', async () => {
     setUser({ planType: 'TIER1', resumeCredits: 1 });
     mockedPrisma.payment.findFirst.mockResolvedValue({ createdAt: new Date('2025-01-15') });
-    mockedPrisma.aIUsage.count.mockResolvedValue(5);
+    mockedPrisma.aIUsage.count.mockResolvedValue(3);
     const r = await canRunAtsOptimization('u1');
     expect(r.allowed).toBe(false);
     expect(r.code).toBe('ATS_LIMIT_REACHED');

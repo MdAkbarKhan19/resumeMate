@@ -14,7 +14,7 @@ const comparisonRows: {
   pro: string | boolean;
 }[] = [
   { feature: 'Active resumes',          free: '1',     pack: '1',  pro: 'Unlimited' },
-  { feature: 'ATS optimizations',       free: '3 / mo', pack: '5',  pro: 'Unlimited' },
+  { feature: 'ATS optimizations',       free: '1 / mo', pack: '3',  pro: 'Unlimited' },
   { feature: 'PDF download',            free: 'With watermark', pack: 'No watermark', pro: 'No watermark' },
   { feature: 'Templates',               free: 'Both',  pack: 'Both', pro: 'Both' },
   { feature: 'Advanced customization',  free: false,   pack: true, pro: true },
@@ -338,8 +338,8 @@ const PricingPage: React.FC = () => {
             Try it free — no card needed
           </h2>
           <p className="text-lg text-indigo-100 mb-8 max-w-2xl mx-auto">
-            Upload your existing resume or start from scratch. Run 3 ATS optimizations
-            on us — see the score jump before you pay a rupee.
+            Upload your existing resume or start from scratch. Try an ATS
+            optimization on us — see the score jump before you pay a rupee.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/auth/signup">

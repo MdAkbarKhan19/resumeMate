@@ -75,7 +75,7 @@ async function handleAutoEnhance(request: NextRequest, { user }: { user: any }) 
     }
 
     // Enforce per-plan ATS quota.
-    //   Free → 3 / month, Pack → 5 per pack, Pro → unlimited.
+    //   Free → 1 / month, Pack → 3 per pack, Pro → unlimited.
     // The check counts AIUsage rows of type AUTO_ENHANCEMENT / JD_MATCHING
     // within the user's active window.
     const gate = await canRunAtsOptimization(user.id);

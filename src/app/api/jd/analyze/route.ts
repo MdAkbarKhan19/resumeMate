@@ -82,7 +82,7 @@ async function handleAnalyzeJD(request: NextRequest, { user }: { user: any }) {
       );
     }
 
-    // ATS optimization quota (Free: 3/month, Pack: 5/pack, Pro: unlimited).
+    // ATS optimization quota (Free: 1/month, Pack: 3/pack, Pro: unlimited).
     // Source of truth lives in entitlements.ts so all gated routes stay in sync.
     const atsGate = await canRunAtsOptimization(user.id);
     if (!atsGate.allowed) {

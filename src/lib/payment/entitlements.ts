@@ -6,8 +6,8 @@
  * and server.
  *
  * Plan summary:
- *   FREE   → 1 resume, 3 ATS optimizations / month, 10 bullet AI / day, watermarked downloads
- *   PACK   → 1 resume (per pack purchase), 5 ATS optimizations (per pack), unlimited bullet AI, no watermark
+ *   FREE   → 1 resume, 1 ATS optimization / month, 10 bullet AI / day, watermarked downloads
+ *   PACK   → 1 resume (per pack purchase), 3 ATS optimizations (per pack), unlimited bullet AI, no watermark
  *   PRO    → unlimited everything, no watermark
  */
 
@@ -34,7 +34,7 @@ export interface PlanEntitlements {
 const FREE: PlanEntitlements = {
   tier: 'free',
   maxActiveResumes: 1,
-  ats: { period: 'monthly', limit: 3 },
+  ats: { period: 'monthly', limit: 1 },
   bullets: { period: 'daily', limit: 10 },
   watermark: true,
 };
@@ -42,7 +42,7 @@ const FREE: PlanEntitlements = {
 const PACK: PlanEntitlements = {
   tier: 'pack',
   maxActiveResumes: 1,                     // a pack = 1 polished resume
-  ats: { period: 'per_pack', limit: 5 },   // tracked since the most recent pack purchase
+  ats: { period: 'per_pack', limit: 3 },   // tracked since the most recent pack purchase
   bullets: { period: 'unlimited', limit: 0 },
   watermark: false,
 };

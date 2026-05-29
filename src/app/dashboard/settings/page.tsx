@@ -378,8 +378,8 @@ const SettingsPage: React.FC = () => {
                     {getPlanName(user.planType)}
                   </span>
                   <p className="mt-2 text-gray-500">
-                    {user.planType === 'FREE' && '1 resume · 3 ATS/mo · 10 AI/day · watermarked PDF'}
-                    {user.planType === 'TIER1' && '1 polished resume · 5 ATS · unlimited AI · clean PDF'}
+                    {user.planType === 'FREE' && '1 resume · 1 ATS/mo · 10 AI/day · watermarked PDF'}
+                    {user.planType === 'TIER1' && '1 polished resume · 3 ATS · unlimited AI · clean PDF'}
                     {user.planType === 'TIER2' && 'Unlimited everything · clean PDF · priority support'}
                   </p>
                 </div>

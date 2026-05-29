@@ -143,13 +143,25 @@ export async function authenticateRequest(
         return { authenticated: false, error: 'Invalid token payload' };
       }
 
+      // Account linking: a Cognito JWT for a federated identity (Google)
+      // includes an `identities` claim naming the IdP. Native email/password
+      // sign-ins don't have this claim. We use it to set the right provider
+      // on first-time row creation. The User table keys on email — so if the
+      // same address has already signed up via the other method, that row is
+      // returned as-is and we never create a duplicate JDsync account.
+      const identities = (cognitoPayload as any).identities as Array<{ providerName?: string }> | undefined;
+      const isGoogle =
+        Array.isArray(identities) && identities.some(i => i?.providerName === 'Google');
+
       // Check cache
       const cached = userCache.get(email);
       if (cached && (Date.now() - cached.timestamp < CACHE_TTL)) {
         return { authenticated: true, user: cached.user };
       }
 
-      // Fetch or create user
+      // Fetch or create user — email is the canonical key, so email+password
+      // signup and Google sign-in with the same address always resolve to the
+      // same User row.
       let user = await prisma.user.findUnique({
         where: { email },
         select: USER_SELECT,
@@ -160,7 +172,7 @@ export async function authenticateRequest(
           data: {
             email,
             providerId: cognitoUserId,
-            provider: 'EMAIL',
+            provider: isGoogle ? 'GOOGLE' : 'EMAIL',
             emailVerified: true,
             planType: 'FREE',
             name: cognitoPayload.name || email.split('@')[0],

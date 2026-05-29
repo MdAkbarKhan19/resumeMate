@@ -1,6 +1,11 @@
 // AWS Amplify Configuration
 import { Amplify } from 'aws-amplify';
 
+// During SSR/build NEXT_PUBLIC_APP_URL may be unset; fall back to the
+// production origin so amplify-config doesn't error before render.
+const APP_ORIGIN =
+  process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') || 'https://jdsync.com';
+
 const amplifyConfig = {
   Auth: {
     Cognito: {
@@ -8,6 +13,15 @@ const amplifyConfig = {
       userPoolClientId: process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID!,
       loginWith: {
         email: true,
+        // Hosted UI OAuth — used by signInWithRedirect({ provider: 'Google' }).
+        // Cognito redirects back to one of redirectSignIn URLs after Google auth.
+        oauth: {
+          domain: 'jdsync-auth.auth.us-east-1.amazoncognito.com',
+          scopes: ['email', 'openid', 'profile'] as ('email' | 'openid' | 'profile')[],
+          redirectSignIn: [`${APP_ORIGIN}/auth/callback`, `${APP_ORIGIN}/`],
+          redirectSignOut: [`${APP_ORIGIN}/`],
+          responseType: 'code' as const,
+        },
       },
       signUpVerificationMethod: 'code' as const,
       userAttributes: {

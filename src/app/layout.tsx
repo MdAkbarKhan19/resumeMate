@@ -9,6 +9,9 @@ import Footer from '@/components/layout/Footer';
 import { ToastContainer } from '@/components/ui/Alert';
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL || 'https://jdsync.com',
+  ),
   title: 'JDsync - AI-Powered Resume Builder',
   description: 'Create professional, ATS-optimized resumes with AI assistance',
   keywords: ['resume builder', 'CV creator', 'ATS optimization', 'AI resume', 'job application'],
@@ -16,6 +19,8 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'JDsync - AI-Powered Resume Builder',
     description: 'Create professional, ATS-optimized resumes with AI assistance',
+    url: 'https://jdsync.com',
+    siteName: 'JDsync',
     type: 'website',
   },
 };

@@ -1,5 +1,11 @@
 'use client';
 
+// Import for side-effect: Amplify.configure() must run on the client before
+// any aws-amplify/auth call. AuthProvider wraps the whole app in layout.tsx,
+// so this guarantees every client page has Amplify ready — without each
+// auth-using page having to remember to import the config itself.
+import '@/lib/amplify-config';
+
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 

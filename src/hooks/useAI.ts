@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { toast } from '@/components/ui/Alert';
+import { readJson } from '@/lib/api-client';
 
 interface AIUsageStats {
   bulletEnhancements: number;
@@ -30,7 +31,7 @@ export const useAI = () => {
         body: JSON.stringify({ bullet: text, context }),
       });
 
-      const data = await response.json();
+      const data = await readJson(response);
 
       if (!response.ok) {
         throw new Error(data.error?.message || data.message || 'Enhancement failed');
@@ -64,7 +65,7 @@ export const useAI = () => {
         body: JSON.stringify({ text }),
       });
 
-      const data = await response.json();
+      const data = await readJson(response);
 
       if (!response.ok) {
         throw new Error(data.message || 'Grammar check failed');
@@ -103,7 +104,7 @@ export const useAI = () => {
           }),
         });
 
-        const data = await response.json();
+        const data = await readJson(response);
 
         if (!response.ok) {
           throw new Error(data.error?.message || data.message || 'Summary generation failed');
@@ -139,7 +140,7 @@ export const useAI = () => {
           body: JSON.stringify({ resumeContent, jobDescription }),
         });
 
-        const data = await response.json();
+        const data = await readJson(response);
 
         if (!response.ok) {
           throw new Error(data.message || 'Job matching failed');
@@ -184,7 +185,7 @@ export const useAI = () => {
         body: JSON.stringify({ type: 'redundancy', bullets }),
       });
 
-      const data = await response.json();
+      const data = await readJson(response);
 
       if (!response.ok) {
         throw new Error(data.message || 'Redundancy check failed');

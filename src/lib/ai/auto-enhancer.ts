@@ -67,7 +67,7 @@ export class AIAutoEnhancer {
     // chain (the experience rewrite + reflection). Roughly halves end-to-end time.
     const [skillsChanges, experienceChanges, summaryChange, projectsChanges] =
       await Promise.all([
-        this.enhanceSkills(enhancedResume, jdAnalysis, usage, candidateName),
+        this.enhanceSkills(enhancedResume, jdAnalysis, usage, candidateName, mode),
         this.enhanceExperience(enhancedResume, jdAnalysis, usage, candidateName, mode),
         this.enhanceSummary(enhancedResume, jdAnalysis, usage, candidateName),
         this.enhanceProjects(enhancedResume, jdAnalysis, usage, candidateName),
@@ -100,7 +100,8 @@ export class AIAutoEnhancer {
     resumeData: any,
     jdAnalysis: JDAnalysisResult,
     usage: LLMUsage,
-    candidateName: string
+    candidateName: string,
+    mode: EnhanceMode
   ): Promise<EnhancementChange[]> {
     const changes: EnhancementChange[] = [];
 
@@ -136,6 +137,35 @@ export class AIAutoEnhancer {
       usage,
       candidateName
     );
+
+    // AGGRESSIVE: force-cover EVERY still-missing JD keyword the model didn't pick
+    // (required + tools + preferred + methodology keywords), so the resume's
+    // keyword match approaches the JD as closely as possible. Deduped against what
+    // the candidate already has and what the model just added.
+    if (mode === 'aggressive') {
+      const haveLower = new Set<string>([
+        ...existingSkillsLower,
+        ...skillsToAdd.map(s => s.name.toLowerCase()),
+      ]);
+      const jobTitleLower = (jdAnalysis.jobTitle || '').toLowerCase();
+      [
+        ...missingRequiredSkills,
+        ...(jdAnalysis.tools || []),
+        ...missingPreferredSkills,
+        ...missingKeywords,
+      ]
+        .map(s => String(s || '').trim())
+        .filter(s => s.length > 1 && s.toLowerCase() !== jobTitleLower)
+        .filter(s => {
+          const key = s.toLowerCase();
+          if (haveLower.has(key)) return false;
+          haveLower.add(key);
+          return true;
+        })
+        .forEach(name => {
+          skillsToAdd.push({ name, category: 'Technical', reason: 'Matched to the job description' });
+        });
+    }
 
     // Add skills in appropriate categories
     if (!resumeData.skills) {
@@ -428,9 +458,21 @@ If no skills should be added, return: { "skills": [] }`;
       const alreadyPresent = claimed.filter((k) =>
         originalLower.includes(k.toLowerCase()),
       );
-      const textMateriallyChanged = rewrittenPlain.trim() !== original.trim();
+      // Compare ignoring trailing punctuation/whitespace so a bullet that only
+      // gained a period ("…step" → "…step.") is NOT treated as a real change.
+      const sansTail = (s: string) => s.replace(/[\s.]+$/, '').trim();
+      const materiallyChanged = sansTail(rewrittenPlain) !== sansTail(original);
+      // Bold markers wrapped around words ALREADY in the bullet — a highlight, not a rewrite.
+      const boldHighlightOnly =
+        !materiallyChanged && rewritten.includes('**') && alreadyPresent.length > 0;
 
-      if (textMateriallyChanged && newlyAdded.length > 0) {
+      // True no-op (identical except at most a trailing period): keep the ORIGINAL
+      // bullet untouched and record NOTHING, so it never shows as a fake "Modified".
+      if (!materiallyChanged && !boldHighlightOnly) {
+        return;
+      }
+
+      if (materiallyChanged && newlyAdded.length > 0) {
         const tail =
           alreadyPresent.length > 0
             ? ` (also highlighted: ${alreadyPresent.join(', ')})`
@@ -442,7 +484,7 @@ If no skills should be added, return: { "skills": [] }`;
           after: rewritten,
           reason: `Incorporated: ${newlyAdded.join(', ')}${tail}`,
         });
-      } else if (textMateriallyChanged) {
+      } else if (materiallyChanged) {
         const tail =
           alreadyPresent.length > 0
             ? ` Highlighted: ${alreadyPresent.join(', ')}.`
@@ -454,9 +496,8 @@ If no skills should be added, return: { "skills": [] }`;
           after: rewritten,
           reason: `Rewritten for impact and JD-tone alignment.${tail}`,
         });
-      } else if (rewritten !== original && alreadyPresent.length > 0) {
-        // Only difference is **bold** markers around words already in the
-        // bullet. Don't pretend we incorporated anything.
+      } else {
+        // boldHighlightOnly
         changes.push({
           section: 'experience',
           type: 'enhanced',
@@ -465,7 +506,6 @@ If no skills should be added, return: { "skills": [] }`;
           reason: `Highlighted for ATS visibility: ${alreadyPresent.join(', ')}`,
         });
       }
-      // else: identical text, no claim — do not push a change record.
 
       if (addr.field === 'description') {
         exp.description = rewritten;

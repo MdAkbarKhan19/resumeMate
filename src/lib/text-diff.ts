@@ -25,9 +25,11 @@ function tokenize(s: string): string[] {
   return s.match(/\s*\S+\s*|\s+/g) || [];
 }
 
-/** Normalize a token for equality (ignore surrounding whitespace + case). */
+/** Normalize a token for equality (ignore whitespace, case, trailing punctuation). */
 function norm(tok: string): string {
-  return tok.trim().toLowerCase();
+  // Trailing-punctuation-insensitive so "step" and "step." match — a period-only
+  // edit shouldn't render as a removed+added word ("stepstep.").
+  return tok.trim().toLowerCase().replace(/[.,;:!?]+$/, '');
 }
 
 /**

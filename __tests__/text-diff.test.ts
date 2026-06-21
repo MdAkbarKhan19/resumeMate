@@ -36,6 +36,11 @@ describe('wordDiff', () => {
     expect(removed).toContain('Spring Boot');
   });
 
+  test('a trailing-period-only edit is NOT a word change (no "stepstep." garble)', () => {
+    const segs = wordDiff('resolve orders during the pause step', 'resolve orders during the pause step.');
+    expect(segs.every(s => s.type === 'same')).toBe(true);
+  });
+
   test('strips ** bold markers before diffing so injected keywords read as added words', () => {
     const segs = wordDiff('Built a data pipeline', 'Built a **Kafka** data pipeline');
     expect(segs.some(s => s.type === 'added' && s.value.includes('Kafka'))).toBe(true);

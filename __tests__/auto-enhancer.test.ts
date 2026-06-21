@@ -190,4 +190,19 @@ describe('AIAutoEnhancer.autoEnhanceResume (mocked model)', () => {
     const bullet0 = result.enhancedResume.experience[0].bullets[0];
     expect(bullet0).toContain('Kafka');
   });
+
+  test('AGGRESSIVE mode force-covers a missing required JD skill the model skipped', async () => {
+    // JD requires Kubernetes + Kafka; the mocked skills model returns only Kubernetes + CI/CD.
+    // Aggressive must still force-add the missing 'Kafka' (and tools like Docker) for max match.
+    const result = await AIAutoEnhancer.autoEnhanceResume(freshResume(), JD, 'aggressive');
+    const names = result.enhancedResume.skills.map((s: any) => (typeof s === 'string' ? s : s.name));
+    expect(names).toContain('Kafka');
+    expect(names).toContain('Docker');
+  });
+
+  test('MODERATE mode does NOT force-add a JD skill the model did not choose', async () => {
+    const result = await AIAutoEnhancer.autoEnhanceResume(freshResume(), JD, 'moderate');
+    const names = result.enhancedResume.skills.map((s: any) => (typeof s === 'string' ? s : s.name));
+    expect(names).not.toContain('Kafka');
+  });
 });

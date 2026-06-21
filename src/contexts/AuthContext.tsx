@@ -6,6 +6,11 @@
 // auth-using page having to remember to import the config itself.
 import '@/lib/amplify-config';
 
+// Side-effect: install the global Response.json() guard before any component
+// mounts or fires a fetch, so a non-JSON (HTML 502/504, empty, truncated)
+// response can never surface the raw "Unexpected token '<'" error anywhere.
+import '@/lib/json-guard';
+
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
 export interface User {

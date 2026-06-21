@@ -379,12 +379,46 @@ If no skills should be added, return: { "skills": [] }`;
 
     if (flat.length === 0) return changes;
 
-    const enhanced = await this.enhanceAllBullets(
-      flat,
-      resumeData.experience.slice(0, expCount),
-      jdAnalysis,
-      usage,
-      candidateName
+    // Rewrite each role's bullets in parallel (scatter-gather). Splitting the one
+    // big serial call into per-role concurrent calls is the main latency win —
+    // wall-clock drops from the SUM across roles to roughly the slowest single
+    // role. Each role is re-indexed to a standalone batch; a role that fails
+    // (timeout/parse) falls back to its original bullets (best-effort), so one
+    // slow role never fails or stalls the whole enhancement.
+    const roleGroups = new Map<number, number[]>(); // expIdx -> positions in `flat`
+    flat.forEach((a, pos) => {
+      const arr = roleGroups.get(a.expIdx);
+      if (arr) arr.push(pos);
+      else roleGroups.set(a.expIdx, [pos]);
+    });
+
+    const enhanced: Array<{ text: string; keywordsIncorporated: string[] }> =
+      flat.map(a => ({ text: a.text, keywordsIncorporated: [] }));
+
+    await Promise.all(
+      [...roleGroups.entries()].map(async ([expIdx, positions]) => {
+        // Standalone single-role batch: re-index expIdx to 0 so enhanceAllBullets
+        // treats it as the only role.
+        const subFlat = positions.map(pos => ({
+          expIdx: 0,
+          bulletIdx: flat[pos].bulletIdx,
+          text: flat[pos].text,
+        }));
+        try {
+          const sub = await this.enhanceAllBullets(
+            subFlat,
+            [resumeData.experience[expIdx]],
+            jdAnalysis,
+            usage,
+            candidateName,
+          );
+          positions.forEach((pos, j) => {
+            if (sub[j]) enhanced[pos] = sub[j];
+          });
+        } catch {
+          // Leave this role's bullets at their original text (already seeded above).
+        }
+      }),
     );
 
     // Apply results back to the resume in place, and record changes.

@@ -115,11 +115,12 @@ function clientFor(provider: AIProvider): OpenAI {
   const cached = clientCache.get(provider);
   if (cached) return cached;
 
-  // A single hung request used to be able to hold a Node connection (and its
-  // buffers) for the SDK default of 10 minutes. Cap each attempt at 90s and
-  // allow one retry on a transient network/5xx blip. 90s comfortably covers the
-  // largest call (the 6000-token quality rewrite) while failing fast otherwise.
-  const COMMON = { timeout: 90_000, maxRetries: 1 };
+  // Cap each attempt at 60s and DON'T auto-retry. A retry on a slow (not failed)
+  // call stacks 60s + 60s and can blow past the nginx proxy budget → 504. With
+  // the per-role parallel rewrite, individual calls are small and finish well
+  // under 60s; a call that does time out falls back to the original bullets
+  // (best-effort) instead of doubling the request's wall-clock.
+  const COMMON = { timeout: 60_000, maxRetries: 0 };
 
   let client: OpenAI;
   if (provider === 'deepseek') {

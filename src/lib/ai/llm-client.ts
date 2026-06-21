@@ -115,6 +115,12 @@ function clientFor(provider: AIProvider): OpenAI {
   const cached = clientCache.get(provider);
   if (cached) return cached;
 
+  // A single hung request used to be able to hold a Node connection (and its
+  // buffers) for the SDK default of 10 minutes. Cap each attempt at 90s and
+  // allow one retry on a transient network/5xx blip. 90s comfortably covers the
+  // largest call (the 6000-token quality rewrite) while failing fast otherwise.
+  const COMMON = { timeout: 90_000, maxRetries: 1 };
+
   let client: OpenAI;
   if (provider === 'deepseek') {
     const apiKey = deepseekKey();
@@ -122,11 +128,12 @@ function clientFor(provider: AIProvider): OpenAI {
     client = new OpenAI({
       apiKey,
       baseURL: process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com',
+      ...COMMON,
     });
   } else {
     const apiKey = openaiKey();
     if (!apiKey) throw new Error('OPENAI_API_KEY is not configured');
-    client = new OpenAI({ apiKey });
+    client = new OpenAI({ apiKey, ...COMMON });
   }
   clientCache.set(provider, client);
   return client;

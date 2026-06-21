@@ -48,23 +48,22 @@ export class AIAutoEnhancer {
     const candidateName: string =
       resumeData?.personalInfo?.name || resumeData?.personalInfo?.fullName || '';
 
-    // 1. Enhance Skills Section
-    const skillsChanges = await this.enhanceSkills(enhancedResume, jdAnalysis, usage, candidateName);
-    changes.push(...skillsChanges);
-
-    // 2. Enhance Experience Bullets
-    const experienceChanges = await this.enhanceExperience(enhancedResume, jdAnalysis, usage, candidateName);
-    changes.push(...experienceChanges);
-
-    // 3. Enhance Professional Summary
-    const summaryChange = await this.enhanceSummary(enhancedResume, jdAnalysis, usage, candidateName);
+    // Run the four section enhancers CONCURRENTLY. Each mutates a disjoint
+    // section of `enhancedResume` (skills / experience / summary / projects) and
+    // only cross-reads the others for prompt context, so parallelizing is safe
+    // and collapses wall-clock from the SUM of all calls to the slowest single
+    // chain (the experience rewrite + reflection). Roughly halves end-to-end time.
+    const [skillsChanges, experienceChanges, summaryChange, projectsChanges] =
+      await Promise.all([
+        this.enhanceSkills(enhancedResume, jdAnalysis, usage, candidateName),
+        this.enhanceExperience(enhancedResume, jdAnalysis, usage, candidateName),
+        this.enhanceSummary(enhancedResume, jdAnalysis, usage, candidateName),
+        this.enhanceProjects(enhancedResume, jdAnalysis, usage, candidateName),
+      ]);
+    changes.push(...skillsChanges, ...experienceChanges, ...projectsChanges);
     if (summaryChange) {
       changes.push(summaryChange);
     }
-
-    // 4. Enhance Projects (if any)
-    const projectsChanges = await this.enhanceProjects(enhancedResume, jdAnalysis, usage, candidateName);
-    changes.push(...projectsChanges);
 
     // Create summary
     const summary = {

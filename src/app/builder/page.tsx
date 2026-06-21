@@ -118,7 +118,10 @@ const BuilderPage: React.FC = () => {
   const searchParams = useSearchParams();
   const resumeId = searchParams.get('id');
 
-  const { isLoading: authLoading, isAuthenticated } = useAuth();
+  const { isLoading: authLoading, isAuthenticated, user } = useAuth();
+  // Draft autosave is scoped per-user so a different account signing in on the
+  // same browser can never restore the previous user's in-progress resume.
+  const draftKey = user?.id ? `resume-draft:${user.id}` : null;
   const { enhanceBullet, generateSummary, isProcessing } = useAI();
 
   // Refs
@@ -205,14 +208,15 @@ const BuilderPage: React.FC = () => {
 
   // Auto-save to localStorage (debounced, 5 seconds)
   useEffect(() => {
+    if (!draftKey) return;
     if (autoSaveRef.current) clearTimeout(autoSaveRef.current);
     autoSaveRef.current = setTimeout(() => {
       try {
-        localStorage.setItem('resume-draft', JSON.stringify(resumeData));
+        localStorage.setItem(draftKey, JSON.stringify(resumeData));
       } catch {}
     }, 5000);
     return () => { if (autoSaveRef.current) clearTimeout(autoSaveRef.current); };
-  }, [resumeData]);
+  }, [resumeData, draftKey]);
 
   // Load resume data
   useEffect(() => {
@@ -340,8 +344,8 @@ const BuilderPage: React.FC = () => {
         } finally {
           setIsLoadingResume(false);
         }
-      } else {
-        const draft = localStorage.getItem('resume-draft');
+      } else if (draftKey) {
+        const draft = localStorage.getItem(draftKey);
         if (draft) {
           try {
             const parsed = JSON.parse(draft);
@@ -362,7 +366,7 @@ const BuilderPage: React.FC = () => {
       }
     };
     if (isAuthenticated) loadResumeData();
-  }, [resumeId, isAuthenticated, router]);
+  }, [resumeId, isAuthenticated, router, draftKey]);
 
   // Navigation: desktop scrolls to section; mobile also expands its accordion.
   const scrollToSection = useCallback((key: SectionKey) => {
@@ -643,7 +647,7 @@ const BuilderPage: React.FC = () => {
 
       if (result.success) {
         toast.success('Resume saved');
-        localStorage.removeItem('resume-draft');
+        if (draftKey) localStorage.removeItem(draftKey);
         if (!effectiveId && result.data?.id) {
           // Remember the new id so later saves PATCH instead of creating dupes.
           createdIdRef.current = result.data.id;
@@ -667,7 +671,7 @@ const BuilderPage: React.FC = () => {
     } finally {
       setIsSaving(false);
     }
-  }, [resumeId, resumeTitle, resumeData, customSections, selectedTemplateId, customization, router]);
+  }, [resumeId, resumeTitle, resumeData, customSections, selectedTemplateId, customization, router, draftKey]);
 
   // DOCX export is temporarily disabled — only PDF is supported in the UI.
   // The /api/export/docx route and EnhancedDOCXService still exist if we want

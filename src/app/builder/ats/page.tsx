@@ -9,7 +9,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import JobDescriptionUpload from '@/components/builder/JobDescriptionUpload';
 import ATSDashboard from '@/components/builder/ATSDashboard';
 import { ArrowLeftIcon, DocumentCheckIcon, PencilSquareIcon, XMarkIcon, CheckIcon, LockClosedIcon } from '@heroicons/react/24/outline';
-import { authenticatedFetch } from '@/lib/api-client';
+import { authenticatedFetch, readJson } from '@/lib/api-client';
 import { ConfirmModal } from '@/components/ui';
 
 // Render text with `**word**` markers as bold spans (no HTML injection).
@@ -161,7 +161,7 @@ function ATSOptimizationPageContent() {
         }),
       });
 
-      const data = await response.json();
+      const data = await readJson(response);
 
       if (!response.ok) {
         throw new Error(data.error?.message || 'Failed to enhance resume');

@@ -7,7 +7,6 @@
 import '@/lib/amplify-config';
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
 
 export interface User {
   id: string;
@@ -32,8 +31,24 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Wipe every piece of per-user client state. Critical for account isolation:
+// without this, signing in as a different account on the same browser can
+// inherit the previous user's token, cached resume list, or in-progress draft.
+function clearAppStorage() {
+  try {
+    localStorage.removeItem('token');
+    localStorage.removeItem('mock-resumes');
+    localStorage.removeItem('test-user');
+    // Drafts are keyed per-user (resume-draft:<userId>); also clears the legacy
+    // global 'resume-draft' key. Iterate backwards since we mutate while looping.
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('resume-draft')) localStorage.removeItem(key);
+    }
+  } catch {}
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -136,19 +151,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } catch {
         // Cognito not available - that's fine
       }
-      localStorage.removeItem('token');
-      setUser(null);
-      setIsAuthenticated(false);
-      router.push('/auth/login');
     } catch (err: any) {
       console.error('[Auth] Logout error:', err);
-      // Force logout even on error
-      localStorage.removeItem('token');
+    } finally {
+      // Always run, even if Cognito sign-out throws. Hard-navigate (not
+      // router.push) so the in-memory SWR cache — which holds the previous
+      // user's resume list — is fully discarded for the next account.
+      clearAppStorage();
       setUser(null);
       setIsAuthenticated(false);
-      router.push('/auth/login');
+      window.location.href = '/auth/login';
     }
-  }, [router]);
+  }, []);
 
   useEffect(() => {
     fetchUser();

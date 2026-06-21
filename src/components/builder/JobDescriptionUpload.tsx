@@ -6,7 +6,7 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { DocumentTextIcon, ArrowUpTrayIcon, SparklesIcon, LinkIcon } from '@heroicons/react/24/outline';
-import { authenticatedFetch } from '@/lib/api-client';
+import { authenticatedFetch, readJson } from '@/lib/api-client';
 
 const SUPPORTED_JOB_URL = /^https?:\/\/([a-z0-9-]+\.)*(linkedin\.com|indeed\.com|indeed\.co\.in)\//i;
 // Naukri ships a SPA shell with no JD content in the initial HTML — a plain
@@ -97,7 +97,7 @@ export default function JobDescriptionUpload({
         }),
       });
 
-      const data = await response.json();
+      const data = await readJson(response);
 
       if (!response.ok) {
         throw new Error(data.error?.message || 'Failed to analyze job description');

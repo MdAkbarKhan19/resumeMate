@@ -53,10 +53,8 @@ server {
     ssl_certificate /etc/letsencrypt/live/yourdomain.com/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/yourdomain.com/privkey.pem;
 
-    # PDF downloads can be large — increase timeout
-    proxy_read_timeout 60s;
-    proxy_connect_timeout 10s;
     client_max_body_size 20M;
+    proxy_connect_timeout 10s;
 
     location / {
         proxy_pass http://localhost:3000;
@@ -68,6 +66,23 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_cache_bypass $http_upgrade;
+        proxy_read_timeout 60s;
+        proxy_send_timeout 60s;
+    }
+
+    # AI + export routes legitimately run long (resume parse, ATS optimize,
+    # auto-enhance can take 80-90s). The default 60s proxy timeout returns a
+    # 504 HTML page mid-request, which the client then fails to JSON.parse
+    # ("Unexpected token '<'"). Give these endpoints real headroom.
+    location ~ ^/api/(ai|agents|jd|parse|resume-parse|ats|export)/ {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 150s;
+        proxy_send_timeout 150s;
     }
 
     # Next.js static files — cache aggressively

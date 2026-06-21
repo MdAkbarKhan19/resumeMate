@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
 import { withAuth } from '@/lib/auth/middleware';
-import { AIAutoEnhancer } from '@/lib/ai/auto-enhancer';
+import { AIAutoEnhancer, type EnhanceMode } from '@/lib/ai/auto-enhancer';
 import { JobDescriptionAnalyzer } from '@/lib/ai/jd-analyzer';
 import { ATSCheckerService } from '@/lib/ai/ats-checker';
 import { canRunAtsOptimization } from '@/lib/payment/entitlements';
@@ -14,6 +14,9 @@ export const dynamic = 'force-dynamic';
 const autoEnhanceSchema = z.object({
   resumeId: z.string().uuid(),
   jdAnalysisId: z.string().uuid(),
+  // Bullet-tailoring strategy the user picked before running. Defaults to
+  // 'aggressive' (max JD match) when omitted.
+  mode: z.enum(['aggressive', 'moderate']).optional(),
 });
 
 /**
@@ -77,6 +80,7 @@ async function runEnhancementJob(
   userId: string,
   resumeId: string,
   jdAnalysisId: string,
+  mode: EnhanceMode,
 ): Promise<void> {
   try {
     console.log(`🤖 [${jobId}] Starting AI auto-enhancement...`);
@@ -84,7 +88,7 @@ async function runEnhancementJob(
     const beforeScore = await JobDescriptionAnalyzer.calculateATSScore(resume, jdAnalysisData);
     console.log(`📊 [${jobId}] Before Score: ${beforeScore.overall}/100`);
 
-    const enhancementResult = await AIAutoEnhancer.autoEnhanceResume(resume, jdAnalysisData);
+    const enhancementResult = await AIAutoEnhancer.autoEnhanceResume(resume, jdAnalysisData, mode);
 
     const afterScore = await JobDescriptionAnalyzer.calculateATSScore(
       enhancementResult.enhancedResume,
@@ -172,6 +176,7 @@ async function handleStartEnhance(request: NextRequest, { user }: { user: any })
     }
 
     const { resumeId, jdAnalysisId } = validation.data;
+    const mode: EnhanceMode = validation.data.mode || 'aggressive';
 
     const resume = await prisma.resume.findUnique({ where: { id: resumeId } });
     if (!resume || resume.userId !== user.id) {
@@ -260,7 +265,7 @@ async function handleStartEnhance(request: NextRequest, { user }: { user: any })
 
     // Fire-and-forget. Intentionally NOT awaited — the response returns now and
     // the work continues on the event loop. Errors are captured inside the job.
-    void runEnhancementJob(jobId, resume, jdAnalysisData, user.id, resumeId, jdAnalysisId);
+    void runEnhancementJob(jobId, resume, jdAnalysisData, user.id, resumeId, jdAnalysisId, mode);
 
     return NextResponse.json({ success: true, data: { jobId, status: 'processing' } }, { status: 202 });
   } catch (error) {

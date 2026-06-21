@@ -8,6 +8,17 @@ import { JDAnalysisResult } from './jd-analyzer';
 import { getLLM, accrue, emptyUsage, LLMUsage } from './llm-client';
 import { redactForEnhancement, restoreRedactions } from './pii';
 
+/**
+ * Bullet-tailoring strategy, chosen by the user before they run an optimization:
+ *  - 'aggressive' → re-skin bullets to the JD's tech stack (keep the story, swap
+ *    the technologies, e.g. Java→Python). Maximum JD match. The fabrication/
+ *    reflection check is intentionally SKIPPED so the substitutions survive.
+ *  - 'moderate'   → only integrate keywords the work genuinely supports, and run
+ *    the reflection fabrication check to scrub anything unsupported.
+ * Skills + summary tailoring stay aggressive in both modes.
+ */
+export type EnhanceMode = 'aggressive' | 'moderate';
+
 export interface EnhancementResult {
   enhancedResume: any;
   changes: EnhancementChange[];
@@ -36,7 +47,8 @@ export class AIAutoEnhancer {
    */
   static async autoEnhanceResume(
     resumeData: any,
-    jdAnalysis: JDAnalysisResult
+    jdAnalysis: JDAnalysisResult,
+    mode: EnhanceMode = 'aggressive'
   ): Promise<EnhancementResult> {
     const changes: EnhancementChange[] = [];
     const usage = emptyUsage();
@@ -56,7 +68,7 @@ export class AIAutoEnhancer {
     const [skillsChanges, experienceChanges, summaryChange, projectsChanges] =
       await Promise.all([
         this.enhanceSkills(enhancedResume, jdAnalysis, usage, candidateName),
-        this.enhanceExperience(enhancedResume, jdAnalysis, usage, candidateName),
+        this.enhanceExperience(enhancedResume, jdAnalysis, usage, candidateName, mode),
         this.enhanceSummary(enhancedResume, jdAnalysis, usage, candidateName),
         this.enhanceProjects(enhancedResume, jdAnalysis, usage, candidateName),
       ]);
@@ -347,7 +359,8 @@ If no skills should be added, return: { "skills": [] }`;
     resumeData: any,
     jdAnalysis: JDAnalysisResult,
     usage: LLMUsage,
-    candidateName: string
+    candidateName: string,
+    mode: EnhanceMode
   ): Promise<EnhancementChange[]> {
     const changes: EnhancementChange[] = [];
 
@@ -391,6 +404,7 @@ If no skills should be added, return: { "skills": [] }`;
       jdAnalysis,
       usage,
       candidateName,
+      mode,
     );
 
     // Apply results back to the resume in place, and record changes.
@@ -475,6 +489,7 @@ If no skills should be added, return: { "skills": [] }`;
     jdAnalysis: JDAnalysisResult,
     usage: LLMUsage,
     candidateName: string,
+    mode: EnhanceMode,
   ): Promise<Array<{ text: string; keywordsIncorporated: string[] }>> {
     // The believability-critical rewrite runs on the quality tier (DeepSeek V4 Pro).
     const { client, model } = getLLM('quality');
@@ -514,6 +529,27 @@ If no skills should be added, return: { "skills": [] }`;
     // schema constraint" — the model is required to reason explicitly before
     // it writes, which catches "force-fitted" keywords that wouldn't survive
     // a fabrication audit. All in one API call, no extra cost.
+    // The two independent strategies. 'aggressive' re-skins the tech stack to the
+    // JD (story unchanged); 'moderate' only places genuinely-supported keywords.
+    const strategyBlock = mode === 'aggressive'
+      ? `## STRATEGY — MAXIMUM JD MATCH (tech re-skin)
+Re-skin every bullet to the JD's stack while keeping its STORY identical. Keep the
+accomplishment, scope, structure, and EVERY metric/number EXACTLY the same; only the
+named technologies move to the JD's equivalents, matched BY CATEGORY (language→language,
+framework→framework, database→database, cloud→cloud, tool→tool). Examples: Java→Python,
+Spring Boot→FastAPI/Django, MySQL→PostgreSQL, Jenkins→GitHub Actions. This is an
+intentional same-category substitution, NOT fabrication — the work is unchanged. In the
+plan below, a same-category substitution ALWAYS beats "reject". Where a bullet names no
+technology, keep it essentially as-is. Do NOT rewrite for style — keep the original
+wording except for the substitutions and at most a single weak-verb fix.`
+      : `## STRATEGY — HONEST MATCH (maximum HONEST coverage)
+Be THOROUGH: integrate EVERY JD keyword the bullet's actual work genuinely supports
+(direct or strongly-implied evidence in the SAME domain), and sharpen each bullet's
+impact (strong action verb, drop filler, tighten phrasing) — do not under-tailor. But
+do NOT substitute a technology the candidate did not use (no Java→Python) and never
+invent tools, metrics, or outcomes. Where a keyword has no genuine support, keep the
+bullet as-is rather than forcing it.`;
+
     const prompt = `You are an expert ATS resume optimizer. You will rewrite resume bullets across an ENTIRE candidate's recent experience in ONE structured pass, distributing job-description keywords with evidence-based reasoning.
 
 ## Target Position: ${jdAnalysis.jobTitle}
@@ -526,6 +562,8 @@ ${jdAnalysis.actionVerbs?.slice(0, 10).join(', ') || 'develop, design, implement
 
 ## Candidate's Bullets (each labeled with its global [index]):
 ${rolesBlock}
+
+${strategyBlock}
 
 ================================================================
 ## METHOD — you MUST follow this structured reasoning process:
@@ -679,16 +717,20 @@ Hard constraints:
 
       let results = flat.map((f, i) => byIndex.get(i) || { text: f.text, keywordsIncorporated: [] });
 
-      // Reflection: critique the rewrites for fabrication / unnatural "AI"
-      // phrasing and revise only what's flawed. Gated + single-pass to bound cost.
-      results = await this.reflectOnBullets(
-        flat,
-        results,
-        client,
-        model,
-        usage,
-        candidateName,
-      );
+      // Reflection (MODERATE mode only): critique the rewrites for fabrication /
+      // unnatural "AI" phrasing and revise only what's flawed. Deliberately
+      // SKIPPED in 'aggressive' mode — there the tech substitutions ARE intended,
+      // so the fabrication check would wrongly revert them.
+      if (mode === 'moderate') {
+        results = await this.reflectOnBullets(
+          flat,
+          results,
+          client,
+          model,
+          usage,
+          candidateName,
+        );
+      }
 
       // Restore any redaction placeholder that survived into the final text.
       return results.map(r => ({

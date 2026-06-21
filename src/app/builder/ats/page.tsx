@@ -131,6 +131,9 @@ function ATSOptimizationPageContent() {
   const [analysisResult, setAnalysisResult] = useState<any>(null);
   const [enhancementResult, setEnhancementResult] = useState<any>(null);
   const [isEnhancing, setIsEnhancing] = useState(false);
+  // Bullet-tailoring strategy, chosen before running. 'aggressive' re-skins the
+  // tech stack to the JD; 'moderate' stays within what the experience supports.
+  const [enhanceMode, setEnhanceMode] = useState<'aggressive' | 'moderate'>('aggressive');
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [showApplyModal, setShowApplyModal] = useState(false);
@@ -176,6 +179,7 @@ function ATSOptimizationPageContent() {
         body: JSON.stringify({
           resumeId,
           jdAnalysisId: analysisResult.analysisId,
+          mode: enhanceMode,
         }),
       });
       const startData = await readJson(startRes);
@@ -818,6 +822,40 @@ function ATSOptimizationPageContent() {
               <span className="inline-flex items-center justify-center h-6 px-2.5 rounded-full bg-amber-100 text-amber-800 text-xs font-semibold">Step 2</span>
               <span className="text-sm font-medium text-gray-600">Auto-tailor your resume</span>
             </div>
+
+            {/* Strategy picker — choose BEFORE optimizing. Hidden once results exist. */}
+            {!enhancementResult && (
+              <div className="mb-3 p-3 rounded-lg border border-gray-200 bg-gray-50">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setEnhanceMode('aggressive')}
+                    disabled={isEnhancing}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${enhanceMode === 'aggressive' ? 'bg-amber-600 text-white border-amber-600' : 'bg-white text-gray-700 border-gray-300 hover:border-amber-400'}`}
+                  >
+                    Max JD match
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEnhanceMode('moderate')}
+                    disabled={isEnhancing}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${enhanceMode === 'moderate' ? 'bg-amber-600 text-white border-amber-600' : 'bg-white text-gray-700 border-gray-300 hover:border-amber-400'}`}
+                  >
+                    Honest
+                  </button>
+                </div>
+                <p className="text-xs text-gray-500">
+                  {enhanceMode === 'aggressive'
+                    ? 'Re-skins your experience bullets to the JD’s tech stack (your accomplishments and metrics stay the same). Highest match.'
+                    : 'Only tailors with skills and keywords your experience genuinely supports. Interview-safe.'}
+                </p>
+                <p className="mt-1.5 text-[11px] text-gray-400 italic">
+                  You know your own skillset best — our job is to match the job description as closely as possible.
+                  Review and edit any suggestion you’re not comfortable with before applying. Interview readiness is your responsibility.
+                </p>
+              </div>
+            )}
+
             <ATSDashboard
               beforeScore={analysisResult?.atsScore}
               afterScore={enhancementResult?.scores.after}

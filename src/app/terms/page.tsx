@@ -3,7 +3,7 @@ export const metadata = {
 };
 
 export default function TermsOfServicePage() {
-  const lastUpdated = 'May 20, 2026';
+  const lastUpdated = 'June 21, 2026';
   return (
     <article className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16 prose prose-gray">
       <h1 className="text-3xl font-bold text-gray-900 mb-2">Terms of Service</h1>
@@ -30,13 +30,27 @@ export default function TermsOfServicePage() {
         Cancellation takes effect at the end of the current billing period.
       </p>
 
-      <h2>4. AI-generated content</h2>
+      <h2>4. AI suggestions and JD matching</h2>
       <p>
-        JDsync uses AI to suggest improvements to your resume. You are
-        responsible for reviewing AI suggestions and ensuring they accurately
-        represent your experience. We do not guarantee that AI-suggested content
-        will be factually correct, and we are not liable for any misrepresentation
-        in a resume you submit to an employer.
+        JDsync’s purpose is to help your resume <strong>match a target job
+        description as closely as possible</strong>. Our optimization — including
+        the “Max JD match” option, which can re-skin your experience toward the
+        job’s tools and terminology while keeping your accomplishments and metrics
+        unchanged — produces <strong>suggestions only</strong>.
+      </p>
+      <p>
+        We assume you are familiar with the skills and technologies on your resume.
+        <strong> You are solely responsible</strong> for reviewing every suggestion,
+        editing or rejecting anything that does not accurately represent your real
+        experience, and ensuring your final resume is truthful before you submit it
+        to any employer. You are free to change or discard any suggestion you are
+        not happy with.
+      </p>
+      <p>
+        We do not guarantee that AI-suggested content is factually correct, and we
+        are not responsible for interview performance or for any misrepresentation
+        in a resume you choose to submit. <strong>Interview readiness and the
+        accuracy of your resume are your responsibility.</strong>
       </p>
 
       <h2>5. Acceptable use</h2>

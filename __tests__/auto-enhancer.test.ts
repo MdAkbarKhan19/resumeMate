@@ -166,10 +166,10 @@ describe('AIAutoEnhancer.autoEnhanceResume (mocked model)', () => {
     expect(result.usage.cost).toBeGreaterThan(0);
   });
 
-  test('reflection revises a flagged bullet and keeps labels honest', async () => {
-    // Reflection rewrites bullet 0 to a version WITHOUT the Kafka keyword.
+  test('MODERATE mode: reflection revises a flagged bullet and keeps labels honest', async () => {
+    // Reflection runs in moderate mode and rewrites bullet 0 WITHOUT the Kafka keyword.
     mockReflectionRevision = 'Built a data pipeline processing 10M events/day';
-    const result = await AIAutoEnhancer.autoEnhanceResume(freshResume(), JD);
+    const result = await AIAutoEnhancer.autoEnhanceResume(freshResume(), JD, 'moderate');
     const bullet0 = result.enhancedResume.experience[0].bullets[0];
     expect(bullet0).toBe('Built a data pipeline processing 10M events/day');
     // Kafka no longer appears in the text, so no change may still claim to have incorporated it.
@@ -177,5 +177,14 @@ describe('AIAutoEnhancer.autoEnhanceResume (mocked model)', () => {
       (c) => c.after === bullet0 && /Incorporated:.*Kafka/.test(c.reason),
     );
     expect(stillClaimsKafka).toBe(false);
+  });
+
+  test('AGGRESSIVE mode: keeps the injected keyword (reflection is skipped by design)', async () => {
+    // The reflection revision WOULD strip Kafka, but aggressive mode never runs
+    // reflection, so the tech substitution survives — maximum JD match by design.
+    mockReflectionRevision = 'Built a data pipeline processing 10M events/day';
+    const result = await AIAutoEnhancer.autoEnhanceResume(freshResume(), JD, 'aggressive');
+    const bullet0 = result.enhancedResume.experience[0].bullets[0];
+    expect(bullet0).toContain('Kafka');
   });
 });

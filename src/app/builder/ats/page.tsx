@@ -10,6 +10,7 @@ import JobDescriptionUpload from '@/components/builder/JobDescriptionUpload';
 import ATSDashboard from '@/components/builder/ATSDashboard';
 import { ArrowLeftIcon, DocumentCheckIcon, PencilSquareIcon, XMarkIcon, CheckIcon, LockClosedIcon } from '@heroicons/react/24/outline';
 import { authenticatedFetch, readJson } from '@/lib/api-client';
+import { wordDiff } from '@/lib/text-diff';
 import { ConfirmModal } from '@/components/ui';
 
 // Render text with `**word**` markers as bold spans (no HTML injection).
@@ -19,6 +20,20 @@ function renderMarkdownBold(text: string): React.ReactNode {
   return parts.map((part, i) => {
     const m = part.match(/^\*\*([^*]+)\*\*$/);
     return m ? <strong key={i} className="font-bold text-amber-700">{m[1]}</strong> : <span key={i}>{part}</span>;
+  });
+}
+
+// Render a word-level diff (old words struck through, new words highlighted) so
+// the user sees EXACTLY what changed, instead of a generic "Rewritten" label.
+function renderWordDiff(before: string, after: string): React.ReactNode {
+  return wordDiff(before, after).map((seg, i) => {
+    if (seg.type === 'added') {
+      return <span key={i} className="bg-amber-100 text-amber-900 rounded px-0.5">{seg.value}</span>;
+    }
+    if (seg.type === 'removed') {
+      return <span key={i} className="text-red-400 line-through">{seg.value}</span>;
+    }
+    return <span key={i} className="text-gray-500">{seg.value}</span>;
   });
 }
 
@@ -723,9 +738,18 @@ function ATSOptimizationPageContent() {
                               </div>
                             )}
 
-                            {/* Reason */}
+                            {/* What actually changed — a word-level diff for
+                                rewrites (so a grammar-only tweak reads as one),
+                                or the reason for added/structural changes. */}
                             {!isEditing && (
-                              <div className="text-xs text-gray-600 italic">{change.reason}</div>
+                              change.before && change.after ? (
+                                <div className="text-xs leading-relaxed">
+                                  <span className="text-gray-400 uppercase tracking-wide">Changes: </span>
+                                  {renderWordDiff(change.before, change.after)}
+                                </div>
+                              ) : (
+                                <div className="text-xs text-gray-600 italic">{change.reason}</div>
+                              )
                             )}
                           </div>
 

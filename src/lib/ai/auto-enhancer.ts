@@ -750,9 +750,10 @@ Hard constraints:
 3. UNNATURAL / "AI-SOUNDING": it reads like generated filler — buzzword salad, hollow superlatives ("spearheaded innovative synergies", "leveraged cutting-edge solutions"), keyword stuffing, or every bullet sharing the same template. Real engineers don't talk like that.
 4. INDEFENSIBLE KEYWORD: an injected keyword doesn't plausibly fit the work described.
 5. FORMAT: not a single sentence, or longer than ~32 words, or first-person pronouns present.
+6. DROPPED KEYWORD/SPECIFIC: the REWRITE deleted a technology, tool, framework, language, acronym, product name, or concrete specific that was in the ORIGINAL (e.g. removed "Spring Boot", "(OIC)", "(SCM)", "HMAC", "multi-threading"). Trimming filler ("efficient", "seamlessly", "various") is fine; deleting a real keyword or specific is NOT — it costs the candidate ATS keywords.
 
 ## How to fix:
-- Provide a corrected single sentence that KEEPS the legitimate improvements (strong verb, real keywords) but removes the violation.
+- Provide a corrected single sentence that KEEPS the legitimate improvements (strong verb, real keywords) AND restores any keyword/specific the rewrite dropped, but removes the violation.
 - Preserve EXACTLY every number from the original. Never add a number that wasn't there.
 - Keep injected technical keywords wrapped in **double asterisks**; don't bold ordinary words.
 - If a rewrite already satisfies every rule, return suggestedRevision: null for it.

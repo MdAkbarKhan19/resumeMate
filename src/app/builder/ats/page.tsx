@@ -153,26 +153,70 @@ function ATSOptimizationPageContent() {
     setEditingIndex(null);
 
     try {
-      const response = await authenticatedFetch('/api/ai/auto-enhance', {
+      // Start the enhancement as a background job — it can take 1-2 minutes on
+      // the reasoning model, which would otherwise hit a proxy 504 on one long
+      // request. We get a jobId back immediately, then poll for the result.
+      const startRes = await authenticatedFetch('/api/ai/auto-enhance', {
         method: 'POST',
         body: JSON.stringify({
           resumeId,
           jdAnalysisId: analysisResult.analysisId,
         }),
       });
+      const startData = await readJson(startRes);
+      if (!startRes.ok || !startData.success) {
+        throw new Error(startData.error?.message || 'Failed to start enhancement');
+      }
+      const jobId = startData.data?.jobId;
+      if (!jobId) throw new Error('Failed to start enhancement');
 
-      const data = await readJson(response);
+      // Poll until the job is done. A terminal job failure comes back as HTTP
+      // 200 with success:false (handled below). Transient infra blips (network,
+      // 502/504, or a 404 right after a process restart) come back non-200 or
+      // make readJson throw — we tolerate a few of those rather than abandon a
+      // job that's still running. 8-min cap, comfortably under the 20-min server TTL.
+      const deadline = Date.now() + 8 * 60 * 1000;
+      let result: any = null;
+      let consecutiveFailures = 0;
+      const MAX_CONSECUTIVE_FAILURES = 5;
+      while (Date.now() < deadline) {
+        await new Promise(r => setTimeout(r, 3000));
+        let pollData: any;
+        try {
+          const pollRes = await authenticatedFetch(
+            `/api/ai/auto-enhance?jobId=${encodeURIComponent(jobId)}`,
+          );
+          pollData = await readJson(pollRes);
+          if (!pollRes.ok) {
+            // Non-200 = transient infra issue (a real job failure is 200 +
+            // success:false). Fall through to the retry counter.
+            throw new Error(pollData?.error?.message || `status ${pollRes.status}`);
+          }
+        } catch {
+          if (++consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
+            throw new Error('Lost connection to the enhancement. Please try again.');
+          }
+          continue;
+        }
+        consecutiveFailures = 0;
 
-      if (!response.ok) {
-        throw new Error(data.error?.message || 'Failed to enhance resume');
+        if (!pollData.success) {
+          // Terminal: the background job itself failed.
+          throw new Error(pollData.error?.message || 'Enhancement failed. Please try again.');
+        }
+        if (pollData.data?.status === 'done') {
+          result = pollData.data.result;
+          break;
+        }
+        // status === 'processing' → keep polling
       }
 
-      if (data.success) {
-        setEnhancementResult(data.data);
-        setSuccessMessage('Resume enhanced! Review each change below - edit or reject as needed.');
-      } else {
-        throw new Error(data.error?.message || 'Enhancement failed');
+      if (!result) {
+        throw new Error('Enhancement is taking longer than expected. Please try again.');
       }
+
+      setEnhancementResult(result);
+      setSuccessMessage('Resume enhanced! Review each change below - edit or reject as needed.');
     } catch (error) {
       console.error('Enhancement error:', error);
       setError(error instanceof Error ? error.message : 'Failed to enhance resume');

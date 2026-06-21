@@ -115,12 +115,12 @@ function clientFor(provider: AIProvider): OpenAI {
   const cached = clientCache.get(provider);
   if (cached) return cached;
 
-  // Cap each attempt at 60s and DON'T auto-retry. A retry on a slow (not failed)
-  // call stacks 60s + 60s and can blow past the nginx proxy budget → 504. With
-  // the per-role parallel rewrite, individual calls are small and finish well
-  // under 60s; a call that does time out falls back to the original bullets
-  // (best-effort) instead of doubling the request's wall-clock.
-  const COMMON = { timeout: 60_000, maxRetries: 0 };
+  // Cap each attempt at 120s and DON'T auto-retry. Auto-enhance now runs as a
+  // background job (no proxy timeout to fit under), so we can give the slow
+  // reasoning model real headroom; but we still bound a single call so a hung
+  // request can't pin a connection for the SDK default of 10 minutes. No retry:
+  // a retry on a slow-but-fine call just doubles latency for no benefit.
+  const COMMON = { timeout: 120_000, maxRetries: 0 };
 
   let client: OpenAI;
   if (provider === 'deepseek') {

@@ -379,46 +379,18 @@ If no skills should be added, return: { "skills": [] }`;
 
     if (flat.length === 0) return changes;
 
-    // Rewrite each role's bullets in parallel (scatter-gather). Splitting the one
-    // big serial call into per-role concurrent calls is the main latency win —
-    // wall-clock drops from the SUM across roles to roughly the slowest single
-    // role. Each role is re-indexed to a standalone batch; a role that fails
-    // (timeout/parse) falls back to its original bullets (best-effort), so one
-    // slow role never fails or stalls the whole enhancement.
-    const roleGroups = new Map<number, number[]>(); // expIdx -> positions in `flat`
-    flat.forEach((a, pos) => {
-      const arr = roleGroups.get(a.expIdx);
-      if (arr) arr.push(pos);
-      else roleGroups.set(a.expIdx, [pos]);
-    });
-
-    const enhanced: Array<{ text: string; keywordsIncorporated: string[] }> =
-      flat.map(a => ({ text: a.text, keywordsIncorporated: [] }));
-
-    await Promise.all(
-      [...roleGroups.entries()].map(async ([expIdx, positions]) => {
-        // Standalone single-role batch: re-index expIdx to 0 so enhanceAllBullets
-        // treats it as the only role.
-        const subFlat = positions.map(pos => ({
-          expIdx: 0,
-          bulletIdx: flat[pos].bulletIdx,
-          text: flat[pos].text,
-        }));
-        try {
-          const sub = await this.enhanceAllBullets(
-            subFlat,
-            [resumeData.experience[expIdx]],
-            jdAnalysis,
-            usage,
-            candidateName,
-          );
-          positions.forEach((pos, j) => {
-            if (sub[j]) enhanced[pos] = sub[j];
-          });
-        } catch {
-          // Leave this role's bullets at their original text (already seeded above).
-        }
-      }),
+    // Single holistic call across all (recent) roles. This is BOTH cheaper (the
+    // long instruction prompt + reasoning is paid once, not per-role) and higher
+    // quality (the model distributes each JD keyword to the single best bullet
+    // across the whole resume, and dedups globally). The async job wrapper on the
+    // route means this call can take its time without a proxy timeout, so there's
+    // no need to split it for latency.
+    const enhanced = await this.enhanceAllBullets(
+      flat,
+      resumeData.experience.slice(0, expCount),
+      jdAnalysis,
+      usage,
+      candidateName,
     );
 
     // Apply results back to the resume in place, and record changes.

@@ -20,8 +20,13 @@ export default function MinimalistTemplate({
     return bullet.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
   };
 
-  const sectionSpacing = spacing.fontSize >= 12 ? 32 : spacing.fontSize >= 11 ? 28 : 22;
-  const itemSpacing = spacing.fontSize >= 12 ? 22 : spacing.fontSize >= 11 ? 18 : 14;
+  // Spacing density preset (compact / normal / spacious) scales the vertical
+  // rhythm on top of the font-driven baseline, so the slider has a real,
+  // IDENTICAL effect in both the live preview and the downloaded PDF. The page
+  // margins (spacing.marginX/Y) already vary by preset via getSpacingValues.
+  const spacingScale = ({ compact: 0.82, normal: 1, spacious: 1.2 } as const)[customization?.spacing ?? 'normal'] ?? 1;
+  const sectionSpacing = (spacing.fontSize >= 12 ? 32 : spacing.fontSize >= 11 ? 28 : 22) * spacingScale;
+  const itemSpacing = (spacing.fontSize >= 12 ? 22 : spacing.fontSize >= 11 ? 18 : 14) * spacingScale;
 
   // URL builders: handle raw strings that may or may not contain protocol/domain
   const buildSocialUrl = (rawInput: string, domain: string, slugPath: string): string => {

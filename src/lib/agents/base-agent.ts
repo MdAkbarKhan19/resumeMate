@@ -5,19 +5,7 @@
 
 import OpenAI from 'openai';
 import { AgentResult, AgentName, ProgressCallback } from './types';
-
-let sharedClient: OpenAI | null = null;
-
-function getOpenAIClient(): OpenAI {
-  if (!sharedClient) {
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) {
-      throw new Error('OPENAI_API_KEY is not configured');
-    }
-    sharedClient = new OpenAI({ apiKey });
-  }
-  return sharedClient;
-}
+import { getLLM } from '@/lib/ai/llm-client';
 
 export abstract class BaseAgent<TInput, TOutput> {
   protected name: AgentName;
@@ -28,8 +16,9 @@ export abstract class BaseAgent<TInput, TOutput> {
 
   constructor(name: AgentName, options?: { model?: string; maxRetries?: number }) {
     this.name = name;
-    this.client = getOpenAIClient();
-    this.model = options?.model || process.env.OPENAI_MODEL || 'gpt-4o-mini';
+    const llm = getLLM('cheap');
+    this.client = llm.client;
+    this.model = options?.model || llm.model;
     this.maxRetries = options?.maxRetries ?? 2;
   }
 

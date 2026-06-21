@@ -201,12 +201,14 @@ export class ATSCheckerService {
     // Extract keywords from job description
     const jdKeywords = this.extractKeywords(jobDescription);
 
-    // Build resume text for analysis
+    // Build resume text for analysis. Guard every field — resume JSON from the
+    // DB can carry missing/odd shapes (e.g. an experience entry without bullets)
+    // and an unguarded `.toLowerCase()` on undefined 500s the whole check.
     const resumeText = [
-      resumeContent.summary,
-      ...resumeContent.experience.flatMap(exp => exp.bullets),
-      ...resumeContent.skills.map(s => s.name),
-      ...resumeContent.education.map(e => e.degree),
+      resumeContent.summary || '',
+      ...resumeContent.experience.flatMap(exp => Array.isArray(exp?.bullets) ? exp.bullets : []),
+      ...resumeContent.skills.map(s => s?.name ?? ''),
+      ...resumeContent.education.map(e => e?.degree ?? ''),
     ].join(' ').toLowerCase();
 
     // Find matched and missing keywords (with fuzzy matching)
@@ -226,7 +228,7 @@ export class ATSCheckerService {
     });
 
     // Skills matching
-    const resumeSkills = resumeContent.skills.map(s => s.name.toLowerCase());
+    const resumeSkills = resumeContent.skills.map(s => (s?.name ?? '').toLowerCase());
     const matchedSkills = jdKeywords.skills.filter(skill => 
       resumeSkills.some(rs => rs.includes(skill) || skill.includes(rs))
     );
@@ -306,8 +308,12 @@ export class ATSCheckerService {
       return { score: 0, notes: ['No experience entries found'] };
     }
 
-    // Check for quantifiable results (numbers, percentages, dollar amounts)
-    const allBullets = experience.flatMap(exp => exp.bullets);
+    // Check for quantifiable results (numbers, percentages, dollar amounts).
+    // Tolerate entries with missing/non-array bullets so a stray shape can't
+    // crash the analysis (e.g. an experience row saved without any bullets).
+    const allBullets = experience
+      .flatMap(exp => (Array.isArray(exp?.bullets) ? exp.bullets : []))
+      .filter((b): b is string => typeof b === 'string');
     const bulletsWithMetrics = allBullets.filter(bullet => /\d+[%$kKmM]|\$\d|reduced|increased|improved.*\d/.test(bullet));
     const metricRatio = allBullets.length > 0 ? bulletsWithMetrics.length / allBullets.length : 0;
 
@@ -352,7 +358,8 @@ export class ATSCheckerService {
     }
 
     // Check bullet count per experience
-    const lowBulletCount = experience.filter(exp => exp.bullets.filter(b => b.trim()).length < 2);
+    const lowBulletCount = experience.filter(exp =>
+      (Array.isArray(exp?.bullets) ? exp.bullets : []).filter(b => typeof b === 'string' && b.trim()).length < 2);
     if (lowBulletCount.length > 0) {
       notes.push(`${lowBulletCount.length} experience entries have fewer than 2 bullet points - add more detail`);
       score -= 5;

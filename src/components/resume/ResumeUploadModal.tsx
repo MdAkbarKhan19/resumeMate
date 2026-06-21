@@ -3,6 +3,7 @@
 import React, { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useDropzone } from 'react-dropzone';
+import { DocumentTextIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui';
 import { toast } from '@/components/ui/Alert';
@@ -161,9 +162,12 @@ export const ResumeUploadModal: React.FC<ResumeUploadModalProps> = ({
         {/* Body */}
         <div className="p-6 space-y-6">
           {/* Instructions */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h3 className="font-semibold text-blue-900 mb-2">📄 How it works</h3>
-            <ul className="text-sm text-blue-800 space-y-1">
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+            <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-1.5">
+              <DocumentTextIcon className="h-4 w-4 text-amber-600" />
+              How it works
+            </h3>
+            <ul className="text-sm text-gray-600 space-y-1">
               <li>✓ Upload your existing resume in PDF or DOCX format</li>
               <li>✓ Our AI will automatically extract all sections and data</li>
               <li>✓ Review and edit the imported data in the builder</li>

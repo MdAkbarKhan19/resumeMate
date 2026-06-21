@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { UserIcon, CreditCardIcon, CpuChipIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/hooks/useAuth';
 import { useAI } from '@/hooks/useAI';
 import {
@@ -203,9 +204,9 @@ const SettingsPage: React.FC = () => {
   };
 
   const tabs = [
-    { id: 'profile' as Tab, name: 'Profile', icon: '👤' },
-    { id: 'subscription' as Tab, name: 'Subscription', icon: '💳' },
-    { id: 'ai-usage' as Tab, name: 'AI Usage', icon: '🤖' },
+    { id: 'profile' as Tab, name: 'Profile', icon: UserIcon },
+    { id: 'subscription' as Tab, name: 'Subscription', icon: CreditCardIcon },
+    { id: 'ai-usage' as Tab, name: 'AI Usage', icon: CpuChipIcon },
   ];
 
   return (
@@ -219,23 +220,26 @@ const SettingsPage: React.FC = () => {
         {/* Tabs */}
         <div className="mb-6">
           <nav className="flex gap-1 bg-gray-100 p-1 rounded-xl">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`
-                  font-medium text-sm transition-all
-                  ${
-                    activeTab === tab.id
-                      ? 'bg-white text-amber-700 font-semibold rounded-lg px-4 py-2 shadow-sm'
-                      : 'text-gray-500 hover:text-gray-700 rounded-lg px-4 py-2 hover:bg-gray-50'
-                  }
-                `}
-              >
-                <span className="mr-2">{tab.icon}</span>
-                {tab.name}
-              </button>
-            ))}
+            {tabs.map((tab) => {
+              const TabIcon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`
+                    inline-flex items-center font-medium text-sm transition-all
+                    ${
+                      activeTab === tab.id
+                        ? 'bg-white text-amber-700 font-semibold rounded-lg px-4 py-2 shadow-sm'
+                        : 'text-gray-500 hover:text-gray-700 rounded-lg px-4 py-2 hover:bg-gray-50'
+                    }
+                  `}
+                >
+                  <TabIcon className="h-4 w-4 mr-2" />
+                  {tab.name}
+                </button>
+              );
+            })}
           </nav>
         </div>
 

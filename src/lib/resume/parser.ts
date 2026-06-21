@@ -2,6 +2,8 @@ import { TextractService } from '@/lib/aws/textract';
 import { OpenAIService } from '@/lib/ai/openai';
 import { ComprehendService } from '@/lib/aws/comprehend';
 import { ParsedResumeData, PersonalInfo, WorkExperience, Education } from '@/types';
+import { heuristicParseResume } from '@/lib/resume/heuristic-parser';
+import { redactForParsing, restoreRedactions } from '@/lib/ai/pii';
 import mammoth from 'mammoth';
 
 // Extended interface for comprehensive parsing
@@ -89,8 +91,40 @@ export class ResumeParserService {
     try {
       const warnings: string[] = [...initialWarnings];
 
-      // Use AI to extract structured data with all sections
-      const aiParsed = await OpenAIService.parseResumeText(text);
+      // PII protection: extract contact details LOCALLY (no model), then redact
+      // them from the text before the AI structural parse. The model receives
+      // only the redacted body — it never sees the candidate's name, email,
+      // phone, or personal profile URLs. We restore identity fields afterwards
+      // from the local extraction.
+      const heuristic = heuristicParseResume(text);
+      const localPII = heuristic.personalInfo;
+
+      // Use AI to extract structured data with all sections. If the AI step is
+      // unavailable (bad/expired key, quota, network), fall back to a pure
+      // heuristic parser so the upload still succeeds with an editable resume
+      // instead of hard-failing with a 500.
+      let aiParsed: any;
+      try {
+        const redacted = redactForParsing(text, {
+          name: localPII.name,
+          personalUrls: [localPII.linkedin, localPII.github, localPII.portfolio].filter(Boolean),
+        });
+        aiParsed = await OpenAIService.parseResumeText(redacted);
+        // Clean up placeholders that leaked into the parsed body. We ONLY restore
+        // the candidate's own NAME — email/phone are intentionally cleared (not
+        // substituted), because redaction replaced EVERY email/phone (including a
+        // reference's or prior manager's) with the same token, so stamping the
+        // candidate's contact info back would corrupt third-party details. The
+        // candidate's own email/phone are filled into personalInfo from the local
+        // extraction below instead.
+        aiParsed = restoreRedactions(aiParsed, { name: localPII.name });
+      } catch (aiError) {
+        console.warn('AI resume parse unavailable, using heuristic fallback:', aiError);
+        aiParsed = heuristic;
+        warnings.push(
+          'AI parsing was unavailable — imported with basic extraction. Please review and organise each section.',
+        );
+      }
 
       // Use AWS Comprehend to extract entities for verification (optional)
       let entities: any[] = [];
@@ -102,6 +136,16 @@ export class ResumeParserService {
 
       // Extract and normalize all sections
       const personalInfo = this.extractPersonalInfo(text, aiParsed, entities);
+
+      // Identity fields are sourced from the LOCAL extraction (the model never
+      // received them), filling any gap the regex pass missed.
+      personalInfo.fullName = personalInfo.fullName || localPII.name;
+      personalInfo.email = personalInfo.email || localPII.email;
+      personalInfo.phone = personalInfo.phone || localPII.phone;
+      personalInfo.location = personalInfo.location || localPII.location;
+      personalInfo.linkedin = personalInfo.linkedin || localPII.linkedin;
+      personalInfo.github = personalInfo.github || localPII.github;
+      personalInfo.website = personalInfo.website || localPII.portfolio;
       const experience = this.extractExperience(aiParsed);
       const education = this.extractEducation(aiParsed);
       const skills = this.extractSkills(aiParsed);

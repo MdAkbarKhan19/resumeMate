@@ -1,25 +1,14 @@
-import OpenAI from 'openai';
+import { getLLM } from './llm-client';
 
 /**
- * AI Enhancement Service using OpenAI
- * Provides resume content improvement features
+ * AI Enhancement Service
+ * Provides per-field resume content improvement (manual, single-item helpers).
+ * Runs on the cheap tier — these are small, interactive, one-field edits.
  */
 export class AIEnhancementService {
-  private static openai: OpenAI | null = null;
-  private static readonly model: string = process.env.OPENAI_MODEL || 'gpt-4o-mini';
-
-  /**
-   * Get or create OpenAI client instance
-   */
-  private static getClient(): OpenAI {
-    if (!this.openai) {
-      const apiKey = process.env.OPENAI_API_KEY;
-      if (!apiKey) {
-        throw new Error('OPENAI_API_KEY environment variable is not set');
-      }
-      this.openai = new OpenAI({ apiKey });
-    }
-    return this.openai;
+  /** Resolve the cheap-tier client + model at call time. */
+  private static llm() {
+    return getLLM('cheap');
   }
 
   /**
@@ -39,7 +28,7 @@ export class AIEnhancementService {
     suggestions: string[];
   }> {
     try {
-      const client = this.getClient();
+      const { client, model } = AIEnhancementService.llm();
 
       const contextInfo = context
         ? `Job Title: ${context.jobTitle || 'N/A'}, Company: ${context.company || 'N/A'}, Industry: ${context.industry || 'N/A'}`
@@ -72,7 +61,7 @@ Format your response as JSON:
 }`;
 
       const response = await client.chat.completions.create({
-        model: this.model,
+        model,
         messages: [
           {
             role: 'system',
@@ -123,7 +112,7 @@ Format your response as JSON:
     improvedText: string;
   }> {
     try {
-      const client = this.getClient();
+      const { client, model } = AIEnhancementService.llm();
 
       const prompt = `Review this resume text for grammar, spelling, and style issues. Provide corrections and an improved version.
 
@@ -150,7 +139,7 @@ Format your response as JSON:
 }`;
 
       const response = await client.chat.completions.create({
-        model: this.model,
+        model,
         messages: [
           {
             role: 'system',
@@ -201,7 +190,7 @@ Format your response as JSON:
     alternatives: string[];
   }> {
     try {
-      const client = this.getClient();
+      const { client, model } = AIEnhancementService.llm();
 
       const mode = resumeData.currentSummary ? 'improve' : 'generate';
 
@@ -255,7 +244,7 @@ Format as JSON:
 }`;
 
       const response = await client.chat.completions.create({
-        model: this.model,
+        model,
         messages: [
           {
             role: 'system',
@@ -299,7 +288,7 @@ Format as JSON:
     missing: string[];
   }> {
     try {
-      const client = this.getClient();
+      const { client, model } = AIEnhancementService.llm();
 
       const prompt = `Analyze this job description and suggest skills for the resume.
 
@@ -327,7 +316,7 @@ Format as JSON:
 }`;
 
       const response = await client.chat.completions.create({
-        model: this.model,
+        model,
         messages: [
           {
             role: 'system',
@@ -373,7 +362,7 @@ Format as JSON:
     matchScore: number;
   }> {
     try {
-      const client = this.getClient();
+      const { client, model } = AIEnhancementService.llm();
 
       const prompt = `Tailor this resume ${contentType} to better match the job description.
 
@@ -403,7 +392,7 @@ Format as JSON:
 }`;
 
       const response = await client.chat.completions.create({
-        model: this.model,
+        model,
         messages: [
           {
             role: 'system',

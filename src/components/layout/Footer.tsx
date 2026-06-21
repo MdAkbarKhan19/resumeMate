@@ -7,7 +7,7 @@ const Footer: React.FC = () => {
   const footerLinks = {
     product: [
       { name: 'Resume Builder', href: '/builder' },
-      { name: 'ATS Optimizer', href: '/builder/ats' },
+      { name: 'Tailor to a Job', href: '/builder/ats' },
       { name: 'Pricing', href: '/pricing' },
     ],
     company: [

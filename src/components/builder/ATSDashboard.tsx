@@ -51,7 +51,7 @@ export default function ATSDashboard({
           <SparklesIcon className="h-16 w-16 mx-auto" />
         </div>
         <h3 className="text-lg font-semibold text-gray-900 mb-2">
-          Optimize Your Resume for ATS
+          Step 2 · Tailor your resume
         </h3>
         <p className="text-gray-600 mb-4">
           Upload a job description to analyze your resume and get an ATS compatibility score
@@ -72,7 +72,7 @@ export default function ATSDashboard({
         ) : (
           <>
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">ATS Compatibility Score</h2>
+              <h2 className="text-2xl font-bold text-gray-900">ATS Match Score</h2>
               {hasComparison && improvement && improvement > 0 && (
                 <div className="flex items-center gap-2 text-amber-600 bg-amber-50 px-4 py-2 rounded-full">
                   <ArrowTrendingUpIcon className="h-5 w-5" />
@@ -161,7 +161,7 @@ export default function ATSDashboard({
                 className="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <SparklesIcon className="h-5 w-5" />
-                AI Auto-Enhance Resume
+                Auto-tailor my resume
               </button>
             )}
           </>
@@ -235,7 +235,7 @@ export default function ATSDashboard({
           </div>
           {!afterScore && (
             <p className="text-sm text-gray-600">
-              💡 Tip: Use AI auto-enhance to naturally incorporate these keywords into your resume
+              Tip: Use Auto-tailor to naturally incorporate these keywords into your resume.
             </p>
           )}
         </div>

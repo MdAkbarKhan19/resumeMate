@@ -15,7 +15,7 @@ import {
   Input,
 } from '@/components/ui';
 import { toast } from '@/components/ui/Alert';
-import { formatDate, getScoreColor, getScoreBgColor } from '@/lib/utils';
+import { formatDate, relativeTime, getScoreColor, getScoreBgColor } from '@/lib/utils';
 
 const ResumesPage: React.FC = () => {
   const router = useRouter();
@@ -257,8 +257,8 @@ const ResumesPage: React.FC = () => {
                         <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate">
                           {resume.title}
                         </h3>
-                        <p className="text-xs sm:text-sm text-gray-500 mt-1">
-                          {formatDate(resume.updatedAt)}
+                        <p className="text-xs sm:text-sm text-gray-500 mt-1" title={`Last edited ${formatDate(resume.updatedAt)}`}>
+                          Edited {relativeTime(resume.updatedAt)}
                         </p>
                       </div>
                       {resume.atsScore !== null && (

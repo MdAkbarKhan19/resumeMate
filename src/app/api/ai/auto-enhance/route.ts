@@ -163,8 +163,9 @@ async function handleAutoEnhance(request: NextRequest, { user }: { user: any }) 
       data: {
         userId: user.id,
         type: 'AUTO_ENHANCEMENT',
-        tokensUsed: 0,
-        cost: 0,
+        // Real per-run usage from the enhancer (was previously hardcoded 0).
+        tokensUsed: enhancementResult.usage.tokensUsed,
+        cost: Number(enhancementResult.usage.cost.toFixed(6)),
         requestData: {
           resumeId,
           jdAnalysisId,
@@ -178,6 +179,10 @@ async function handleAutoEnhance(request: NextRequest, { user }: { user: any }) 
         successful: true,
       },
     });
+
+    console.log(
+      `💰 Enhancement cost: ~$${enhancementResult.usage.cost.toFixed(5)} (${enhancementResult.usage.tokensUsed} tokens)`,
+    );
 
     console.log('✅ Auto-enhancement complete!');
 

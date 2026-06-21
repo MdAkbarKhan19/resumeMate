@@ -8,7 +8,7 @@ import { useEffect, useState, Suspense, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import JobDescriptionUpload from '@/components/builder/JobDescriptionUpload';
 import ATSDashboard from '@/components/builder/ATSDashboard';
-import { ArrowLeftIcon, DocumentCheckIcon, PencilSquareIcon, XMarkIcon, CheckIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, DocumentCheckIcon, PencilSquareIcon, XMarkIcon, CheckIcon, LockClosedIcon } from '@heroicons/react/24/outline';
 import { authenticatedFetch } from '@/lib/api-client';
 import { ConfirmModal } from '@/components/ui';
 
@@ -74,8 +74,8 @@ function ResumeSelector({ onSelect }: { onSelect: (id: string) => void }) {
       <div className="max-w-3xl mx-auto px-3 sm:px-4">
         <div className="mb-6 sm:mb-8 text-center">
           <DocumentCheckIcon className="h-10 w-10 sm:h-12 sm:w-12 text-amber-600 mx-auto mb-3 sm:mb-4" />
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">ATS Resume Optimizer</h1>
-          <p className="text-sm sm:text-base text-gray-600 mt-2">Choose a resume to optimize against a job description</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Tailor to a Job</h1>
+          <p className="text-sm sm:text-base text-gray-600 mt-2">Choose a resume to tailor against a job description</p>
         </div>
         <div className="space-y-3">
           {resumes.map((resume) => (
@@ -470,7 +470,7 @@ function ATSOptimizationPageContent() {
         throw new Error(result.error?.message || 'Failed to save enhanced resume');
       }
 
-      setSuccessMessage('✅ Changes applied successfully! Your resume has been updated.');
+      setSuccessMessage('Changes applied successfully! Your resume has been updated.');
       setError(null);
       
       // Clear the enhancement result so user can see the success message with buttons
@@ -497,10 +497,16 @@ function ATSOptimizationPageContent() {
           </button>
           <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
             <DocumentCheckIcon className="h-8 w-8 text-amber-600" />
-            ATS Optimization
+            Tailor your resume to a job
           </h1>
           <p className="text-gray-600 mt-2">
-            Analyze your resume against a job description and get AI-powered enhancements
+            Paste a job description, see your match score, then auto-tailor your resume to match
+          </p>
+
+          {/* Privacy badge */}
+          <p className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs text-gray-600">
+            <LockClosedIcon className="h-3.5 w-3.5 text-amber-600" aria-hidden="true" />
+            <span>Your name, email and phone are never sent to AI — only your experience is analyzed.</span>
           </p>
         </div>
 
@@ -523,7 +529,7 @@ function ATSOptimizationPageContent() {
                       setAnalysisResult(null);
                       setEnhancementResult(null);
                     }}
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
+                    className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium rounded-lg transition-colors"
                   >
                     Re-analyze Resume
                   </button>
@@ -542,6 +548,10 @@ function ATSOptimizationPageContent() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Column: Job Description Upload */}
           <div>
+            <div className="mb-3 inline-flex items-center gap-2">
+              <span className="inline-flex items-center justify-center h-6 px-2.5 rounded-full bg-amber-100 text-amber-800 text-xs font-semibold">Step 1</span>
+              <span className="text-sm font-medium text-gray-600">Get your match score</span>
+            </div>
             <JobDescriptionUpload
               resumeId={resumeId}
               onAnalysisComplete={handleAnalysisComplete}
@@ -736,6 +746,10 @@ function ATSOptimizationPageContent() {
 
           {/* Right Column: ATS Dashboard */}
           <div>
+            <div className="mb-3 inline-flex items-center gap-2">
+              <span className="inline-flex items-center justify-center h-6 px-2.5 rounded-full bg-amber-100 text-amber-800 text-xs font-semibold">Step 2</span>
+              <span className="text-sm font-medium text-gray-600">Auto-tailor your resume</span>
+            </div>
             <ATSDashboard
               beforeScore={analysisResult?.atsScore}
               afterScore={enhancementResult?.scores.after}
@@ -749,13 +763,13 @@ function ATSOptimizationPageContent() {
 
         {/* How It Works */}
         <div className="mt-12 bg-white rounded-lg shadow-md p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">How ATS Optimization Works</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">How it works</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center">
               <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl font-bold text-amber-600">1</span>
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Upload Job Description</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">Paste the job description</h3>
               <p className="text-sm text-gray-600">
                 Paste or upload the full job description including requirements and responsibilities
               </p>
@@ -764,18 +778,18 @@ function ATSOptimizationPageContent() {
               <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl font-bold text-amber-600">2</span>
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">AI Analysis</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">See your match score</h3>
               <p className="text-sm text-gray-600">
-                Our AI extracts keywords, skills, and requirements to calculate your ATS score
+                We extract the keywords, skills, and requirements to calculate your match score
               </p>
             </div>
             <div className="text-center">
               <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl font-bold text-amber-600">3</span>
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Auto-Enhance</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">Auto-tailor your resume to match</h3>
               <p className="text-sm text-gray-600">
-                Click enhance to automatically optimize your resume with relevant keywords and improvements
+                Tailor your resume to naturally weave in the relevant keywords and improvements
               </p>
             </div>
           </div>
@@ -808,7 +822,7 @@ function ATSOptimizationPageContent() {
 
 export default function ATSOptimizationPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600"></div></div>}>
       <ATSOptimizationPageContent />
     </Suspense>
   );

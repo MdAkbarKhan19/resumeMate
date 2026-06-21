@@ -3,7 +3,7 @@
  * Extracts keywords, skills, requirements, and provides intelligent matching
  */
 
-import OpenAI from 'openai';
+import { getLLM } from './llm-client';
 import { ATSCheckerService } from './ats-checker';
 
 export interface JDAnalysisResult {
@@ -54,24 +54,12 @@ export interface BeforeAfterComparison {
 }
 
 export class JobDescriptionAnalyzer {
-  private static openai: OpenAI | null = null;
-
-  private static getOpenAIClient(): OpenAI {
-    if (!this.openai) {
-      const apiKey = process.env.OPENAI_API_KEY;
-      if (!apiKey) {
-        throw new Error('OPENAI_API_KEY is not configured');
-      }
-      this.openai = new OpenAI({ apiKey });
-    }
-    return this.openai;
-  }
-
   /**
-   * Analyze job description using AI to extract structured information
+   * Analyze job description using AI to extract structured information.
+   * Runs on the cheap tier — this is structured extraction, not creative writing.
    */
   static async analyzeJobDescription(jobDescription: string): Promise<JDAnalysisResult> {
-    const client = this.getOpenAIClient();
+    const { client, model } = getLLM('cheap');
 
     const prompt = `You are an expert ATS recruiter analyzing a job description. Extract ALL technical requirements with precision.
 
@@ -135,7 +123,7 @@ Return as JSON:
 }`;
 
     const response = await client.chat.completions.create({
-      model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+      model,
       messages: [
         {
           role: 'system',

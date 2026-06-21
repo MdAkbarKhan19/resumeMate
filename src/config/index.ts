@@ -50,6 +50,16 @@ export const jwtConfig = {
   expiresIn: process.env.JWT_EXPIRES_IN || '7d',
 };
 
+// Guard against the silent-logout vector: if JWT_SECRET is unset in production,
+// the fallback secret changes on every deploy and invalidates all local-JWT
+// sessions (mass logout). Surface it loudly rather than failing quietly.
+if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET) {
+  console.error(
+    '[config] WARNING: JWT_SECRET is not set in production. Local-JWT sessions ' +
+      'will be invalidated on every restart/deploy. Set a stable JWT_SECRET in .env.production.',
+  );
+}
+
 // Rate Limiting Configuration
 export const rateLimitConfig = {
   maxRequests: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100'),

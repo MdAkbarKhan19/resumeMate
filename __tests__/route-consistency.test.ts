@@ -102,6 +102,35 @@ describe('Pricing route consistency', () => {
     }
   });
 
+  test('No routed handler reads user.sub without an user.id fallback', () => {
+    // The auth middleware returns the DB user row (`user.id`), NOT the raw
+    // token (`user.sub`). Routes that read `user.sub` alone 401 every request.
+    // This bug has bitten ats/check, suggest-skills and improve-bullet before —
+    // pin it so it can't come back. Only consider Next-routed files (route.ts);
+    // *.enhanced.ts variants are dead code Next never mounts.
+    const SUB_RE = /\buser\?\.sub\b/;
+    // Accept any `|| <expr>.id` fallback (e.g. `user?.sub || user?.id` or
+    // `context.user?.sub || context.user?.id`).
+    const ID_FALLBACK_RE = /\buser\?\.sub\b\s*\|\|\s*[\w.?]*\.id\b/;
+    const offenders: string[] = [];
+    for (const f of allApiFiles) {
+      if (path.basename(f) !== 'route.ts') continue;
+      const content = fs.readFileSync(f, 'utf8');
+      const rel = path.relative(repoRoot, f).replace(/\\/g, '/');
+      content.split('\n').forEach((line) => {
+        if (SUB_RE.test(line) && !ID_FALLBACK_RE.test(line)) {
+          offenders.push(`${rel}: ${line.trim()}`);
+        }
+      });
+    }
+    if (offenders.length > 0) {
+      throw new Error(
+        'These routes read user.sub without a user.id fallback (will 401 every ' +
+          'request). Use `user?.sub || user?.id`:\n  - ' + offenders.join('\n  - '),
+      );
+    }
+  });
+
   test('Every gated-action route imports from entitlements.ts OR is on the inline list', () => {
     // Heuristic: any route that uses prisma.aIUsage (a usage gate) OR
     // prisma.resume.create / .update without going through entitlements is

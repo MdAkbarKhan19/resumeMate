@@ -41,40 +41,55 @@ function LoginPageContent() {
     setLoading(true);
 
     try {
-      // Wipe any stale Amplify state from prior attempts
-      Object.keys(localStorage).forEach((k) => {
-        if (k === 'amplify-auto-sign-in' || k.startsWith('CognitoIdentityServiceProvider.')) {
-          localStorage.removeItem(k);
-        }
-      });
+      const { signIn, signOut, fetchAuthSession } = await import('aws-amplify/auth');
 
-      const res = await fetch('/api/auth/cognito-login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: formData.email, password: formData.password }),
-      });
-
-      const json = await res.json();
-
-      if (!res.ok || !json.success) {
-        const code = json?.error?.code;
-        if (code === 'NOT_CONFIRMED') {
+      // Sign in via Amplify so Cognito's REFRESH TOKEN is stored and managed.
+      // The previous flow stored a raw ~1h idToken that was never refreshed —
+      // the root cause of users being auto-logged-out about an hour after login.
+      // With an Amplify-owned session, the idToken is silently refreshed from
+      // the refresh token, so the session lasts as long as the refresh token.
+      //
+      // We do NOT signOut() pre-emptively: doing so would destroy a perfectly
+      // valid session whenever a user mistypes their password. We only clear a
+      // session when one is actually BLOCKING the new sign-in, then retry once.
+      try {
+        await signIn({ username: formData.email, password: formData.password });
+      } catch (err: any) {
+        if (err?.name === 'UserAlreadyAuthenticatedException') {
+          await signOut();
+          await signIn({ username: formData.email, password: formData.password });
+        } else if (err?.name === 'UserNotConfirmedException') {
           setError('Please verify your email before signing in');
           router.push('/auth/signup');
           return;
+        } else {
+          throw err;
         }
-        setError(json?.error?.message || 'Failed to sign in. Please try again.');
-        return;
       }
 
-      localStorage.setItem('token', json.data.idToken);
-      if (json.data.refreshToken) {
-        localStorage.setItem('refreshToken', json.data.refreshToken);
+      // Cognito's session lookup can lag a few hundred ms behind signIn().
+      let retries = 5;
+      while (retries > 0) {
+        const session = await fetchAuthSession({ forceRefresh: true });
+        if (session.tokens?.idToken) {
+          localStorage.setItem('token', session.tokens.idToken.toString());
+          await refreshUser();
+          router.replace('/dashboard');
+          return;
+        }
+        await new Promise((r) => setTimeout(r, 600));
+        retries--;
       }
-      await refreshUser();
-      router.replace('/dashboard');
+      setError('Signed in, but session setup is slow. Please try again.');
     } catch (err: any) {
-      setError(err.message || 'Failed to sign in. Please try again.');
+      const name = err?.name;
+      if (name === 'NotAuthorizedException') {
+        setError('Incorrect email or password.');
+      } else if (name === 'UserNotFoundException') {
+        setError('No account found with that email.');
+      } else {
+        setError(err?.message || 'Failed to sign in. Please try again.');
+      }
     } finally {
       setLoading(false);
     }

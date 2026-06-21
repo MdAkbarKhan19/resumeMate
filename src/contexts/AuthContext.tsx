@@ -44,22 +44,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(true);
       setError(null);
 
-      // Prefer the local-JWT stored in localStorage (7-day TTL from /api/auth/login).
-      // Only fall through to Cognito if no local token exists, so we never clobber a
-      // long-lived local JWT with a 1h Cognito idToken (the main cause of frequent logouts).
-      let token: string | null = localStorage.getItem('token');
-
-      if (!token) {
-        try {
-          const { fetchAuthSession } = await import('aws-amplify/auth');
-          const session = await fetchAuthSession({ forceRefresh: false });
-          if (session.tokens?.idToken) {
-            token = session.tokens.idToken.toString();
-            localStorage.setItem('token', token);
-          }
-        } catch {
-          // Cognito not configured or no session - that's fine
+      // Always source a FRESH token from Amplify first. Amplify silently
+      // refreshes a near/just-expired Cognito idToken using the stored refresh
+      // token, so the session survives well past the ~1h idToken lifetime
+      // instead of bouncing the user to login. We cache the token in
+      // localStorage only as a convenience. If there's no Amplify session
+      // (e.g. a local-JWT login), we fall back to the stored token.
+      let token: string | null = null;
+      try {
+        const { fetchAuthSession } = await import('aws-amplify/auth');
+        const session = await fetchAuthSession({ forceRefresh: false });
+        if (session.tokens?.idToken) {
+          token = session.tokens.idToken.toString();
+          localStorage.setItem('token', token);
         }
+      } catch {
+        // Cognito not configured or no session — fall back to a stored token.
+      }
+      if (!token) {
+        token = localStorage.getItem('token');
       }
 
       if (!token) {
@@ -69,11 +72,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      const response = await fetch('/api/auth/me', {
+      let response = await fetch('/api/auth/me', {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      // Genuine session failure — clear and bail.
+      // On 401, attempt ONE forced Cognito refresh and retry before logging out.
+      // This turns a transient idToken expiry into a silent refresh.
+      if (response.status === 401) {
+        try {
+          const { fetchAuthSession } = await import('aws-amplify/auth');
+          const refreshed = await fetchAuthSession({ forceRefresh: true });
+          const newToken = refreshed.tokens?.idToken?.toString();
+          if (newToken && newToken !== token) {
+            localStorage.setItem('token', newToken);
+            response = await fetch('/api/auth/me', {
+              headers: { Authorization: `Bearer ${newToken}` },
+            });
+          }
+        } catch {
+          // No refreshable Cognito session — fall through to the logout below.
+        }
+      }
+
+      // Genuine session failure after a refresh attempt — clear and bail.
       if (response.status === 401) {
         localStorage.removeItem('token');
         setUser(null);

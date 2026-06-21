@@ -1,10 +1,12 @@
-import OpenAI from 'openai';
 import { openaiConfig } from '@/config';
 import { AIBulletEnhancement, GrammarCorrection, RedundancyCheck } from '@/types';
+import { getLLM } from './llm-client';
+import { redactForEnhancement } from './pii';
 
-const openai = new OpenAI({
-  apiKey: openaiConfig.apiKey,
-});
+/** Resolve the cheap-tier client + model at call time (DeepSeek V4 Flash by default). */
+function llm() {
+  return getLLM('cheap');
+}
 
 export class OpenAIService {
   /**
@@ -36,8 +38,9 @@ Format your response as JSON:
   "improvements": ["improvement 1", "improvement 2", ...]
 }`;
 
-      const response = await openai.chat.completions.create({
-        model: openaiConfig.model,
+      const { client, model } = llm();
+      const response = await client.chat.completions.create({
+        model,
         messages: [{ role: 'user', content: prompt }],
         temperature: openaiConfig.temperature,
         max_tokens: openaiConfig.maxTokens,
@@ -96,8 +99,9 @@ Format your response as JSON array:
 
 If no errors, return an empty array.`;
 
-      const response = await openai.chat.completions.create({
-        model: openaiConfig.model,
+      const { client, model } = llm();
+      const response = await client.chat.completions.create({
+        model,
         messages: [{ role: 'user', content: prompt }],
         temperature: 0.3, // Lower temperature for more factual corrections
         max_tokens: openaiConfig.maxTokens,
@@ -168,8 +172,9 @@ Format your response as JSON:
   ]
 }`;
 
-      const response = await openai.chat.completions.create({
-        model: openaiConfig.model,
+      const { client, model } = llm();
+      const response = await client.chat.completions.create({
+        model,
         messages: [{ role: 'user', content: prompt }],
         temperature: 0.5,
         max_tokens: openaiConfig.maxTokens,
@@ -209,8 +214,9 @@ Requirements:
 
 Return only the summary text, no additional formatting.`;
 
-      const response = await openai.chat.completions.create({
-        model: openaiConfig.model,
+      const { client, model } = llm();
+      const response = await client.chat.completions.create({
+        model,
         messages: [{ role: 'user', content: prompt }],
         temperature: 0.7,
         max_tokens: 200,
@@ -243,13 +249,15 @@ Return only the summary text, no additional formatting.`;
     recommendations: string[];
   }> {
     try {
+      // Strip direct identifiers (name/email/phone) before sending to the model.
+      const safeResume = redactForEnhancement(resumeText);
       const prompt = `You are an ATS (Applicant Tracking System) expert. Compare this resume with a job description and provide a match score.
 
 JOB DESCRIPTION:
 ${jdText}
 
 RESUME:
-${resumeText}
+${safeResume}
 
 Provide:
 1. A match score (0-100) indicating how well the resume matches the job requirements
@@ -265,8 +273,9 @@ Format as JSON:
   "recommendations": ["recommendation 1", "recommendation 2", ...]
 }`;
 
-      const response = await openai.chat.completions.create({
-        model: openaiConfig.model,
+      const { client, model } = llm();
+      const response = await client.chat.completions.create({
+        model,
         messages: [{ role: 'user', content: prompt }],
         temperature: 0.5,
         max_tokens: openaiConfig.maxTokens,
@@ -417,8 +426,9 @@ CRITICAL REQUIREMENTS:
 - If a section has unusual name (e.g., "Technical Expertise" instead of "Skills"), still map it correctly
 - Return ONLY valid JSON, no additional text`;
 
-      const response = await openai.chat.completions.create({
-        model: 'gpt-4o', // Using GPT-4o for maximum accuracy
+      const { client, model } = llm();
+      const response = await client.chat.completions.create({
+        model, // routed via the cheap tier (DeepSeek V4 Flash by default); input is PII-redacted by the caller
         messages: [
           {
             role: 'system',

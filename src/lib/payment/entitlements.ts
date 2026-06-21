@@ -56,6 +56,31 @@ const PRO: PlanEntitlements = {
 };
 
 /**
+ * Promo override — "everything free for everyone".
+ *
+ * When the env var `PROMO_FREE_MODE` is set to `true`, every user (regardless
+ * of their real DB plan) is treated as Pro: unlimited resumes, unlimited ATS,
+ * unlimited bullet AI, and NO watermark on downloads. Used for time-boxed
+ * free periods (e.g. handing the app to friends to test).
+ *
+ * 100% revertible with zero code-path difference: unset the env var (or set it
+ * to anything other than the string "true") and restart the server. Every gate
+ * funnels through `getEntitlementsForUserId`, so this single switch covers all
+ * of them — no per-feature toggles to remember to flip back.
+ *
+ * Read lazily inside a function (never a module-level const) so `next start`
+ * picks the value up from the runtime environment instead of inlining it at
+ * build time.
+ */
+export function isPromoFreeMode(): boolean {
+  // Read via a dynamic key so the bundler can NEVER inline this at build time.
+  // That keeps it a pure runtime switch: to revert, set PROMO_FREE_MODE=false
+  // (or remove it) in the environment and restart — no rebuild required.
+  const key = 'PROMO_FREE_MODE';
+  return process.env[key] === 'true';
+}
+
+/**
  * Resolve which entitlement tier this user currently belongs to.
  *
  * Subscription expiry: if `subscriptionExpiry` has passed we silently
@@ -103,7 +128,8 @@ export async function getEntitlementsForUserId(userId: string): Promise<{
     },
   });
   if (!user) throw new Error('User not found');
-  const tier = tierForUser(user);
+  // Promo override wins over the user's real tier. See isPromoFreeMode().
+  const tier = isPromoFreeMode() ? 'pro' : tierForUser(user);
   return { user, entitlements: tier === 'pro' ? PRO : tier === 'pack' ? PACK : FREE };
 }
 

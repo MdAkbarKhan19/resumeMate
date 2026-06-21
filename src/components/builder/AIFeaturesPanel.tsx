@@ -1,6 +1,15 @@
 'use client';
 
 import React, { useState } from 'react';
+import {
+  SparklesIcon,
+  DocumentTextIcon,
+  ChartBarIcon,
+  CheckCircleIcon,
+  LightBulbIcon,
+  ExclamationTriangleIcon,
+  CheckIcon,
+} from '@heroicons/react/24/outline';
 import { Button } from '@/components/ui';
 import { toast } from '@/components/ui/Alert';
 
@@ -83,7 +92,7 @@ export default function AIFeaturesPanel({ resumeData, onApplySuggestion, resumeI
   return (
     <div className="bg-white rounded-lg shadow-lg p-6 space-y-4">
       <div className="flex items-center gap-2 mb-4">
-        <span className="text-xl">✨</span>
+        <SparklesIcon className="h-5 w-5 text-amber-600" />
         <h3 className="text-lg font-semibold">AI Assistant</h3>
       </div>
 
@@ -91,43 +100,49 @@ export default function AIFeaturesPanel({ resumeData, onApplySuggestion, resumeI
       <div className="flex gap-2 border-b">
         <button
           onClick={() => setActiveTab('improve')}
-          className={`px-4 py-2 font-medium transition-colors ${
+          className={`px-4 py-2 font-medium transition-colors inline-flex items-center gap-1.5 ${
             activeTab === 'improve'
-              ? 'text-blue-600 border-b-2 border-blue-600'
+              ? 'text-amber-600 border-b-2 border-amber-600'
               : 'text-gray-600 hover:text-gray-900'
           }`}
         >
-          📄 Quick Tips
+          <DocumentTextIcon className="h-4 w-4" />
+          Quick Tips
         </button>
         <button
           onClick={() => setActiveTab('ats')}
-          className={`px-4 py-2 font-medium transition-colors ${
+          className={`px-4 py-2 font-medium transition-colors inline-flex items-center gap-1.5 ${
             activeTab === 'ats'
-              ? 'text-blue-600 border-b-2 border-blue-600'
+              ? 'text-amber-600 border-b-2 border-amber-600'
               : 'text-gray-600 hover:text-gray-900'
           }`}
         >
-          📊 ATS Score
+          <ChartBarIcon className="h-4 w-4" />
+          ATS Score
         </button>
         <button
           onClick={() => setActiveTab('skills')}
-          className={`px-4 py-2 font-medium transition-colors ${
+          className={`px-4 py-2 font-medium transition-colors inline-flex items-center gap-1.5 ${
             activeTab === 'skills'
-              ? 'text-blue-600 border-b-2 border-blue-600'
+              ? 'text-amber-600 border-b-2 border-amber-600'
               : 'text-gray-600 hover:text-gray-900'
           }`}
         >
-          ✅ Skills
+          <CheckCircleIcon className="h-4 w-4" />
+          Skills
         </button>
       </div>
 
       {/* Quick Tips Tab */}
       {activeTab === 'improve' && (
         <div className="space-y-4">
-          <div className="p-4 bg-blue-50 rounded-lg">
-            <h4 className="font-semibold text-blue-900 mb-2">💡 Pro Tips</h4>
-            <ul className="space-y-2 text-sm text-blue-800">
-              <li>• Use the ✨ button next to bullet points for AI improvement</li>
+          <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+            <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-1.5">
+              <LightBulbIcon className="h-4 w-4 text-amber-600" />
+              Pro Tips
+            </h4>
+            <ul className="space-y-2 text-sm text-gray-600">
+              <li>• Use the AI enhance button next to bullet points for improvement</li>
               <li>• Start bullets with strong action verbs (Led, Developed, Implemented)</li>
               <li>• Include quantifiable results (increased by 40%, saved $200K)</li>
               <li>• Keep bullet points concise (1-2 lines each)</li>
@@ -136,12 +151,25 @@ export default function AIFeaturesPanel({ resumeData, onApplySuggestion, resumeI
           </div>
           
           <div className="p-4 bg-amber-50 rounded-lg">
-            <h4 className="font-semibold text-amber-900 mb-2">✅ Quick Stats</h4>
+            <h4 className="font-semibold text-amber-900 mb-2 flex items-center gap-1.5">
+              <CheckCircleIcon className="h-4 w-4 text-amber-700" />
+              Quick Stats
+            </h4>
             <div className="space-y-2 text-sm text-amber-800">
               <div className="flex justify-between">
                 <span>Summary:</span>
-                <span className="font-medium">
-                  {resumeData.summary ? '✓ Added' : '⚠️ Missing'}
+                <span className="font-medium inline-flex items-center gap-1">
+                  {resumeData.summary ? (
+                    <>
+                      <CheckIcon className="h-4 w-4 text-amber-700" />
+                      Added
+                    </>
+                  ) : (
+                    <>
+                      <ExclamationTriangleIcon className="h-4 w-4 text-amber-700" />
+                      Missing
+                    </>
+                  )}
                 </span>
               </div>
               <div className="flex justify-between">
@@ -183,12 +211,13 @@ export default function AIFeaturesPanel({ resumeData, onApplySuggestion, resumeI
             disabled={!jobDescription.trim() || !resumeId}
             className="w-full"
           >
-            📊 {loading ? 'Analyzing...' : 'Check ATS Score'}
+            {loading ? 'Analyzing...' : 'Check ATS Score'}
           </Button>
 
           {!resumeId && (
-            <p className="text-sm text-amber-600 text-center">
-              ⚠️ Please save your resume first to use ATS checker
+            <p className="text-sm text-amber-600 text-center inline-flex items-center justify-center gap-1.5 w-full">
+              <ExclamationTriangleIcon className="h-4 w-4 flex-shrink-0" />
+              Please save your resume first to use ATS checker
             </p>
           )}
 
@@ -253,13 +282,13 @@ export default function AIFeaturesPanel({ resumeData, onApplySuggestion, resumeI
                     {atsAnalysis.recommendations.map((rec: any, idx: number) => (
                       <div key={idx} className="flex gap-2">
                         {rec.type === 'critical' && (
-                          <span className="text-red-500 flex-shrink-0 mt-0.5 font-bold">⚠️</span>
+                          <ExclamationTriangleIcon className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
                         )}
                         {rec.type === 'important' && (
-                          <span className="text-yellow-500 flex-shrink-0 mt-0.5 font-bold">⚠️</span>
+                          <ExclamationTriangleIcon className="h-5 w-5 text-yellow-500 flex-shrink-0 mt-0.5" />
                         )}
                         {rec.type === 'suggested' && (
-                          <span className="text-blue-500 flex-shrink-0 mt-0.5 font-bold">✓</span>
+                          <CheckCircleIcon className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
                         )}
                         <div className="text-sm">
                           <p className="font-medium">{rec.message}</p>
@@ -312,9 +341,10 @@ export default function AIFeaturesPanel({ resumeData, onApplySuggestion, resumeI
             onClick={handleSkillSuggestions}
             isLoading={loading}
             disabled={!jobDescription.trim()}
-            className="w-full"
+            className="w-full inline-flex items-center justify-center gap-1.5"
           >
-            ✨ {loading ? 'Analyzing...' : 'Get Skill Suggestions'}
+            <SparklesIcon className="h-4 w-4" />
+            {loading ? 'Analyzing...' : 'Get Skill Suggestions'}
           </Button>
 
           {skillSuggestions && (

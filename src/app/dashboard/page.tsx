@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { useResumes } from '@/hooks/useResumes';
 import { Button, Card, CardHeader, CardTitle, CardContent, PageLoading } from '@/components/ui';
-import { formatDate, getScoreColor, getScoreBgColor } from '@/lib/utils';
+import { formatDate, relativeTime, getScoreColor, getScoreBgColor } from '@/lib/utils';
 
 const DashboardPage: React.FC = () => {
   const router = useRouter();
@@ -234,9 +234,9 @@ const DashboardPage: React.FC = () => {
         <div className="mb-6 sm:mb-8 bg-gradient-to-r from-amber-600 to-amber-600 rounded-2xl shadow-xl shadow-amber-500/15 p-4 sm:p-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="min-w-0">
-              <h3 className="text-lg sm:text-xl font-bold text-white">ATS Resume Optimizer</h3>
+              <h3 className="text-lg sm:text-xl font-bold text-white">Tailor to a Job</h3>
               <p className="text-amber-100 mt-1 text-sm sm:text-base">
-                Paste a job description, get your ATS score, and auto-enhance your resume to match
+                Paste a job description and tailor your resume to match it.
               </p>
             </div>
             {recentResumes.length > 0 ? (
@@ -244,7 +244,7 @@ const DashboardPage: React.FC = () => {
                 <button
                   className="w-full sm:w-auto bg-white text-amber-700 font-semibold hover:bg-amber-50 rounded-xl shadow-lg px-5 sm:px-6 py-2.5 sm:py-3 text-base sm:text-lg transition-all duration-200"
                 >
-                  Optimize Resume
+                  Tailor my resume
                 </button>
               </Link>
             ) : (
@@ -316,8 +316,8 @@ const DashboardPage: React.FC = () => {
                     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-3">
                       <div className="flex-1 min-w-0">
                         <h4 className="text-sm font-semibold text-gray-900 truncate">{resume.title}</h4>
-                        <p className="text-xs text-gray-400 mt-1">
-                          Last updated: {formatDate(resume.updatedAt)}
+                        <p className="text-xs text-gray-400 mt-1" title={`Last edited ${formatDate(resume.updatedAt)}`}>
+                          Edited {relativeTime(resume.updatedAt)}
                         </p>
                       </div>
                       <div className="flex items-center gap-2 flex-wrap">
@@ -335,7 +335,7 @@ const DashboardPage: React.FC = () => {
                         </Link>
                         <Link href={`/builder/ats?resumeId=${resume.id}`}>
                           <Button variant="ghost" size="sm" className="text-amber-600 hover:text-amber-500 whitespace-nowrap">
-                            ATS Optimize
+                            Tailor to job
                           </Button>
                         </Link>
                       </div>

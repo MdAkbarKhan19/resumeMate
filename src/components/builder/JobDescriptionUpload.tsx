@@ -143,7 +143,7 @@ export default function JobDescriptionUpload({
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
       <div className="mb-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-2">Job Description Analysis</h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-2">Step 1 · Paste the job description</h2>
         <p className="text-gray-600 text-sm">
           Paste or upload a job description to analyze your resume's ATS compatibility
         </p>
@@ -337,7 +337,7 @@ export default function JobDescriptionUpload({
           ) : (
             <>
               <SparklesIcon className="h-5 w-5" />
-              Analyze Resume
+              Get my match score
             </>
           )}
         </button>
@@ -360,12 +360,12 @@ export default function JobDescriptionUpload({
       </div>
 
       {/* Tips */}
-      <div className="mt-6 bg-blue-50 rounded-lg p-4">
-        <h4 className="text-sm font-semibold text-blue-900 mb-2">💡 Tips for Best Results</h4>
-        <ul className="text-sm text-blue-800 space-y-1">
-          <li>• Include the complete job description with all requirements</li>
-          <li>• Make sure to paste both required and preferred qualifications</li>
-          <li>• Include the responsibilities section for better keyword matching</li>
+      <div className="mt-6 rounded-lg border border-gray-200 bg-gray-50 p-4">
+        <h4 className="text-sm font-semibold text-gray-900 mb-2">Tips for the best match</h4>
+        <ul className="text-sm text-gray-600 space-y-1 list-disc list-inside">
+          <li>Paste the complete job description — not just the job title</li>
+          <li>Include both the required and preferred qualifications</li>
+          <li>Keep the responsibilities section for better keyword matching</li>
         </ul>
       </div>
     </div>

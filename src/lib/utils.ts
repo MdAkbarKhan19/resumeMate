@@ -22,6 +22,35 @@ export function formatDate(date: Date | string): string {
 }
 
 /**
+ * Friendly relative time, e.g. "Just now", "5 minutes ago", "Yesterday",
+ * "3 days ago". Falls back to an absolute date for anything older than ~30 days.
+ * Used on saved-resume cards so users can tell at a glance which one they
+ * edited most recently.
+ */
+export function relativeTime(date: Date | string): string {
+  const d = typeof date === 'string' ? new Date(date) : date;
+  const ms = d.getTime();
+  if (isNaN(ms)) return '';
+  const diffSec = Math.round((Date.now() - ms) / 1000);
+
+  if (diffSec < 0) return 'Just now'; // clock skew / future timestamp
+  if (diffSec < 45) return 'Just now';
+  if (diffSec < 90) return '1 minute ago';
+
+  const diffMin = Math.round(diffSec / 60);
+  if (diffMin < 60) return `${diffMin} minutes ago`;
+
+  const diffHr = Math.round(diffMin / 60);
+  if (diffHr < 24) return diffHr === 1 ? '1 hour ago' : `${diffHr} hours ago`;
+
+  const diffDay = Math.round(diffHr / 24);
+  if (diffDay === 1) return 'Yesterday';
+  if (diffDay < 30) return `${diffDay} days ago`;
+
+  return formatDate(d);
+}
+
+/**
  * Format currency in Indian Rupees
  */
 export function formatCurrency(amount: number): string {

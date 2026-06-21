@@ -4,8 +4,9 @@
  * Adds skills, modifies experience bullets, optimizes summary - all done systematically
  */
 
-import OpenAI from 'openai';
-import { JDAnalysisResult, JobDescriptionAnalyzer } from './jd-analyzer';
+import { JDAnalysisResult } from './jd-analyzer';
+import { getLLM, accrue, emptyUsage, LLMUsage } from './llm-client';
+import { redactForEnhancement, restoreRedactions } from './pii';
 
 export interface EnhancementResult {
   enhancedResume: any;
@@ -16,6 +17,8 @@ export interface EnhancementResult {
     summaryEnhanced: boolean;
     projectsEnhanced: number;
   };
+  /** Aggregate token + USD cost across every model call in this run. */
+  usage: LLMUsage;
 }
 
 export interface EnhancementChange {
@@ -27,19 +30,6 @@ export interface EnhancementChange {
 }
 
 export class AIAutoEnhancer {
-  private static openai: OpenAI | null = null;
-
-  private static getOpenAIClient(): OpenAI {
-    if (!this.openai) {
-      const apiKey = process.env.OPENAI_API_KEY;
-      if (!apiKey) {
-        throw new Error('OPENAI_API_KEY is not configured');
-      }
-      this.openai = new OpenAI({ apiKey });
-    }
-    return this.openai;
-  }
-
   /**
    * Main auto-enhancement function
    * Intelligently enhances entire resume based on job description
@@ -49,24 +39,31 @@ export class AIAutoEnhancer {
     jdAnalysis: JDAnalysisResult
   ): Promise<EnhancementResult> {
     const changes: EnhancementChange[] = [];
+    const usage = emptyUsage();
     const enhancedResume = JSON.parse(JSON.stringify(resumeData)); // Deep clone
 
+    // The candidate's own name — passed to the redactor so it's never sent to
+    // the model even if it appears inside a bullet/summary. Email/phone are
+    // always scrubbed regardless.
+    const candidateName: string =
+      resumeData?.personalInfo?.name || resumeData?.personalInfo?.fullName || '';
+
     // 1. Enhance Skills Section
-    const skillsChanges = await this.enhanceSkills(enhancedResume, jdAnalysis);
+    const skillsChanges = await this.enhanceSkills(enhancedResume, jdAnalysis, usage, candidateName);
     changes.push(...skillsChanges);
 
     // 2. Enhance Experience Bullets
-    const experienceChanges = await this.enhanceExperience(enhancedResume, jdAnalysis);
+    const experienceChanges = await this.enhanceExperience(enhancedResume, jdAnalysis, usage, candidateName);
     changes.push(...experienceChanges);
 
     // 3. Enhance Professional Summary
-    const summaryChange = await this.enhanceSummary(enhancedResume, jdAnalysis);
+    const summaryChange = await this.enhanceSummary(enhancedResume, jdAnalysis, usage, candidateName);
     if (summaryChange) {
       changes.push(summaryChange);
     }
 
     // 4. Enhance Projects (if any)
-    const projectsChanges = await this.enhanceProjects(enhancedResume, jdAnalysis);
+    const projectsChanges = await this.enhanceProjects(enhancedResume, jdAnalysis, usage, candidateName);
     changes.push(...projectsChanges);
 
     // Create summary
@@ -81,6 +78,7 @@ export class AIAutoEnhancer {
       enhancedResume,
       changes,
       summary,
+      usage,
     };
   }
 
@@ -89,10 +87,12 @@ export class AIAutoEnhancer {
    */
   private static async enhanceSkills(
     resumeData: any,
-    jdAnalysis: JDAnalysisResult
+    jdAnalysis: JDAnalysisResult,
+    usage: LLMUsage,
+    candidateName: string
   ): Promise<EnhancementChange[]> {
     const changes: EnhancementChange[] = [];
-    
+
     // Get existing skills as flat array
     const existingSkills = this.extractExistingSkills(resumeData);
     const existingSkillsLower = existingSkills.map(s => s.toLowerCase());
@@ -107,13 +107,23 @@ export class AIAutoEnhancer {
       skill => !existingSkillsLower.includes(skill.toLowerCase())
     );
 
+    // Find missing JD keywords (methodologies/concepts: Agile, CI/CD, REST,
+    // design patterns…). Covering these defensibly lifts the keyword-match
+    // component of the ATS score, which is what gets the resume into the 80s-90s.
+    const missingKeywords = (jdAnalysis.keywords || []).filter(
+      keyword => !existingSkillsLower.includes(keyword.toLowerCase())
+    );
+
     // Use AI to determine which missing skills should be added
     // (Only add skills that make sense based on existing experience)
     const skillsToAdd = await this.determineSkillsToAdd(
       resumeData,
       missingRequiredSkills,
       missingPreferredSkills,
-      jdAnalysis
+      missingKeywords,
+      jdAnalysis,
+      usage,
+      candidateName
     );
 
     // Add skills in appropriate categories
@@ -183,7 +193,10 @@ export class AIAutoEnhancer {
     resumeData: any,
     missingRequired: string[],
     missingPreferred: string[],
-    jdAnalysis: JDAnalysisResult
+    missingKeywords: string[],
+    jdAnalysis: JDAnalysisResult,
+    usage: LLMUsage,
+    candidateName: string
   ): Promise<Array<{ name: string; category: string; reason: string }>> {
     // Also include missing tools from JD
     const existingSkills = this.extractExistingSkills(resumeData).map(s => s.toLowerCase());
@@ -191,18 +204,26 @@ export class AIAutoEnhancer {
       tool => !existingSkills.includes(tool.toLowerCase())
     );
 
-    if (missingRequired.length === 0 && missingPreferred.length === 0 && missingTools.length === 0) {
+    if (
+      missingRequired.length === 0 &&
+      missingPreferred.length === 0 &&
+      missingTools.length === 0 &&
+      missingKeywords.length === 0
+    ) {
       return [];
     }
 
-    const client = this.getOpenAIClient();
+    const { client, model } = getLLM('cheap');
 
-    // Extract context from resume (include bullets for more context)
+    // Extract context from resume (include bullets for more context).
+    // PII is scrubbed from free-text before it's serialized into the prompt.
     const experienceSummary = resumeData.experience?.map((exp: any) => ({
       title: exp.jobTitle || exp.position,
       company: exp.company,
-      description: exp.description || '',
-      bullets: (exp.bullets || exp.achievements || []).slice(0, 4),
+      description: redactForEnhancement(exp.description || '', candidateName),
+      bullets: (exp.bullets || exp.achievements || [])
+        .slice(0, 4)
+        .map((b: string) => redactForEnhancement(b, candidateName)),
     })) || [];
 
     // Filter out job title from skills lists
@@ -220,11 +241,14 @@ ${JSON.stringify(experienceSummary, null, 2)}
 Required Skills: ${filterJobTitle(missingRequired).join(', ') || 'None'}
 Preferred Skills: ${filterJobTitle(missingPreferred).join(', ') || 'None'}
 Tools & Technologies: ${filterJobTitle(missingTools).join(', ') || 'None'}
+Methodologies & Concepts: ${filterJobTitle(missingKeywords).join(', ') || 'None'}
 
 ## Target Position: ${jdAnalysis.jobTitle}
 
 ## Goal
-Aim to add as MANY missing JD skills as defensible — the skills section is the highest-leverage ATS surface. Default to ADD; only skip a skill when there is genuinely no link to the candidate's domain. Conservative under-listing of skills costs the candidate ATS points.
+Aim to add as MANY missing JD skills as defensible — the skills section is the highest-leverage ATS surface, and comprehensive coverage is what pushes the candidate's ATS match into the 85-95 range. Default to ADD; only skip a skill when there is genuinely no link to the candidate's domain. Conservative under-listing of skills costs the candidate ATS points.
+
+From "Methodologies & Concepts", add ONLY items that are genuine, searchable competencies or practices (e.g. "Agile", "Scrum", "CI/CD", "REST", "Microservices", "TDD", "Design Patterns", "Distributed Systems"). NEVER add vague phrases, durations, seniority words, or sentence fragments as skills.
 
 ## What counts as "defensible to add" (any ONE is enough):
 1. **Directly demonstrated** — the bullet explicitly names the skill or uses it ("developed REST APIs" → API Design, HTTP, REST).
@@ -263,7 +287,7 @@ If no skills should be added, return: { "skills": [] }`;
 
     try {
       const response = await client.chat.completions.create({
-        model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+        model,
         messages: [
           {
             role: 'system',
@@ -279,6 +303,7 @@ If no skills should be added, return: { "skills": [] }`;
         response_format: { type: 'json_object' },
       });
 
+      accrue(usage, model, response.usage);
       const content = response.choices[0]?.message?.content;
       if (!content) {
         return [];
@@ -321,7 +346,9 @@ If no skills should be added, return: { "skills": [] }`;
    */
   private static async enhanceExperience(
     resumeData: any,
-    jdAnalysis: JDAnalysisResult
+    jdAnalysis: JDAnalysisResult,
+    usage: LLMUsage,
+    candidateName: string
   ): Promise<EnhancementChange[]> {
     const changes: EnhancementChange[] = [];
 
@@ -353,7 +380,13 @@ If no skills should be added, return: { "skills": [] }`;
 
     if (flat.length === 0) return changes;
 
-    const enhanced = await this.enhanceAllBullets(flat, resumeData.experience.slice(0, expCount), jdAnalysis);
+    const enhanced = await this.enhanceAllBullets(
+      flat,
+      resumeData.experience.slice(0, expCount),
+      jdAnalysis,
+      usage,
+      candidateName
+    );
 
     // Apply results back to the resume in place, and record changes.
     enhanced.forEach((result, i) => {
@@ -435,8 +468,11 @@ If no skills should be added, return: { "skills": [] }`;
     flat: Array<{ expIdx: number; bulletIdx: number; text: string }>,
     experiences: Array<{ jobTitle?: string; position?: string; company?: string }>,
     jdAnalysis: JDAnalysisResult,
+    usage: LLMUsage,
+    candidateName: string,
   ): Promise<Array<{ text: string; keywordsIncorporated: string[] }>> {
-    const client = this.getOpenAIClient();
+    // The believability-critical rewrite runs on the quality tier (DeepSeek V4 Pro).
+    const { client, model } = getLLM('quality');
 
     const allTechnologies = [...new Set([
       ...jdAnalysis.requiredSkills,
@@ -456,7 +492,10 @@ If no skills should be added, return: { "skills": [] }`;
       const bullets = grouped[i] || [];
       const title = exp.jobTitle || exp.position || 'Unknown';
       const company = exp.company || 'Unknown';
-      const lines = bullets.map(b => `  [${b.globalIdx}] ${b.text}`).join('\n');
+      // Scrub any stray PII from bullet text before it reaches the model.
+      const lines = bullets
+        .map(b => `  [${b.globalIdx}] ${redactForEnhancement(b.text, candidateName)}`)
+        .join('\n');
       return `### Role ${i + 1}: ${title} at ${company}\n${lines || '  (no bullets)'}`;
     }).join('\n\n');
 
@@ -582,7 +621,7 @@ Hard constraints:
 
     try {
       const response = await client.chat.completions.create({
-        model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+        model,
         messages: [
           {
             role: 'system',
@@ -596,6 +635,7 @@ Hard constraints:
         response_format: { type: 'json_object' },
       });
 
+      accrue(usage, model, response.usage);
       const content = response.choices[0]?.message?.content;
       if (!content) {
         return flat.map(f => ({ text: f.text, keywordsIncorporated: [] }));
@@ -632,10 +672,153 @@ Hard constraints:
         byIndex.set(r.index, { text: r.text, keywordsIncorporated: cleanedKeywords });
       });
 
-      return flat.map((f, i) => byIndex.get(i) || { text: f.text, keywordsIncorporated: [] });
+      let results = flat.map((f, i) => byIndex.get(i) || { text: f.text, keywordsIncorporated: [] });
+
+      // Reflection: critique the rewrites for fabrication / unnatural "AI"
+      // phrasing and revise only what's flawed. Gated + single-pass to bound cost.
+      results = await this.reflectOnBullets(
+        flat,
+        results,
+        client,
+        model,
+        usage,
+        candidateName,
+      );
+
+      // Restore any redaction placeholder that survived into the final text.
+      return results.map(r => ({
+        ...r,
+        text: restoreRedactions(r.text, { name: candidateName }),
+      }));
     } catch (error) {
       console.error('Error enhancing bullets:', error);
       return flat.map(f => ({ text: f.text, keywordsIncorporated: [] }));
+    }
+  }
+
+  /**
+   * Reflection pass (generate → critique → revise) over the rewritten bullets.
+   *
+   * Runs ONE extra model call that audits each rewrite against a believability
+   * rubric (no fabricated numbers/tech, preserve every metric, must not read as
+   * generic "AI" output, keyword placements must be defensible). The same call
+   * returns a corrected version for any bullet that fails, so a flawed rewrite
+   * is fixed without a third round-trip. If every bullet passes ("clean"), no
+   * revision is applied.
+   *
+   * Cost control: skipped entirely when AI_REFLECTION=off, when nothing was
+   * rewritten, or when there are no bullets. Single pass, no looping.
+   *
+   * After revision, each bullet's keywordsIncorporated is recomputed against the
+   * NEW text so the change labels shown to the user never claim a keyword the
+   * final wording doesn't actually contain.
+   */
+  private static async reflectOnBullets(
+    flat: Array<{ text: string }>,
+    results: Array<{ text: string; keywordsIncorporated: string[] }>,
+    client: ReturnType<typeof getLLM>['client'],
+    model: string,
+    usage: LLMUsage,
+    candidateName: string,
+  ): Promise<Array<{ text: string; keywordsIncorporated: string[] }>> {
+    if ((process.env.AI_REFLECTION || 'on').toLowerCase() === 'off') return results;
+
+    // Only reflect on bullets we actually changed — unchanged bullets are the
+    // candidate's own words and need no audit.
+    const changedIdx = results
+      .map((r, i) => (r.text.trim() !== (flat[i]?.text || '').trim() ? i : -1))
+      .filter(i => i >= 0);
+    if (changedIdx.length === 0) return results;
+
+    const block = changedIdx
+      .map(
+        i =>
+          `[${i}] ORIGINAL: "${redactForEnhancement(flat[i].text, candidateName)}"\n      REWRITE:  "${results[i].text}"\n      injected: ${results[i].keywordsIncorporated.join(', ') || '(none)'}`,
+      )
+      .join('\n\n');
+
+    const prompt = `You are a meticulous resume editor and fact-checker. Audit each AI-rewritten bullet against the ORIGINAL and fix ONLY what violates the rubric.
+
+## Rubric — a rewrite FAILS if any of these are true:
+1. NUMBERS: any number, %, metric, date, duration, team size, or money figure in the ORIGINAL is missing, changed, rounded, or newly invented in the REWRITE.
+2. FABRICATION: it asserts a technology, responsibility, scope, or outcome not supported by the original work.
+3. UNNATURAL / "AI-SOUNDING": it reads like generated filler — buzzword salad, hollow superlatives ("spearheaded innovative synergies", "leveraged cutting-edge solutions"), keyword stuffing, or every bullet sharing the same template. Real engineers don't talk like that.
+4. INDEFENSIBLE KEYWORD: an injected keyword doesn't plausibly fit the work described.
+5. FORMAT: not a single sentence, or longer than ~32 words, or first-person pronouns present.
+
+## How to fix:
+- Provide a corrected single sentence that KEEPS the legitimate improvements (strong verb, real keywords) but removes the violation.
+- Preserve EXACTLY every number from the original. Never add a number that wasn't there.
+- Keep injected technical keywords wrapped in **double asterisks**; don't bold ordinary words.
+- If a rewrite already satisfies every rule, return suggestedRevision: null for it.
+
+## Worked examples (how to judge + fix):
+- ORIGINAL: "Improved API response time by 40% by adding caching"
+  REWRITE:  "Spearheaded transformative **Redis** caching initiatives leveraging cutting-edge solutions to optimize API performance by 40%"
+  → FAIL — rules 2 & 3: "Redis" is fabricated (original just says "caching"); "spearheaded transformative… cutting-edge solutions" is hollow AI filler.
+  FIX: "Cut API response time 40% by introducing a **caching** layer on hot read paths"
+- ORIGINAL: "Led a team of 5 to deliver the billing service"
+  REWRITE:  "Led a team of 8 engineers to architect a scalable, enterprise-grade billing platform serving millions"
+  → FAIL — rule 1: team size changed 5→8; "serving millions" is an invented metric.
+  FIX: "Led a 5-engineer team to design and ship the **billing** microservice"
+- ORIGINAL: "Built REST APIs in Java for the orders module"
+  REWRITE:  "Engineered **REST** **APIs** in **Java** with **Spring Boot** for the orders module"
+  → PASS if the JD lists Spring Boot and Java REST work plausibly implies it; otherwise drop **Spring Boot**. suggestedRevision: null when it passes.
+
+## Bullets to audit:
+${block}
+
+Return strict JSON:
+{
+  "verdict": "clean" | "issues",
+  "perBullet": [
+    { "index": <number>, "issues": ["short reason", ...], "suggestedRevision": "<corrected bullet>" | null }
+  ]
+}
+Include an entry only for bullets that need changes; omit clean ones.`;
+
+    try {
+      const response = await client.chat.completions.create({
+        model,
+        messages: [
+          {
+            role: 'system',
+            content:
+              'You are a rigorous resume fact-checker and line editor. You catch fabricated numbers/technologies and generic AI-sounding phrasing, and you rewrite only what is flawed while preserving every real metric. You always return valid JSON in the exact schema requested.',
+          },
+          { role: 'user', content: prompt },
+        ],
+        temperature: 0.2,
+        max_tokens: 2500,
+        response_format: { type: 'json_object' },
+      });
+
+      accrue(usage, model, response.usage);
+      const content = response.choices[0]?.message?.content;
+      if (!content) return results;
+
+      const parsed = JSON.parse(content);
+      if (parsed?.verdict === 'clean' || !Array.isArray(parsed?.perBullet)) return results;
+
+      const revised = [...results];
+      for (const item of parsed.perBullet) {
+        const i = item?.index;
+        const rev = item?.suggestedRevision;
+        if (typeof i !== 'number' || !revised[i] || typeof rev !== 'string' || !rev.trim()) continue;
+        const newText = rev.trim();
+        // Recompute which claimed keywords actually survive in the revised text,
+        // so labels stay honest after the edit.
+        const newTextLower = newText.toLowerCase();
+        const survivingKeywords = revised[i].keywordsIncorporated.filter(k =>
+          newTextLower.includes(k.toLowerCase()),
+        );
+        revised[i] = { text: newText, keywordsIncorporated: survivingKeywords };
+      }
+      return revised;
+    } catch (error) {
+      // Reflection is best-effort — never let it break the main enhancement.
+      console.error('Reflection pass failed (using un-reflected bullets):', error);
+      return results;
     }
   }
 
@@ -644,11 +827,13 @@ Hard constraints:
    */
   private static async enhanceSummary(
     resumeData: any,
-    jdAnalysis: JDAnalysisResult
+    jdAnalysis: JDAnalysisResult,
+    usage: LLMUsage,
+    candidateName: string
   ): Promise<EnhancementChange | null> {
     if (!resumeData.summary) {
       // Generate a new summary if none exists
-      resumeData.summary = await this.generateSummary(resumeData, jdAnalysis);
+      resumeData.summary = await this.generateSummary(resumeData, jdAnalysis, usage, candidateName);
       return {
         section: 'summary',
         type: 'added',
@@ -658,13 +843,13 @@ Hard constraints:
       };
     }
 
-    const client = this.getOpenAIClient();
+    const { client, model } = getLLM('cheap');
     const originalSummary = resumeData.summary;
 
     const prompt = `You are an expert resume writer. Enhance this professional summary to better align with the target job.
 
 Current Summary:
-"${originalSummary}"
+"${redactForEnhancement(originalSummary, candidateName)}"
 
 Target Job: ${jdAnalysis.jobTitle}
 Key Required Skills/Technologies: ${[...jdAnalysis.requiredSkills.slice(0, 8), ...(jdAnalysis.tools || []).slice(0, 5)].join(', ')}
@@ -686,7 +871,7 @@ Return JSON:
 
     try {
       const response = await client.chat.completions.create({
-        model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+        model,
         messages: [
           {
             role: 'system',
@@ -702,13 +887,14 @@ Return JSON:
         response_format: { type: 'json_object' },
       });
 
+      accrue(usage, model, response.usage);
       const content = response.choices[0]?.message?.content;
       if (!content) {
         return null;
       }
 
       const parsed = JSON.parse(content);
-      const enhancedSummary = parsed.summary;
+      const enhancedSummary = restoreRedactions(parsed.summary, { name: candidateName });
 
       if (enhancedSummary && enhancedSummary !== originalSummary) {
         resumeData.summary = enhancedSummary;
@@ -733,9 +919,11 @@ Return JSON:
    */
   private static async generateSummary(
     resumeData: any,
-    jdAnalysis: JDAnalysisResult
+    jdAnalysis: JDAnalysisResult,
+    usage: LLMUsage,
+    candidateName: string
   ): Promise<string> {
-    const client = this.getOpenAIClient();
+    const { client, model } = getLLM('cheap');
 
     const experienceSummary = resumeData.experience?.slice(0, 3).map((exp: any) => ({
       title: exp.jobTitle || exp.position,
@@ -766,7 +954,7 @@ Return JSON:
 
     try {
       const response = await client.chat.completions.create({
-        model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+        model,
         messages: [
           {
             role: 'system',
@@ -782,13 +970,14 @@ Return JSON:
         response_format: { type: 'json_object' },
       });
 
+      accrue(usage, model, response.usage);
       const content = response.choices[0]?.message?.content;
       if (!content) {
         return '';
       }
 
       const parsed = JSON.parse(content);
-      return parsed.summary || '';
+      return restoreRedactions(parsed.summary || '', { name: candidateName });
     } catch (error) {
       console.error('Error generating summary:', error);
       return '';
@@ -800,7 +989,9 @@ Return JSON:
    */
   private static async enhanceProjects(
     resumeData: any,
-    jdAnalysis: JDAnalysisResult
+    jdAnalysis: JDAnalysisResult,
+    usage: LLMUsage,
+    candidateName: string
   ): Promise<EnhancementChange[]> {
     const changes: EnhancementChange[] = [];
 
@@ -816,10 +1007,12 @@ Return JSON:
     });
     if (targets.length === 0) return changes;
 
-    const client = this.getOpenAIClient();
+    const { client, model } = getLLM('cheap');
     const techPool = [...jdAnalysis.requiredSkills.slice(0, 10), ...(jdAnalysis.tools || []).slice(0, 6)];
 
-    const projectsBlock = targets.map((t, i) => `[${i}] ${t.name}\n  ${t.description}`).join('\n\n');
+    const projectsBlock = targets
+      .map((t, i) => `[${i}] ${t.name}\n  ${redactForEnhancement(t.description, candidateName)}`)
+      .join('\n\n');
 
     const prompt = `Rewrite the project descriptions below to align with a ${jdAnalysis.jobTitle} role, incorporating specific technologies from the JD.
 
@@ -849,7 +1042,7 @@ The "projects" array MUST contain one entry per input index (0..${targets.length
 
     try {
       const response = await client.chat.completions.create({
-        model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+        model,
         messages: [
           { role: 'system', content: 'You are an expert resume writer. Always return valid JSON keyed by the input project index.' },
           { role: 'user', content: prompt },
@@ -859,6 +1052,7 @@ The "projects" array MUST contain one entry per input index (0..${targets.length
         response_format: { type: 'json_object' },
       });
 
+      accrue(usage, model, response.usage);
       const content = response.choices[0]?.message?.content;
       if (!content) return changes;
 
@@ -867,7 +1061,7 @@ The "projects" array MUST contain one entry per input index (0..${targets.length
       const byIndex = new Map<number, string>();
       resultArray.forEach((r: any) => {
         if (typeof r?.index === 'number' && typeof r?.description === 'string') {
-          byIndex.set(r.index, r.description);
+          byIndex.set(r.index, restoreRedactions(r.description, { name: candidateName }));
         }
       });
 

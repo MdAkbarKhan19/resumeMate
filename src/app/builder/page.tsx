@@ -110,6 +110,9 @@ function normalizeSkillCategory(category: string | undefined | null): 'technical
   return 'technical';
 }
 
+// Live-preview page width = 8.5in @ 96dpi (matches the PDF export geometry).
+const PREVIEW_PAGE_WIDTH = 816;
+
 const BuilderPage: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -121,6 +124,11 @@ const BuilderPage: React.FC = () => {
   // Refs
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const autoSaveRef = useRef<NodeJS.Timeout>();
+  // Holds the id of a resume we just created in this session when the URL was
+  // NOT updated (e.g. save-before-download with skipNavigation). Without this,
+  // every subsequent save would POST a brand-new resume — tripping the free
+  // 1-resume cap with a misleading "1 resume already used" error.
+  const createdIdRef = useRef<string | null>(null);
 
   // State
   const [activeSection, setActiveSection] = useState<string>('personal');
@@ -140,6 +148,36 @@ const BuilderPage: React.FC = () => {
   const [showPreview, setShowPreview] = useState(true);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState('modern-two-column');
+
+  // Live-preview fit-to-width scaling. The preview must render the resume at the
+  // SAME page width the PDF uses (PREVIEW_PAGE_WIDTH = 8.5in = 816px @ 96dpi) so
+  // text wraps identically, then scale that fixed-width page down to fill the
+  // preview column — no fixed 0.65 zoom (which reflowed the layout and left a
+  // dead band on the right).
+  const previewColumnRef = useRef<HTMLDivElement>(null);
+  const previewScalerRef = useRef<HTMLDivElement>(null);
+  const [previewScale, setPreviewScale] = useState(0.65);
+  const [previewBoxHeight, setPreviewBoxHeight] = useState<number | undefined>(undefined);
+
+  useEffect(() => {
+    if (!showPreview) return;
+    const column = previewColumnRef.current;
+    if (!column) return;
+    const recompute = () => {
+      const w = column.clientWidth;
+      if (w > 0) {
+        setPreviewScale(w / PREVIEW_PAGE_WIDTH);
+        if (previewScalerRef.current) {
+          setPreviewBoxHeight((previewScalerRef.current.scrollHeight * w) / PREVIEW_PAGE_WIDTH);
+        }
+      }
+    };
+    recompute();
+    const ro = new ResizeObserver(recompute);
+    ro.observe(column);
+    if (previewScalerRef.current) ro.observe(previewScalerRef.current);
+    return () => ro.disconnect();
+  }, [showPreview]);
   const [customization, setCustomization] = useState<TemplateCustomization>(DEFAULT_CUSTOMIZATION);
   const [customSections, setCustomSections] = useState<CustomSection[]>([]);
   const [newCustomSectionTitle, setNewCustomSectionTitle] = useState('');
@@ -581,9 +619,14 @@ const BuilderPage: React.FC = () => {
         customization,
       };
 
+      // The effective id is the one in the URL, or one we created earlier this
+      // session but didn't navigate to. Either means we should PATCH (update),
+      // not POST (create another row).
+      const effectiveId = resumeId || createdIdRef.current;
+
       let result;
-      if (resumeId) {
-        const response = await fetch(`/api/resumes/${resumeId}`, {
+      if (effectiveId) {
+        const response = await fetch(`/api/resumes/${effectiveId}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify(payload),
@@ -601,13 +644,19 @@ const BuilderPage: React.FC = () => {
       if (result.success) {
         toast.success('Resume saved');
         localStorage.removeItem('resume-draft');
-        if (!resumeId && result.data?.id) {
+        if (!effectiveId && result.data?.id) {
+          // Remember the new id so later saves PATCH instead of creating dupes.
+          createdIdRef.current = result.data.id;
           if (!skipNavigation) {
             router.push(`/builder?id=${result.data.id}`);
+          } else {
+            // Update the URL in place (no remount/refetch) so a manual refresh
+            // or share keeps the resume, without disrupting the download flow.
+            window.history.replaceState(null, '', `/builder?id=${result.data.id}`);
           }
           return result.data.id;
         }
-        return resumeId;
+        return effectiveId;
       } else {
         toast.error(result.error?.message || result.error || 'Failed to save');
         return null;
@@ -626,7 +675,7 @@ const BuilderPage: React.FC = () => {
   const handleDownload = useCallback(async (format: 'pdf') => {
     try {
       const savedId = await handleSave(true);
-      const currentResumeId = savedId || resumeId;
+      const currentResumeId = savedId || resumeId || createdIdRef.current;
       if (!currentResumeId) {
         toast.error('Please save the resume first');
         return;
@@ -790,7 +839,7 @@ const BuilderPage: React.FC = () => {
                   onClick={() => router.push(`/builder/ats?resumeId=${resumeId}`)}
                   className="bg-amber-600 hover:bg-amber-700 text-white border-0"
                 >
-                  ATS Score
+                  Tailor to a Job
                 </Button>
               )}
             </div>
@@ -1096,8 +1145,8 @@ const BuilderPage: React.FC = () => {
           {showPreview && (
             <div className="hidden lg:block lg:w-[45%] lg:max-w-[45%]">
               <div className="sticky top-36">
-                <Card className="shadow-lg">
-                  <div className="flex items-center justify-between px-4 py-3 border-b bg-gray-50 rounded-t-lg">
+                <Card className="shadow-lg" padding="none">
+                  <div className="flex items-center justify-between px-4 py-3 border-b bg-gray-50 rounded-t-2xl">
                     <span className="text-sm font-medium text-gray-600">Live Preview</span>
                     <button onClick={() => setShowPreview(false)} className="text-gray-400 hover:text-gray-600">
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1105,18 +1154,36 @@ const BuilderPage: React.FC = () => {
                       </svg>
                     </button>
                   </div>
-                  <div className="overflow-auto" style={{ maxHeight: 'calc(100vh - 200px)' }}>
-                    <div className="transform scale-[0.65] origin-top">
-                      <TemplateRenderer
-                        templateId={selectedTemplateId}
-                        // Merge customSections into the preview data — they live
-                        // in a separate state slice in the builder, but the
-                        // templates expect them on `data.customSections` (which
-                        // is how the saved/downloaded version sees them).
-                        data={{ ...resumeData, customSections }}
-                        customization={customization}
-                        preview={true}
-                      />
+                  {/* Outer: scrolls tall resumes. */}
+                  <div className="overflow-auto rounded-b-2xl bg-gray-100" style={{ maxHeight: 'calc(100vh - 200px)' }}>
+                    {/* Column: full preview width; reserves the POST-scale height so
+                        there's no empty band (transform: scale doesn't shrink the
+                        layout box). */}
+                    <div
+                      ref={previewColumnRef}
+                      style={{ width: '100%', height: previewBoxHeight, overflow: 'hidden' }}
+                    >
+                      {/* Scaler: a fixed 816px-wide page (identical wrapping to the
+                          PDF) scaled to exactly fill the column width. */}
+                      <div
+                        ref={previewScalerRef}
+                        style={{
+                          width: `${PREVIEW_PAGE_WIDTH}px`,
+                          transform: `scale(${previewScale})`,
+                          transformOrigin: 'top left',
+                        }}
+                      >
+                        <TemplateRenderer
+                          templateId={selectedTemplateId}
+                          // Merge customSections into the preview data — they live
+                          // in a separate state slice in the builder, but the
+                          // templates expect them on `data.customSections` (which
+                          // is how the saved/downloaded version sees them).
+                          data={{ ...resumeData, customSections }}
+                          customization={customization}
+                          preview={true}
+                        />
+                      </div>
                     </div>
                   </div>
                 </Card>

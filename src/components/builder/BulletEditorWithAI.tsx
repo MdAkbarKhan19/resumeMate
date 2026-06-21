@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { SparklesIcon, CheckIcon } from '@heroicons/react/24/outline';
 import { Button } from '@/components/ui';
 import { toast } from '@/components/ui/Alert';
 
@@ -72,7 +73,7 @@ export default function BulletEditorWithAI({ value, onChange, context }: BulletE
           className="h-fit"
           title="Improve with AI"
         >
-          ✨
+          <SparklesIcon className="h-4 w-4" />
         </Button>
       </div>
 
@@ -84,7 +85,7 @@ export default function BulletEditorWithAI({ value, onChange, context }: BulletE
               {/* Header */}
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold flex items-center gap-2">
-                  <span className="text-xl">✨</span>
+                  <SparklesIcon className="h-5 w-5 text-amber-600" />
                   AI-Improved Suggestions
                 </h3>
                 <button
@@ -104,13 +105,17 @@ export default function BulletEditorWithAI({ value, onChange, context }: BulletE
               {/* Main Improved Version */}
               <div className="mb-4 p-4 bg-amber-50 border-2 border-amber-200 rounded-lg">
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-sm font-medium text-amber-800">✨ Recommended:</p>
+                  <p className="text-sm font-medium text-amber-800 inline-flex items-center gap-1.5">
+                    <SparklesIcon className="h-4 w-4" />
+                    Recommended:
+                  </p>
                   <Button
                     size="sm"
                     onClick={() => applySuggestion(suggestions.improved)}
-                    className="bg-amber-600 hover:bg-amber-700"
+                    className="bg-amber-600 hover:bg-amber-700 inline-flex items-center gap-1"
                   >
-                    ✓ Use This
+                    <CheckIcon className="h-4 w-4" />
+                    Use This
                   </Button>
                 </div>
                 <p className="text-gray-800">{suggestions.improved}</p>
@@ -121,7 +126,7 @@ export default function BulletEditorWithAI({ value, onChange, context }: BulletE
                 <div className="space-y-3">
                   <p className="text-sm font-medium text-gray-700">Alternative Versions:</p>
                   {suggestions.suggestions.map((alt: string, idx: number) => (
-                    <div key={idx} className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div key={idx} className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
                       <div className="flex items-start justify-between gap-3">
                         <p className="text-gray-800 flex-1">{alt}</p>
                         <Button

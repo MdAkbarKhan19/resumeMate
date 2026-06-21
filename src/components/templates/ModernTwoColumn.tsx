@@ -20,6 +20,14 @@ export default function ModernTwoColumnTemplate({
   // padding, etc.) is untouched.
   const baseFs = getBaseFontSize(customization, data);
   const r = (px: number) => `${((px * baseFs) / 11).toFixed(1)}px`;
+
+  // Spacing density preset (compact / normal / spacious). Drives the vertical
+  // rhythm — paddings, section gaps, entry gaps — so the slider has a real,
+  // IDENTICAL effect in both the live preview and the downloaded PDF (both
+  // render this same component). Previously `spacing` was a no-op.
+  const spacingScale = ({ compact: 0.82, normal: 1, spacious: 1.2 } as const)[customization?.spacing ?? 'normal'] ?? 1;
+  const sp = (px: number) => `${(px * spacingScale).toFixed(1)}px`;
+  const sectionGap = sp(20);
   const fs = {
     base: baseFs,
     tiny: r(9),
@@ -173,7 +181,7 @@ export default function ModernTwoColumnTemplate({
     fontFamily: fonts.heading,
     paddingBottom: '5px',
     borderBottom: `1.5px solid ${primary}`,
-    margin: '0 0 10px 0',
+    margin: `0 0 ${sp(10)} 0`,
   };
 
   return (
@@ -190,7 +198,7 @@ export default function ModernTwoColumnTemplate({
       <div
         style={{
           backgroundColor: headerBg,
-          padding: '32px 36px 20px 36px',
+          padding: `${sp(32)} 36px ${sp(20)} 36px`,
           textAlign: 'center',
         }}
       >
@@ -262,15 +270,15 @@ export default function ModernTwoColumnTemplate({
         <div
           style={{
             width: '35%',
-            padding: '20px 16px 20px 22px',
+            padding: `${sp(20)} 16px ${sp(20)} 22px`,
             borderRight: '1px solid #e0e0e0',
           }}
         >
           {/* Technical Skills */}
           {data.skills && data.skills.length > 0 && (
-            <div style={{ marginBottom: '20px' }}>
+            <div style={{ marginBottom: sectionGap }}>
               <h2 style={sectionTitleStyle}>Technical Skills</h2>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '7px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: sp(7) }}>
                 {Object.entries(skillsByCategory).map(([category, skills]) => (
                   <div key={category} style={{ fontSize: fs.small, lineHeight: '1.55', color: '#333333' }}>
                     <span style={{ fontWeight: 700, color: '#1a1a1a' }}>
@@ -286,9 +294,9 @@ export default function ModernTwoColumnTemplate({
 
           {/* Certifications */}
           {data.certifications && data.certifications.length > 0 && (
-            <div style={{ marginBottom: '20px' }}>
+            <div style={{ marginBottom: sectionGap }}>
               <h2 style={sectionTitleStyle}>Certifications</h2>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: sp(8) }}>
                 {data.certifications.map((cert, index) => {
                   const certHref = cert.url ? buildSiteUrl(cert.url) : '';
                   const formattedDate = formatMonthYear(cert.date);
@@ -327,9 +335,9 @@ export default function ModernTwoColumnTemplate({
 
           {/* Education */}
           {data.education && data.education.length > 0 && (
-            <div style={{ marginBottom: '20px' }}>
+            <div style={{ marginBottom: sectionGap }}>
               <h2 style={sectionTitleStyle}>Education</h2>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: sp(8) }}>
                 {data.education.map((edu, index) => (
                   <div key={index}>
                     <div style={{ fontSize: fs.entryHeader, fontWeight: 700, color: '#1a1a1a', lineHeight: '1.4' }}>
@@ -352,7 +360,7 @@ export default function ModernTwoColumnTemplate({
 
           {/* Languages */}
           {data.languages && data.languages.length > 0 && (
-            <div style={{ marginBottom: '20px' }}>
+            <div style={{ marginBottom: sectionGap }}>
               <h2 style={sectionTitleStyle}>Languages</h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
                 {data.languages.map((lang, index) => (
@@ -369,7 +377,7 @@ export default function ModernTwoColumnTemplate({
 
           {/* Volunteer */}
           {data.volunteer && data.volunteer.length > 0 && (
-            <div style={{ marginBottom: '20px' }}>
+            <div style={{ marginBottom: sectionGap }}>
               <h2 style={sectionTitleStyle}>Volunteer</h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 {data.volunteer.map((vol, index) => (
@@ -389,7 +397,7 @@ export default function ModernTwoColumnTemplate({
           {data.customSections && data.customSections.length > 0 && (
             <>
               {data.customSections.map((section, index) => (
-                <div key={index} style={{ marginBottom: '20px' }}>
+                <div key={index} style={{ marginBottom: sectionGap }}>
                   <h2 style={sectionTitleStyle}>{section.title}</h2>
                   <div style={{ fontSize: fs.small, color: '#333333', whiteSpace: 'pre-wrap', lineHeight: '1.45' }}>
                     {section.content}
@@ -404,12 +412,12 @@ export default function ModernTwoColumnTemplate({
         <div
           style={{
             width: '65%',
-            padding: '20px 22px 20px 20px',
+            padding: `${sp(20)} 22px ${sp(20)} 20px`,
           }}
         >
           {/* Profile Summary */}
           {data.summary && (
-            <div style={{ marginBottom: '20px' }}>
+            <div style={{ marginBottom: sectionGap }}>
               <h2 style={sectionTitleStyle}>Profile Summary</h2>
               <p
                 style={{
@@ -427,9 +435,9 @@ export default function ModernTwoColumnTemplate({
 
           {/* Work Experience */}
           {data.experience && data.experience.length > 0 && (
-            <div style={{ marginBottom: '20px' }}>
+            <div style={{ marginBottom: sectionGap }}>
               <h2 style={sectionTitleStyle}>Work Experience</h2>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: sp(14) }}>
                 {data.experience.map((exp, index) => (
                   <div key={index}>
                     {/* Company + Date row */}
@@ -474,9 +482,9 @@ export default function ModernTwoColumnTemplate({
 
           {/* Projects */}
           {data.projects && data.projects.length > 0 && (
-            <div style={{ marginBottom: '20px' }}>
+            <div style={{ marginBottom: sectionGap }}>
               <h2 style={sectionTitleStyle}>Projects</h2>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: sp(12) }}>
                 {data.projects.map((project, index) => (
                   <div key={index}>
                     {/* Project Name + Link + Date row */}

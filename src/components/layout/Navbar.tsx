@@ -18,7 +18,7 @@ const Navbar: React.FC = () => {
     { name: 'Pricing', href: '/pricing', public: true },
     { name: 'Dashboard', href: '/dashboard', public: false },
     { name: 'Builder', href: '/builder', public: false },
-    { name: 'ATS Optimizer', href: '/builder/ats', public: false },
+    { name: 'Tailor to a Job', href: '/builder/ats', public: false },
   ];
 
   const filteredNav = navigation.filter(

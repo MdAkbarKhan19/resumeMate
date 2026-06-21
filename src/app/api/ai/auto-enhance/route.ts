@@ -117,6 +117,9 @@ async function runEnhancementJob(
         },
       };
     }
+    console.log(
+      `✨ [${jobId}] mode=${mode} | bullets:${enhancementResult.summary.bulletsModified} skills:${enhancementResult.summary.skillsAdded} summary:${enhancementResult.summary.summaryEnhanced}`,
+    );
     console.log(`✅ [${jobId}] Auto-enhancement complete!`);
 
     // Record one ATS optimization against the user's quota (best-effort).

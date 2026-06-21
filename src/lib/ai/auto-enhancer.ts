@@ -550,7 +550,7 @@ do NOT substitute a technology the candidate did not use (no Java→Python) and 
 invent tools, metrics, or outcomes. Where a keyword has no genuine support, keep the
 bullet as-is rather than forcing it.`;
 
-    const prompt = `You are an expert ATS resume optimizer. You will rewrite resume bullets across an ENTIRE candidate's recent experience in ONE structured pass, distributing job-description keywords with evidence-based reasoning.
+    const moderatePrompt = `You are an expert ATS resume optimizer. You will rewrite resume bullets across an ENTIRE candidate's recent experience in ONE structured pass, distributing job-description keywords with evidence-based reasoning.
 
 ## Target Position: ${jdAnalysis.jobTitle}
 
@@ -662,15 +662,55 @@ Hard constraints:
 - evidence_quote must be a verbatim substring of the original bullet text — for direct evidence, quote the supporting phrase; for implied evidence, quote the work-description phrase that implies the tool (e.g. quote "data pipeline" when placing Kafka on a pipeline bullet).
 - Default to "place". Only "reject" when no bullet's domain touches the keyword at all.`;
 
+    // AGGRESSIVE mode uses a dedicated, DIRECT tech-substitution prompt — NOT the
+    // evidence-based plan above (whose domain-check rejects cross-domain swaps and
+    // left bullets unchanged). This one simply re-skins each bullet's technologies
+    // to the JD's category-matched equivalents.
+    const aggressivePrompt = `You re-skin resume bullets to a target job's technology stack.
+
+## Target role: ${jdAnalysis.jobTitle}
+
+## Target tech stack (from the JD) — substitute TOWARD these:
+${allTechnologies.join(', ')}
+
+## Candidate's bullets (labeled by [index]):
+${rolesBlock}
+
+## TASK — for EVERY bullet:
+1. Find each technology the bullet names (language, framework, library, database, cloud, tool, platform).
+2. REPLACE it with the JD's equivalent technology in the SAME category:
+   - language → language (e.g. Java → Python)
+   - framework → framework (e.g. Spring Boot → FastAPI / Django)
+   - database → database (e.g. MySQL → PostgreSQL)
+   - cloud → cloud, CI/build tool → CI/build tool, message queue → message queue, etc.
+3. Keep EVERYTHING else the same: the action, the achievement, the scope, the structure, and EVERY number / percentage / metric EXACTLY as written.
+4. If a bullet names NO technology, keep it as-is (you may fix only a weak opening verb like "Worked on" / "Helped" / "Responsible for").
+5. Wrap each substituted or newly-added technology in **double asterisks**.
+
+## Rules:
+- This is a same-CATEGORY substitution; the work is unchanged. If the JD lists alternatives in a category (React/Angular/Vue), pick ONE and use it consistently.
+- NEVER change, drop, round, or invent a number/metric.
+- Each bullet stays ONE sentence, no first-person pronouns, same tense.
+- You MUST substitute wherever a category match exists — do NOT return a tech-bearing bullet unchanged.
+
+Return strict JSON, one entry per input index (0..${flat.length - 1}):
+{
+  "bullets": [
+    { "index": 0, "text": "<re-skinned bullet>", "keywordsIncorporated": ["Python", "FastAPI"] }
+  ]
+}
+Every input index 0..${flat.length - 1} MUST appear exactly once.`;
+
+    const prompt = mode === 'aggressive' ? aggressivePrompt : moderatePrompt;
+    const systemMessage = mode === 'aggressive'
+      ? "You re-skin resume bullets to a target job's technology stack: swap the candidate's technologies for the JD's equivalents BY CATEGORY, keep the story and EVERY metric exactly, and wrap swapped tech in **bold**. You MUST change every bullet that names a technology; never return a tech-bearing bullet unchanged. Always return valid JSON in the exact schema requested."
+      : 'You are an expert ATS resume optimizer. You ALWAYS produce a per-keyword plan with evidence quoted verbatim from the original bullet text BEFORE writing the final bullets. You then REWRITE EVERY bullet for impact — strong action verbs, weasel-words removed, verbose phrasing tightened, JD-tone aligned — independent of whether a keyword was placed. Returning a bullet unchanged is the exception, not the default. You never place a keyword without evidence. You never add a keyword to more than one bullet. You never fabricate metrics, responsibilities, or technologies, and you preserve every existing number EXACTLY. Authenticity beats coverage. Always return valid JSON in the exact schema requested.';
+
     try {
       const response = await client.chat.completions.create({
         model,
         messages: [
-          {
-            role: 'system',
-            content:
-              'You are an expert ATS resume optimizer. You ALWAYS produce a per-keyword plan with evidence quoted verbatim from the original bullet text BEFORE writing the final bullets. You then REWRITE EVERY bullet for impact — strong action verbs, weasel-words removed, verbose phrasing tightened, JD-tone aligned — independent of whether a keyword was placed. Returning a bullet unchanged is the exception, not the default. You never place a keyword without evidence. You never add a keyword to more than one bullet. You never fabricate metrics, responsibilities, or technologies, and you preserve every existing number EXACTLY. Authenticity beats coverage. Always return valid JSON in the exact schema requested.',
-          },
+          { role: 'system', content: systemMessage },
           { role: 'user', content: prompt },
         ],
         temperature: 0.2,

@@ -39,7 +39,10 @@ function mockCreate({ messages }: any) {
       }),
     );
   }
-  if (sys.includes('expert ATS resume optimizer')) {
+  // Bullet rewrite — matches BOTH the moderate ('expert ATS resume optimizer')
+  // and the aggressive ('re-skin resume bullets') system prompts. Same shape so
+  // the audit/dedup assertions hold; only downstream reflection differs by mode.
+  if (sys.includes('expert ATS resume optimizer') || sys.includes('re-skin resume bullets')) {
     return Promise.resolve(
       reply({
         plan: [],
